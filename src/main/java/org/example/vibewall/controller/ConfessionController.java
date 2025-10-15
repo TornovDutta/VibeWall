@@ -36,7 +36,7 @@ public class ConfessionController {
         }
     }
     @DeleteMapping("delete/{id}")
-    public  ResponseEntity<String> update(@PathVariable  String id){
+    public  ResponseEntity<String> delete(@PathVariable  String id){
         try{
             service.delete(id);
             return new ResponseEntity<>("delete",HttpStatus.OK);
