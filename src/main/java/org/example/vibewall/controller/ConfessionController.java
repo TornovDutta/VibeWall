@@ -17,20 +17,32 @@ public class ConfessionController {
 
     @PostMapping("create")
     public ResponseEntity<String> create(@RequestBody Confession confession){
-        service.create(confession);
-        return new ResponseEntity<>("Created", HttpStatus.CREATED);
+        try{
+            service.create(confession);
+            return new ResponseEntity<>("Created", HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
     @PutMapping("update")
     public ResponseEntity<String> update(@RequestBody Confession confession){
-        service.create(confession);
-        return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
+        try{
+            service.create(confession);
+            return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
     }
     @DeleteMapping("delete")
     public  ResponseEntity<String> update(@RequestParam Integer id){
-        service.delete(id);
-        return new ResponseEntity<>("delete",HttpStatus.OK);
+        try{
+            service.delete(id);
+            return new ResponseEntity<>("delete",HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
