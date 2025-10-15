@@ -15,4 +15,8 @@ public class ConfessionService {
     public void create(Confession confession) {
         repo.save(confession);
     }
+
+    public void delete(Integer id) {
+        repo.removeById(id);
+    }
 }

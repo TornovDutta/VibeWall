@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ConfessionRepo extends MongoRepository<Confession,Integer> {
+    void removeById(Integer id);
 }
