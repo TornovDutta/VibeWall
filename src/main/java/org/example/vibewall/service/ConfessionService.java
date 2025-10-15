@@ -4,6 +4,9 @@ import org.example.vibewall.DAO.ConfessionRepo;
 import org.example.vibewall.model.Confession;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.Optional;
+
 @Service
 public class ConfessionService {
     private final ConfessionRepo repo;
@@ -16,7 +19,19 @@ public class ConfessionService {
         repo.save(confession);
     }
 
-    public void delete(Integer id) {
+    public void delete(String id) {
         repo.removeById(id);
     }
+
+    public void update(String id, Confession confession) {
+        Confession existingConfession = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Confession not found with id: " + id));
+
+        existingConfession.setContent(confession.getContent());
+        existingConfession.setTime(new Date());
+
+        repo.save(existingConfession);
+    }
+
+
 }

@@ -26,17 +26,17 @@ public class ConfessionController {
 
     }
 
-    @PutMapping("update")
-    public ResponseEntity<String> update(@RequestBody Confession confession){
+    @PutMapping("update/{id}")
+    public ResponseEntity<String> update(@PathVariable String id,@RequestBody Confession confession){
         try{
-            service.create(confession);
+            service.update(id,confession);
             return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
     }
-    @DeleteMapping("delete")
-    public  ResponseEntity<String> update(@RequestParam Integer id){
+    @DeleteMapping("delete/{id}")
+    public  ResponseEntity<String> update(@PathVariable  String id){
         try{
             service.delete(id);
             return new ResponseEntity<>("delete",HttpStatus.OK);
