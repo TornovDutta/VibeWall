@@ -11,7 +11,7 @@ import java.util.Date;
 @Data
 public class Confession {
     @Id
-    private Integer id;
+    private String id;
     private String content;
     @CreatedDate
     private Date time;
