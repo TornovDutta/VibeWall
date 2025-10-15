@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/confession")
 public class ConfessionController {
@@ -40,6 +42,23 @@ public class ConfessionController {
         try{
             service.delete(id);
             return new ResponseEntity<>("delete",HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @GetMapping("")
+    public ResponseEntity<List<Confession>> show(){
+        try{
+            return new ResponseEntity<>(service.showAll(),HttpStatus.OK);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @GetMapping("{id}")
+    public ResponseEntity<Confession> showById(@PathVariable String id){
+        try{
+            return new ResponseEntity<>(service.show(id),HttpStatus.OK);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }

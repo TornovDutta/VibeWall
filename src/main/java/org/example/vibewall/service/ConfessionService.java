@@ -5,6 +5,7 @@ import org.example.vibewall.model.Confession;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,4 +35,11 @@ public class ConfessionService {
     }
 
 
+    public List<Confession> showAll() {
+        return repo.findAll();
+    }
+
+    public Confession show(String id) {
+        return repo.findById(id).orElseThrow();
+    }
 }
