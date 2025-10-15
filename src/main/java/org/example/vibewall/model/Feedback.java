@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 public class Feedback {
     @Id
-    private Integer id;
+    private String id;
     private String feedback;
     private Date date;
 
