@@ -4,10 +4,7 @@ import org.example.vibewall.model.Feedback;
 import org.example.vibewall.service.FeedbackService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/feedback")
@@ -18,10 +15,11 @@ public class FeedbackController {
         this.service = service;
     }
 
-    @PostMapping("")
-    public ResponseEntity<String> create(@RequestBody Feedback feedback){
+    @PostMapping("{id}")
+    public ResponseEntity<String> create(@PathVariable String id, @RequestBody Feedback feedback){
         try{
-            service.giveFeedback(feedback);
+
+            service.giveFeedback(id,feedback);
             return new ResponseEntity<>("create the feedback", HttpStatus.CREATED);
 
         } catch (RuntimeException e) {

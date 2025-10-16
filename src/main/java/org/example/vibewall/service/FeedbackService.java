@@ -6,14 +6,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FeedbackService {
-    private final FeedbackRepo repo;
+    private final FeedbackRepo feedbackRepo;
 
-    public FeedbackService(FeedbackRepo repo) {
-        this.repo = repo;
+    public FeedbackService(FeedbackRepo feedbackRepo) {
+        this.feedbackRepo = feedbackRepo;
     }
 
-    public void giveFeedback(Feedback feedback) {
-        repo.save(feedback);
+    public void giveFeedback(String id,Feedback feedback) {
+        feedbackRepo.save(feedback);
 
     }
 }
