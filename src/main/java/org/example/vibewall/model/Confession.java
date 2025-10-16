@@ -17,6 +17,7 @@ public class Confession {
     private String content;
     @CreatedDate
     private Date time;
+//    private String userId;
     private List<Feedback> feedbacks=new ArrayList<>();
 
     public Confession(){
