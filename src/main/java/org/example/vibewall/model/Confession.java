@@ -1,5 +1,6 @@
 package org.example.vibewall.model;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -14,6 +15,7 @@ import java.util.List;
 public class Confession {
     @Id
     private String id;
+    @NotBlank
     private String content;
     @CreatedDate
     private Date time;
