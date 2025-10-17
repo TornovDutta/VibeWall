@@ -5,6 +5,8 @@ import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Feedback;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,5 +28,17 @@ public class FeedbackService {
             System.out.println("Error");
         }
 
+    }
+
+    public List<Feedback> get(String id) {
+        Optional<Confession> confessionOptional= confessionRepo.findById(id);
+        if(confessionOptional.isPresent()){
+            Confession confession=confessionOptional.get();
+
+            return new ArrayList<>(confession.getFeedbacks());
+        }else{
+            System.out.println("Error");
+            return new ArrayList<>();
+        }
     }
 }
