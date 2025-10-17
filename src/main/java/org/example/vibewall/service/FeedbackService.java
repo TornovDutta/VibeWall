@@ -47,12 +47,11 @@ public class FeedbackService {
 
     public String update(String id,String contest) {
         Optional<Feedback> feedbackOptional=feedbackRepo.findById(id);
-        try{
+        if(feedbackOptional.isPresent()){
             Feedback feedback=feedbackOptional.get();
             feedback.setFeedback(contest);
             feedbackRepo.save(feedback);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
         }
+        return null;
     }
 }
