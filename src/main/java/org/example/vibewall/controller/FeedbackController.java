@@ -36,4 +36,12 @@ public class FeedbackController {
             throw new RuntimeException(e);
         }
     }
+    @PutMapping("update/{id}")
+    public ResponseEntity<String> update(@PathVariable String id,@RequestBody String feedback){
+        try{
+            return new ResponseEntity<>(service.update(id,feedback),HttpStatus.ACCEPTED);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

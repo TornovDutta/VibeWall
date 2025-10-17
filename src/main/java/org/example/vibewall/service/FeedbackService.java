@@ -1,6 +1,7 @@
 package org.example.vibewall.service;
 
 import org.example.vibewall.DAO.ConfessionRepo;
+import org.example.vibewall.DAO.FeedbackRepo;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Feedback;
 import org.springframework.stereotype.Service;
@@ -13,12 +14,14 @@ import java.util.Optional;
 public class FeedbackService {
 
     private final ConfessionRepo confessionRepo;
+    private final FeedbackRepo feedbackRepo;
 
-    public FeedbackService(ConfessionRepo confessionRepo) {
-        this.confessionRepo=confessionRepo;
+    public FeedbackService(ConfessionRepo confessionRepo, FeedbackRepo feedbackRepo) {
+        this.confessionRepo = confessionRepo;
+        this.feedbackRepo = feedbackRepo;
     }
 
-    public void giveFeedback(String id,Feedback feedback) {
+    public void giveFeedback(String id, Feedback feedback) {
         Optional<Confession> confession=confessionRepo.findById(id);
         if(confession.isPresent()){
             Confession con=confession.get();
@@ -39,6 +42,17 @@ public class FeedbackService {
         }else{
             System.out.println("Error");
             return new ArrayList<>();
+        }
+    }
+
+    public String update(String id,String contest) {
+        Optional<Feedback> feedbackOptional=feedbackRepo.findById(id);
+        try{
+            Feedback feedback=feedbackOptional.get();
+            feedback.setFeedback(contest);
+            feedbackRepo.save(feedback);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
     }
 }
