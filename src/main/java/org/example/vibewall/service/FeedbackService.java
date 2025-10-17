@@ -54,4 +54,12 @@ public class FeedbackService {
         }
         return null;
     }
+
+    public Feedback getById(String id) {
+        Optional<Feedback> feedback=feedbackRepo.findById(id);
+        if(feedback.isPresent()){
+            return  feedback.get();
+        }
+        return new Feedback();
+    }
 }

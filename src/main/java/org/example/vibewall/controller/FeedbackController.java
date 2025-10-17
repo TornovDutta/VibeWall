@@ -28,10 +28,18 @@ public class FeedbackController {
             throw new RuntimeException(e);
         }
     }
-    @GetMapping("{id}")
+    @GetMapping("confession/{id}")
     public ResponseEntity<List<Feedback>> getAll(@PathVariable String id){
         try{
             return new ResponseEntity<>(service.get(id),HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @GetMapping("{id}")
+    public ResponseEntity<Feedback> get(@PathVariable String id){
+        try{
+            return new ResponseEntity<>(service.getById(id),HttpStatus.OK);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
