@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FeedbackRepo extends MongoRepository<Feedback,String> {
+    void removeById(String id);
 }

@@ -51,6 +51,7 @@ public class FeedbackService {
             Feedback feedback=feedbackOptional.get();
             feedback.setFeedback(contest);
             feedbackRepo.save(feedback);
+            return "Update";
         }
         return null;
     }
@@ -61,5 +62,12 @@ public class FeedbackService {
             return  feedback.get();
         }
         return new Feedback();
+    }
+
+    public void delete(String id) {
+        Optional<Feedback> feedback=feedbackRepo.findById(id);
+        if(feedback.isPresent()){
+            feedbackRepo.removeById(id);
+        }
     }
 }

@@ -52,4 +52,13 @@ public class FeedbackController {
             throw new RuntimeException(e);
         }
     }
+    @DeleteMapping("{id}")
+    public ResponseEntity<String> delete(@PathVariable String id){
+        try{
+            service.delete(id);
+            return new ResponseEntity<>("Delete",HttpStatus.ACCEPTED);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
