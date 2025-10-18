@@ -23,15 +23,7 @@ public class UserController {
             throw new RuntimeException(e);
         }
     }
-    @PostMapping("addAdmin")
-    public ResponseEntity<String> addAdmin(@RequestBody Users users){
-        try{
-            service.addAdmin(users);
-            return new ResponseEntity<>("add the user", HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
     @PutMapping("update")
     public ResponseEntity<String> update(@RequestBody Users user){
         try{
@@ -41,15 +33,7 @@ public class UserController {
             throw new RuntimeException(e);
         }
     }
-    @PutMapping("updateAdmin")
-    public ResponseEntity<String> updateAdmin(@RequestBody Users user){
-        try{
-            service.update(user);
-            return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
 
     @DeleteMapping("delete")
@@ -61,14 +45,6 @@ public class UserController {
             throw new RuntimeException(e);
         }
     }
-    @DeleteMapping("deleteAdmin")
-    public ResponseEntity<String> deleteAdmin(@PathVariable String id){
-        try{
-            service.delete(id);
-            return new ResponseEntity<>("delete",HttpStatus.OK);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
 }
