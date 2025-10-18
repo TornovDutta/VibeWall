@@ -21,4 +21,8 @@ public class UsersService {
         user.setRole("ADMIN");
         repo.save(user);
     }
+
+    public void update(Users user) {
+        repo.save(user);
+    }
 }

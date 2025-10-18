@@ -4,10 +4,7 @@ import org.example.vibewall.model.Users;
 import org.example.vibewall.service.UsersService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -36,4 +33,14 @@ public class UserController {
             throw new RuntimeException(e);
         }
     }
+    @PutMapping("update")
+    public ResponseEntity<String> update(@RequestBody Users user){
+        try{
+            service.update(user);
+            return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
