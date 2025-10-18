@@ -26,26 +26,27 @@ allows students to share thoughts securely and anonymously, promoting open commu
 
 ---
 
+
 ## REST API Endpoints
 
-| Endpoint | HTTP Method | Description | Access |
-|----------|------------|-------------|--------|
-| `/api/admin/add` | POST | Add a new admin | Admin only |
-| `/api/admin/update` | PUT | Update admin details | Admin only |
-| `/api/admin/deleteAdmin/{id}` | DELETE | Delete an admin by ID | Admin only |
-| `/api/user/add` | POST | Add a new user | Admin only |
-| `/api/user/update` | PUT | Update user details | Admin only |
-| `/api/user/delete/{id}` | DELETE | Delete a user by ID | Admin only |
-| `/api/confession/create` | POST | Create a new confession | User/Admin |
-| `/api/confession/update/{id}` | PUT | Update a confession by ID | Admin only |
-| `/api/confession/delete/{id}` | DELETE | Delete a confession by ID | Admin only |
-| `/api/confession/` | GET | Get all confessions | User/Admin |
-| `/api/confession/{id}` | GET | Get confession by ID | User/Admin |
-| `/api/feedback/{id}` | POST | Add feedback to confession | User/Admin |
-| `/api/feedback/confession/{id}` | GET | Get all feedback for a confession | User/Admin |
-| `/api/feedback/{id}` | GET | Get feedback by ID | User/Admin |
-| `/api/feedback/update/{id}` | PUT | Update feedback by ID | User/Admin |
-| `/api/feedback/{id}` | DELETE | Delete feedback by ID | Admin only |
+| Endpoint | HTTP Method | Description | Access | Example |
+|----------|------------|-------------|--------|---------|
+| `/api/admin/add` | POST | Add a new admin | Admin only | `{ "username": "admin1", "password": "pass123" }` |
+| `/api/admin/update` | PUT | Update admin details | Admin only | `{ "id": "64f1a3", "username": "admin2" }` |
+| `/api/admin/deleteAdmin/{id}` | DELETE | Delete an admin by ID | Admin only | `/api/admin/deleteAdmin/64f1a3` |
+| `/api/user/add` | POST | Add a new user | Admin only | `{ "username": "user1", "email": "user@example.com" }` |
+| `/api/user/update` | PUT | Update user details | Admin only | `{ "id": "64f1a4", "email": "newmail@example.com" }` |
+| `/api/user/delete/{id}` | DELETE | Delete a user by ID | Admin only | `/api/user/delete/64f1a4` |
+| `/api/confession/create` | POST | Create a new confession | User/Admin | `{ "content": "Feeling stressed today" }` |
+| `/api/confession/update/{id}` | PUT | Update a confession by ID | Admin only | `{ "content": "Updated confession" }` |
+| `/api/confession/delete/{id}` | DELETE | Delete a confession by ID | Admin only | `/api/confession/delete/64f1a5` |
+| `/api/confession/` | GET | Get all confessions | User/Admin | `/api/confession/` |
+| `/api/confession/{id}` | GET | Get confession by ID | User/Admin | `/api/confession/64f1a5` |
+| `/api/feedback/{id}` | POST | Add feedback to confession | User/Admin | `{ "message": "Stay strong!" }` |
+| `/api/feedback/confession/{id}` | GET | Get all feedback for a confession | User/Admin | `/api/feedback/confession/64f1a5` |
+| `/api/feedback/{id}` | GET | Get feedback by ID | User/Admin | `/api/feedback/64f1a6` |
+| `/api/feedback/update/{id}` | PUT | Update feedback by ID | User/Admin | `{ "message": "Updated feedback" }` |
+| `/api/feedback/{id}` | DELETE | Delete feedback by ID | Admin only | `/api/feedback/64f1a6` |
 
 ---
 
