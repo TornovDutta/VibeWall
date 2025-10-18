@@ -42,5 +42,14 @@ public class UserController {
             throw new RuntimeException(e);
         }
     }
+    @DeleteMapping("delete")
+    public ResponseEntity<String> delete(@PathVariable String id){
+        try{
+            service.delete(id);
+            return new ResponseEntity<>("delete",HttpStatus.OK);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

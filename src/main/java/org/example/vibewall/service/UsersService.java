@@ -25,4 +25,8 @@ public class UsersService {
     public void update(Users user) {
         repo.save(user);
     }
+
+    public void delete(String id) {
+        repo.removeById(id);
+    }
 }
