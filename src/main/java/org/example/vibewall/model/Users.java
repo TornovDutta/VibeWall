@@ -19,4 +19,9 @@ public class Users {
         this.password = password;
         this.role = role;
     }
+
+    public Users(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 }
