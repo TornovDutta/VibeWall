@@ -33,7 +33,7 @@ public class AdminController {
             throw new RuntimeException(e);
         }
     }
-    @DeleteMapping("deleteAdmin")
+    @DeleteMapping("delete")
     public ResponseEntity<String> deleteAdmin(@PathVariable String id){
         try{
             service.delete(id);
