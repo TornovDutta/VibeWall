@@ -1,5 +1,4 @@
 package org.example.vibewall.controller;
-
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.UsersService;
 import org.springframework.http.HttpStatus;
