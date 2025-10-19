@@ -1,7 +1,9 @@
 package org.example.vibewall.service;
 
 import org.example.vibewall.DAO.ConfessionRepo;
+import org.example.vibewall.DAO.UsersRepo;
 import org.example.vibewall.model.Confession;
+import org.example.vibewall.model.Users;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -11,12 +13,17 @@ import java.util.Optional;
 @Service
 public class ConfessionService {
     private final ConfessionRepo repo;
+    private final UsersRepo usersRepo;
 
-    public ConfessionService(ConfessionRepo repo) {
+    public ConfessionService(ConfessionRepo repo, UsersRepo usersRepo) {
         this.repo = repo;
+        this.usersRepo = usersRepo;
     }
 
-    public void create(Confession confession) {
+    public void create(Confession confession, String userName) {
+        Users user = usersRepo.findByUsername(userName)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userName));
+        confession.setUserId(user.getId());
         repo.save(confession);
     }
 

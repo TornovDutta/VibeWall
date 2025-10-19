@@ -19,14 +19,15 @@ public class Confession {
     private String content;
     @CreatedDate
     private Date time;
-//    private String userId;
+    private String userId;
     private List<Feedback> feedbacks=new ArrayList<>();
 
     public Confession(){
         this.time=new Date();
     }
-    public Confession(String content){
+    public Confession(String content,String userId){
         this.content=content;
+        this.userId=userId;
         this.time=new Date();
     }
 }
