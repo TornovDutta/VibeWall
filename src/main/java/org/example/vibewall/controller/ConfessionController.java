@@ -20,11 +20,11 @@ public class ConfessionController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<String> create(@RequestBody Confession confession, Authentication authentication) {
+    public ResponseEntity<String> create(@RequestBody String content, Authentication authentication) {
         try {
 
             String username = authentication.getName();
-            service.create(confession, username);
+            service.create(content, username);
             return new ResponseEntity<>("Confession created successfully", HttpStatus.CREATED);
         } catch (RuntimeException e) {
             throw new RuntimeException("Error creating confession: " + e.getMessage());

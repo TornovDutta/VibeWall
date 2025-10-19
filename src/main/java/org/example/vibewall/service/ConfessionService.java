@@ -20,10 +20,13 @@ public class ConfessionService {
         this.usersRepo = usersRepo;
     }
 
-    public void create(Confession confession, String userName) {
+    public void create(String content, String userName) {
         Users user = usersRepo.findByUsername(userName)
                 .orElseThrow(() -> new RuntimeException("User not found: " + userName));
-        confession.setUserId(user.getId());
+        String id=user.getId();
+        Confession confession=new Confession();
+        confession.setContent(content);
+        confession.setUserId(id);
         repo.save(confession);
     }
 
