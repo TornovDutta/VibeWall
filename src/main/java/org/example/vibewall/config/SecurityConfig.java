@@ -22,7 +22,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                // Simple login for testing
                 .formLogin(form -> form.permitAll())
                 .httpBasic(basic -> {});
 
