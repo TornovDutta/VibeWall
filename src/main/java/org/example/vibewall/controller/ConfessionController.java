@@ -43,9 +43,10 @@ public class ConfessionController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> delete(@PathVariable String id) {
+    public ResponseEntity<String> delete(@PathVariable String id,Authentication authentication) {
+        String username=authentication.getName();
         try {
-            service.delete(id);
+            service.delete(id,username);
             return new ResponseEntity<>("Confession deleted successfully", HttpStatus.OK);
         } catch (RuntimeException e) {
             throw new RuntimeException("Error deleting confession: " + e.getMessage());

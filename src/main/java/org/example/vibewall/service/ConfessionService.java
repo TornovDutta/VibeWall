@@ -30,9 +30,30 @@ public class ConfessionService {
         repo.save(confession);
     }
 
-    public void delete(String id) {
+    public void delete(String id, String username) {
+
+        Optional<Users> userOpt = usersRepo.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        Users user = userOpt.get();
+
+
+        Confession existingConfession = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Confession not found with id: " + id));
+
+
+        boolean isOwner = existingConfession.getUserId().equals(user.getId());
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("Unauthorized to delete this confession");
+        }
+
+
         repo.removeById(id);
     }
+
 
     public void update(String id, Confession confession, String username) {
 
