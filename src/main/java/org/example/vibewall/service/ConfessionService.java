@@ -34,15 +34,33 @@ public class ConfessionService {
         repo.removeById(id);
     }
 
-    public void update(String id, Confession confession) {
+    public void update(String id, Confession confession, String username) {
+
+        Optional<Users> userOpt = usersRepo.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("User not found: " + username);
+        }
+        Users user = userOpt.get();
+
+
         Confession existingConfession = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Confession not found with id: " + id));
+
+
+        boolean isOwner = existingConfession.getUserId().equals(user.getId());
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
+
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("Unauthorized to update this confession");
+        }
+
 
         existingConfession.setContent(confession.getContent());
         existingConfession.setTime(new Date());
 
         repo.save(existingConfession);
     }
+
 
 
     public List<Confession> showAll() {

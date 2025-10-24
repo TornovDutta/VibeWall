@@ -32,9 +32,10 @@ public class ConfessionController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<String> update(@PathVariable String id, @RequestBody Confession confession) {
+    public ResponseEntity<String> update(@PathVariable String id, @RequestBody Confession confession,Authentication authentication) {
         try {
-            service.update(id, confession);
+            String username=authentication.getName();
+            service.update(id, confession,username);
             return new ResponseEntity<>("Confession updated successfully", HttpStatus.ACCEPTED);
         } catch (RuntimeException e) {
             throw new RuntimeException("Error updating confession: " + e.getMessage());
