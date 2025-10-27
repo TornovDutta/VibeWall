@@ -27,7 +27,7 @@ public class UsersService {
         repo.save(user);
     }
 
-    public void update(Users user) {
+    public void update(String id,Users user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         repo.save(user);
     }

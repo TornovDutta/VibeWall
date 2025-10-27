@@ -24,10 +24,10 @@ public class AdminController {
             throw new RuntimeException(e);
         }
     }
-    @PutMapping("update")
-    public ResponseEntity<String> updateAdmin(@RequestBody Users user){
+    @PutMapping("update/{id}")
+    public ResponseEntity<String> updateAdmin(@PathVariable String id,@RequestBody Users user){
         try{
-            service.update(user);
+            service.update(id,user);
             return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);

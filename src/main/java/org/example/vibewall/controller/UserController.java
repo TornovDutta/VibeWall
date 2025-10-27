@@ -14,33 +14,31 @@ public class UserController {
         this.service = service;
     }
 
-    @PostMapping("add")
-    public ResponseEntity<String> addUser(@RequestBody Users user){
+    @PostMapping
+    public ResponseEntity<String> addUser(@RequestBody Users user) {
         try{
             service.add(user);
-            return new ResponseEntity<>("add the user", HttpStatus.CREATED);
+            return new ResponseEntity<>("User created successfully", HttpStatus.CREATED);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @PutMapping("update")
-    public ResponseEntity<String> update(@RequestBody Users user){
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable String id, @RequestBody Users user) {
         try{
-            service.update(user);
-            return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
+            service.update(id, user);
+            return new ResponseEntity<>("User updated successfully", HttpStatus.OK);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
     }
 
-
-
-    @DeleteMapping("delete")
-    public ResponseEntity<String> delete(@PathVariable String id){
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         try{
             service.delete(id);
-            return new ResponseEntity<>("delete",HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
