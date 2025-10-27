@@ -27,10 +27,19 @@ public class UsersService {
         repo.save(user);
     }
 
-    public void update(String id,Users user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        repo.save(user);
+    public void update(String id, Users user) {
+
+        Users existingUser = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+
+        existingUser.setUsername(user.getUsername());
+        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+
+
+        repo.save(existingUser);
     }
+
 
     public void delete(String id) {
         repo.deleteById(id);
