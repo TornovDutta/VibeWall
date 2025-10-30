@@ -1,0 +1,33 @@
+package org.example.vibewall.service;
+
+import org.example.vibewall.DAO.ReportRepo;
+import org.example.vibewall.exception.ReportNotFoundException;
+import org.example.vibewall.model.Report;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ReportService {
+    private final ReportRepo repo;
+
+    public ReportService(ReportRepo repo) {
+        this.repo = repo;
+    }
+
+    public String create(Report report) {
+        return repo.save(report).getId();
+    }
+
+    public String remove(String id) throws ReportNotFoundException{
+        repo.findById(id).orElseThrow(()->
+                new ReportNotFoundException());
+        return repo.removeById(id);
+    }
+
+    public Report update(String id, Report report) throws ReportNotFoundException {
+        Report r=repo.findById(id).orElseThrow(()->
+                new ReportNotFoundException());
+        r.setReportContent(report.getReportContent());
+        r.setStatus("PENDING");
+        return repo.save(report);
+    }
+}

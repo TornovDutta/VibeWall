@@ -20,4 +20,9 @@ public class GenericException {
         ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"User not found");
         return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(ReportNotFoundException.class)
+    public ResponseEntity<?> handleReportNotFound(ReportNotFoundException e){
+        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"no Report");
+        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    }
 }
