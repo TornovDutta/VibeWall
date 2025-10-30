@@ -3,17 +3,22 @@ package org.example.vibewall.service;
 import org.example.vibewall.DAO.ReportRepo;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class ReportService {
     private final ReportRepo repo;
-
+    private final static Logger logger = LoggerFactory.getLogger(ReportService.class);
     public ReportService(ReportRepo repo) {
         this.repo = repo;
     }
 
     public String create(Report report) {
+        logger.info(report +" coming at "+ LocalDateTime.now());
         return repo.save(report).getId();
     }
 
