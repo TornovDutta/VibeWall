@@ -96,6 +96,6 @@ org.example.vibewall
 
 ## Contribution
 
-Contributions are welcome! Please fork the repository, make changes, and create a pull request.
+Contributions are welcome! Please fork the repository, make changes, and create a pull requestUpdate.
 
 
