@@ -33,7 +33,7 @@ public class AdminController {
         return new ResponseEntity<>(service.update(id,user),HttpStatus.OK);
 
     }
-    @DeleteMapping("")
+    @DeleteMapping("{id}")
     public ResponseEntity<?> deleteAdmin(@PathVariable String id)throws AdminNotFoundException{
         service.delete(id);
         return new ResponseEntity<>("Delete",HttpStatus.NO_CONTENT);

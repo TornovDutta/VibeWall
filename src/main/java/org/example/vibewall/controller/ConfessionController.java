@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/confession")
+@RequestMapping("/api/v2/confession")
 public class ConfessionController {
 
     private final ConfessionService service;
@@ -19,7 +19,7 @@ public class ConfessionController {
         this.service = service;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<String> create(@RequestBody String content, Authentication authentication) {
         try {
 
@@ -31,7 +31,7 @@ public class ConfessionController {
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<String> update(@PathVariable String id, @RequestBody Confession confession,Authentication authentication) {
         try {
             String username=authentication.getName();
@@ -42,7 +42,7 @@ public class ConfessionController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<String> delete(@PathVariable String id,Authentication authentication) {
         String username=authentication.getName();
         try {
