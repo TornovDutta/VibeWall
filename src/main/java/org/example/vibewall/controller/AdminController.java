@@ -56,5 +56,9 @@ public class AdminController {
     public ResponseEntity<List<Report>> allPendingReport(@PathVariable String id){
         return new ResponseEntity<>(service.getPendingById(id),HttpStatus.OK);
     }
+    @PostMapping("report/Reviewed/{id}/{status}")
+    public ResponseEntity<?> review(@PathVariable String id,@PathVariable String status) throws ReportNotFoundException{
+        return new ResponseEntity<>(service.reslove(id,status),HttpStatus.OK);
+    }
 
 }

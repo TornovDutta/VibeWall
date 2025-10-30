@@ -66,4 +66,11 @@ public class AdminService {
     public List<Report> getPendingById(String id) {
         return reportRepo.findByStatusAndId("PENDING",id);
     }
+
+    public Report reslove(String id, String status) throws ReportNotFoundException {
+        Report report=reportRepo.findById(id).orElseThrow(()->
+                new ReportNotFoundException());
+        report.setStatus(status);
+        return reportRepo.save(report);
+    }
 }
