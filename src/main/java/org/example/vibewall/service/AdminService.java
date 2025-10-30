@@ -23,6 +23,8 @@ public class AdminService {
     }
 
     public Users addAdmin(Users user) {
+        user.setRole("ADMIN");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return repo.save(user);
     }
 
