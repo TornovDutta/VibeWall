@@ -25,4 +25,14 @@ public class GenericException {
         ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"no Report");
         return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleGenericException(Exception e){
+        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"error by server");
+        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(ConfessionNotFoundException.class)
+    public ResponseEntity<?> handleConfessionNotFound(ConfessionNotFoundException e){
+        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"Confession not found");
+        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    }
 }
