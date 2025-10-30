@@ -1,6 +1,8 @@
 package org.example.vibewall.controller;
 
 import org.example.vibewall.exception.AdminNotFoundException;
+import org.example.vibewall.exception.ReportNotFoundException;
+import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
 import org.springframework.http.HttpStatus;
@@ -38,4 +40,21 @@ public class AdminController {
         service.delete(id);
         return new ResponseEntity<>("Delete",HttpStatus.NO_CONTENT);
     }
+    @GetMapping("report")
+    public ResponseEntity<List<Report>> allReport(){
+        return new ResponseEntity<>(service.getReport(),HttpStatus.OK);
+    }
+    @GetMapping("report/{id}")
+    public ResponseEntity<Report> allReport(@PathVariable String id) throws ReportNotFoundException {
+        return new ResponseEntity<>(service.getReportById(id),HttpStatus.OK);
+    }
+    @GetMapping("report/pending")
+    public ResponseEntity<List<Report>> allPendingReport(){
+        return new ResponseEntity<>(service.getPending(),HttpStatus.OK);
+    }
+    @GetMapping("report/pending/{id}")
+    public ResponseEntity<List<Report>> allPendingReport(@PathVariable String id){
+        return new ResponseEntity<>(service.getPendingById(id),HttpStatus.OK);
+    }
+
 }
