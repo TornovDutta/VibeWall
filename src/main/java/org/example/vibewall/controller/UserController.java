@@ -1,7 +1,5 @@
 package org.example.vibewall.controller;
 import org.example.vibewall.exception.UserNotFoundException;
-import org.example.vibewall.model.RequestDelete;
-import org.example.vibewall.model.RequestUpdate;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.UsersService;
 import org.springframework.http.HttpStatus;
@@ -23,20 +21,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RequestUpdate> updateUser(
-            @PathVariable String id,
-            @RequestBody Users user) throws UserNotFoundException {
-        RequestUpdate request = service.update(id, user);
-        return new ResponseEntity<>(request, HttpStatus.ACCEPTED);
+    public ResponseEntity<Users> updateUser(@PathVariable String id, @RequestBody Users user) throws UserNotFoundException {
+        return new ResponseEntity<>(service.update(id,user),HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<RequestDelete> deleteUser(
-            @PathVariable String id) throws UserNotFoundException {
-        RequestDelete request = service.delete(id);
-        return new ResponseEntity<>(request, HttpStatus.ACCEPTED);
+    public ResponseEntity<String> deleteUser(@PathVariable String id) throws UserNotFoundException{
+        service.delete(id);
+        return new ResponseEntity<>("delete the id : "+id,HttpStatus.NO_CONTENT);
     }
-
 
 
 }
