@@ -12,11 +12,10 @@ import java.util.List;
 
 public class CustomUserDetailsService implements UserDetailsService{
     private final UsersRepo userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public CustomUserDetailsService(UsersRepo userRepository, PasswordEncoder passwordEncoder) {
+
+    public CustomUserDetailsService(UsersRepo userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
