@@ -39,7 +39,7 @@ public class UsersService {
         Users existingUser = repo.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 
-        existingUser.setUsername(passwordEncoder.encode(user.getUsername()));
+        existingUser.setUsername(user.getUsername());
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         return repo.save(existingUser);
 

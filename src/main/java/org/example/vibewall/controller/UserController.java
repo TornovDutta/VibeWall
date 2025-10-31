@@ -1,4 +1,5 @@
 package org.example.vibewall.controller;
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.UsersService;
@@ -8,12 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v2")
+@RequiredArgsConstructor
 public class UserController {
     private final UsersService service;
 
-    public UserController(UsersService service) {
-        this.service = service;
-    }
+
 
     @PostMapping
     public ResponseEntity<String> addUser(@RequestBody Users user) {

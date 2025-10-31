@@ -1,5 +1,6 @@
 package org.example.vibewall.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.ReportRepo;
 import org.example.vibewall.DAO.UsersRepo;
 import org.example.vibewall.exception.AdminNotFoundException;
@@ -15,20 +16,17 @@ import java.util.List;
 
 
 @Service
+@RequiredArgsConstructor
 public class AdminService {
-    private final UsersRepo repo;
+    private final UsersRepo userRepo;
     private final ReportRepo reportRepo;
     private final PasswordEncoder passwordEncoder;
     private static final Logger logger= LoggerFactory.getLogger(AdminService.class);
 
-    public AdminService(UsersRepo repo, PasswordEncoder passwordEncoder,ReportRepo reportRepo) {
-        this.repo = repo;
-        this.passwordEncoder = passwordEncoder;
-        this.reportRepo=reportRepo;
-    }
+
 
     public List<Users> getAll() {
-        return repo.findAll();
+        return userRepo.findAll();
     }
 
     public Users addAdmin(Users user) {
@@ -36,25 +34,25 @@ public class AdminService {
         user.setRole("ADMIN");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("new admin add");
-        return repo.save(user);
+        return userRepo.save(user);
     }
 
     public Users update(String id, Users user) throws AdminNotFoundException{
-        Users existingUser = repo.findById(id)
+        Users existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
         existingUser.setUsername(passwordEncoder.encode(user.getUsername()));
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("admin of id: "+id+" update");
-        return repo.save(existingUser);
+        return userRepo.save(existingUser);
     }
 
     public void delete(String id) throws AdminNotFoundException{
-        repo.findById(id)
+        userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
         logger.info("admin of id: "+id+" remove");
-        repo.removeById(id);
+        userRepo.removeById(id);
     }
 
     public List<Report> getReport() {

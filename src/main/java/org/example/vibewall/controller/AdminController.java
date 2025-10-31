@@ -1,5 +1,6 @@
 package org.example.vibewall.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
@@ -13,12 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2/admin")
+@RequiredArgsConstructor
 public class AdminController {
     private final AdminService service;
 
-    public AdminController(AdminService service) {
-        this.service = service;
-    }
 
     @GetMapping
     public ResponseEntity<List<Users>> getAll(){

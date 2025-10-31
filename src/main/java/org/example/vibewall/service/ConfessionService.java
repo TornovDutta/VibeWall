@@ -1,7 +1,9 @@
 package org.example.vibewall.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.ConfessionRepo;
 import org.example.vibewall.DAO.UsersRepo;
+import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Users;
 import org.springframework.stereotype.Service;
@@ -11,23 +13,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ConfessionService {
     private final ConfessionRepo repo;
     private final UsersRepo usersRepo;
 
-    public ConfessionService(ConfessionRepo repo, UsersRepo usersRepo) {
-        this.repo = repo;
-        this.usersRepo = usersRepo;
-    }
 
-    public void create(String content, String userName) {
-        Users user = usersRepo.findByUsername(userName)
-                .orElseThrow(() -> new RuntimeException("User not found: " + userName));
-        String id=user.getId();
+
+    public Confession create(String content, String userName) throws UserNotFoundException {
+        Optional<Users> user = usersRepo.findByUsername(userName);
+        String id=user.get().getId();
         Confession confession=new Confession();
         confession.setContent(content);
         confession.setUserId(id);
-        repo.save(confession);
+        return repo.save(confession);
     }
 
     public void delete(String id, String username) {
@@ -68,11 +67,8 @@ public class ConfessionService {
                 .orElseThrow(() -> new RuntimeException("Confession not found with id: " + id));
 
 
-        boolean isOwner = existingConfession.getUserId().equals(user.getId());
-        boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
-
-        if (!isOwner && !isAdmin) {
-            throw new RuntimeException("Unauthorized to update this confession");
+        if(user.getId()!=id){
+            throw new RuntimeException("you are not the owner of this confession");
         }
 
 

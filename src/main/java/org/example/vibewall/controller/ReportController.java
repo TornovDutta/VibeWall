@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v2/report")
+@RequestMapping("/api/v2/user/report")
 public class ReportController {
     private final ReportService service;
 
@@ -16,7 +16,7 @@ public class ReportController {
         this.service = service;
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<String> makeReport(@RequestBody Report report){
         return new ResponseEntity<>(service.create(report), HttpStatus.CREATED);
     }
