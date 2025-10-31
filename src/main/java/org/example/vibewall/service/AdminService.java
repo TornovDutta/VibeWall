@@ -30,7 +30,7 @@ public class AdminService {
     }
 
     public Users addAdmin(Users user) {
-        user.setUsername(passwordEncoder.encode(user.getUsername()));
+        user.setUsername(user.getUsername());
         user.setRole("ADMIN");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("new admin add");
@@ -41,7 +41,7 @@ public class AdminService {
         Users existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
-        existingUser.setUsername(passwordEncoder.encode(user.getUsername()));
+        existingUser.setUsername(user.getUsername());
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("admin of id: "+id+" update");
         return userRepo.save(existingUser);
