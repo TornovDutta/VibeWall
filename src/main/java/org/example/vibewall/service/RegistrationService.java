@@ -1,22 +1,28 @@
 package org.example.vibewall.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.UsersRepo;
 import org.example.vibewall.model.Users;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class RegistrationService {
+    private final PasswordEncoder passwordEncoder;
     private final UsersRepo repo;
     private final static Logger logger= LoggerFactory.getLogger(RegistrationService.class);
 
-    public RegistrationService(UsersRepo repo) {
-        this.repo = repo;
-    }
-    public Users adduser(Users user){
-        logger.info(user+" add");
-        return repo.save(user);
 
+    public Users adduser(Users user){
+        user.setUsername(user.getUsername());
+        user.setRole("USER");
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        logger.info("new admin add");
+        return repo.save(user);
     }
+
+
 }
