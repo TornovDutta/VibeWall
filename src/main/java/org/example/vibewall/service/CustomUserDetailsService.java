@@ -6,13 +6,17 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.util.List;
 
 public class CustomUserDetailsService implements UserDetailsService{
     private final UsersRepo userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public CustomUserDetailsService(UsersRepo userRepository) {
+    public CustomUserDetailsService(UsersRepo userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
