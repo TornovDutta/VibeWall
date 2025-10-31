@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v2")
+@RequestMapping("/api/v2/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UsersService service;

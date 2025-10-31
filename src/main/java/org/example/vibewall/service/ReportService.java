@@ -18,8 +18,9 @@ public class ReportService {
     }
 
     public String create(Report report) {
+        Report r=new Report(report.getReportContent());
         logger.info(report +" coming at "+ LocalDateTime.now());
-        return repo.save(report).getId();
+        return repo.save(r).getId();
     }
 
     public String remove(String id) throws ReportNotFoundException{
@@ -28,11 +29,11 @@ public class ReportService {
         return repo.removeById(id);
     }
 
-    public Report update(String id, Report report) throws ReportNotFoundException {
+    public String update(String id, Report report) throws ReportNotFoundException {
         Report r=repo.findById(id).orElseThrow(()->
                 new ReportNotFoundException());
-        r.setReportContent(report.getReportContent());
-        r.setStatus("PENDING");
-        return repo.save(report);
+        repo.removeById(id);
+        Report newReport=new Report(report.getReportContent());
+        return repo.save(newReport).getId();
     }
 }

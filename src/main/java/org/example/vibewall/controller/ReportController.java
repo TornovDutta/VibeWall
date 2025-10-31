@@ -1,5 +1,6 @@
 package org.example.vibewall.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.service.ReportService;
@@ -8,13 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v2/user/report")
+@RequestMapping("/user/report")
+@RequiredArgsConstructor
 public class ReportController {
     private final ReportService service;
 
-    public ReportController(ReportService service) {
-        this.service = service;
-    }
+
 
     @PostMapping
     public ResponseEntity<String> makeReport(@RequestBody Report report){

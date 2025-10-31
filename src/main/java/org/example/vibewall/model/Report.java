@@ -17,7 +17,8 @@ public class Report {
     private String id;
     private String reportContent;
     private LocalDateTime dateTime;
-    private String status;
+    private String status="PENDING";
+
 
     public Report( String reportContent) {
 
