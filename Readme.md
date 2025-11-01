@@ -1,19 +1,23 @@
-
 # VibeWall
 
-**VibeWall** is an anonymous confession and discussion platform built using **Spring Boot** and **MongoDB**. It 
-allows students to share thoughts securely and anonymously, promoting open communication and emotional expression. With features like feedback, optional login, and admin management, it ensures privacy, simplicity, and a safe space for honest campus discussions.
+**VibeWall** is an anonymous and secure emotion-sharing platform built using **Spring Boot** and **MongoDB**.  
+It allows students to freely share their thoughts and emotions while ensuring complete privacy and emotional safety.  
+With advanced encryption, AI-powered moderation, reporting features, and admin management, VibeWall promotes open communication in a safe and judgment-free environment.
 
 ---
 
 ## Features
 
-- **Anonymous Confessions:** Users can post thoughts without revealing their identity.
-- **Admin Management:** Admins can manage users, admins, and confessions.
-- **User Management:** Users can be added, updated, or deleted.
-- **Feedback System:** Users can give and view feedback on confessions.
-- **Optional Login:** Flexible authentication while maintaining anonymity.
-- **Simple UI:** Easy to use and navigate.
+- **Anonymous Confessions:** Users can share emotions or thoughts without revealing their identity.
+- **End-to-End Encryption:** Usernames, passwords, confessions, and feedback are stored in encrypted form to protect privacy—even admins cannot view the raw emotions.
+- **AI-Powered Moderation:** Integrated **OpenAI** API automatically detects and blocks harmful or unsafe posts and feedback to maintain a positive space.
+- **Report System:** Users can report confessions, feedback, or activities they find unsafe or inappropriate, ensuring continuous community safety.
+- **Admin Management:** Admins can manage users, confessions, and reports while maintaining platform integrity.
+- **User Management:** Admins can add, update, or delete user accounts securely.
+- **Feedback System:** Users can share and view supportive feedback on confessions.
+- **Optional Login:** Offers flexibility to engage anonymously or through optional authentication.
+- **Swagger UI Integration:** Enables interactive API documentation and testing for developers.
+- **Simple UI:** Intuitive and minimal interface for a distraction-free experience.
 
 ---
 
@@ -23,6 +27,11 @@ allows students to share thoughts securely and anonymously, promoting open commu
 - **Database:** MongoDB
 - **Language:** Java
 - **Build Tool:** Maven
+- **AI Moderation:** OpenAI API
+- **Documentation:** Swagger UI
+
+
+
 
 ---
 
