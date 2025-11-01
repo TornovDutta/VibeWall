@@ -8,17 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v2/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UsersService service;
 
-
-
-    @PostMapping
-    public ResponseEntity<String> addUser(@RequestBody Users user) {
-        return new ResponseEntity<>(service.add(user),HttpStatus.CREATED);
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Users> updateUser(@PathVariable String id, @RequestBody Users user) throws UserNotFoundException {

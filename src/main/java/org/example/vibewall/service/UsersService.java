@@ -1,6 +1,8 @@
 package org.example.vibewall.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.UsersRepo;
+import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
 import org.slf4j.Logger;
@@ -10,27 +12,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
+@RequiredArgsConstructor
 public class UsersService {
 
     private final UsersRepo repo;
 
     private final PasswordEncoder passwordEncoder;
     private final static Logger logger= LoggerFactory.getLogger(UsersService.class);
+    private final Encryption encryption;
 
 
-    public UsersService(UsersRepo repo, PasswordEncoder passwordEncoder) {
-        this.repo = repo;
-        this.passwordEncoder = passwordEncoder;
 
-    }
 
-    public String add(Users user) {
-        user.setUsername(passwordEncoder.encode(user.getUsername()));
-        user.setRole("USER");
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        logger.info(user+" add");
-        return repo.save(user).getId();
-    }
+
 
 
 
@@ -39,7 +33,7 @@ public class UsersService {
         Users existingUser = repo.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 
-        existingUser.setUsername(user.getUsername());
+        existingUser.setUsername(encryption.encode(user.getUsername()));
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         return repo.save(existingUser);
 

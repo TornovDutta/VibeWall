@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v2/users/confession")
+@RequestMapping("/users/confession")
 @RequiredArgsConstructor
 public class ConfessionController {
 
@@ -21,14 +21,13 @@ public class ConfessionController {
 
 
     @PostMapping
-    public ResponseEntity<Confession> create(@RequestBody String content, Authentication authentication) throws UserNotFoundException {
-        String userName=authentication.getName();
-        return new ResponseEntity<>(service.create(content,userName),HttpStatus.CREATED);
+    public ResponseEntity<Confession> create(@RequestBody Confession  confession,Authentication authentication) throws UserNotFoundException {
+        String name=authentication.getName();
+        return new ResponseEntity<>(service.create(confession,name),HttpStatus.CREATED);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Confession confession,
-                                    Authentication authentication) {
+    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Confession confession,Authentication authentication) {
         String userName=authentication.getName();
         service.update(id,confession,userName);
         return new ResponseEntity<>(HttpStatus.OK);

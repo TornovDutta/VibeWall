@@ -3,6 +3,7 @@ package org.example.vibewall.service;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.ReportRepo;
 import org.example.vibewall.DAO.UsersRepo;
+import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
@@ -21,6 +22,7 @@ public class AdminService {
     private final UsersRepo userRepo;
     private final ReportRepo reportRepo;
     private final PasswordEncoder passwordEncoder;
+    private final Encryption encryption;
     private static final Logger logger= LoggerFactory.getLogger(AdminService.class);
 
 
@@ -30,7 +32,7 @@ public class AdminService {
     }
 
     public Users addAdmin(Users user) {
-        user.setUsername(user.getUsername());
+        user.setUsername(encryption.encode(user.getUsername()));
         user.setRole("ADMIN");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("new admin add");
@@ -41,7 +43,7 @@ public class AdminService {
         Users existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
-        existingUser.setUsername(user.getUsername());
+        existingUser.setUsername(encryption.encode(user.getUsername()));
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("admin of id: "+id+" update");
         return userRepo.save(existingUser);

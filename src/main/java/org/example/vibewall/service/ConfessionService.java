@@ -3,9 +3,11 @@ package org.example.vibewall.service;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.ConfessionRepo;
 import org.example.vibewall.DAO.UsersRepo;
+import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Users;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -17,19 +19,20 @@ import java.util.Optional;
 public class ConfessionService {
     private final ConfessionRepo repo;
     private final UsersRepo usersRepo;
+    private final Encryption encryption;
 
 
 
-    public Confession create(String content, String userName) throws UserNotFoundException {
-        Optional<Users> user = usersRepo.findByUsername(userName);
+    public Confession create(Confession confession, String userName) throws UserNotFoundException {
+        Optional<Users> user = usersRepo.findByUsername(encryption.encode(userName));
         String id=user.get().getId();
-        Confession confession=new Confession();
-        confession.setContent(content);
+
+        confession.setContent(encryption.encode(confession.getContent()));
         confession.setUserId(id);
         return repo.save(confession);
     }
 
-    public void delete(String id, String username) {
+    public void delete(String id,String username) {
 
         Optional<Users> userOpt = usersRepo.findByUsername(username);
         if (userOpt.isEmpty()) {
@@ -54,7 +57,7 @@ public class ConfessionService {
     }
 
 
-    public void update(String id, Confession confession, String username) {
+    public void update(String id, Confession confession,String username) {
 
         Optional<Users> userOpt = usersRepo.findByUsername(username);
         if (userOpt.isEmpty()) {

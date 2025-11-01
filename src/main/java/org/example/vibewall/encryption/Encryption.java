@@ -1,7 +1,9 @@
 package org.example.vibewall.encryption;
 
-import java.util.Base64;
+import org.springframework.stereotype.Service;
 
+import java.util.Base64;
+@Service
 public class Encryption {
     public String encode(String str) {
         if (str == null) return null;
