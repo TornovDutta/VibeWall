@@ -36,7 +36,7 @@ public class GenericException {
         return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleFeedbackNotFound(FeedBackNotFoundException e){
+    public ResponseEntity<?> handleFeedbackNotFound(FeedbackNotFoundException e){
         ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"no feedback");
         return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
