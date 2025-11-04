@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users/confession")
+@RequestMapping("/users/confessions")
 @RequiredArgsConstructor
 public class ConfessionController {
 

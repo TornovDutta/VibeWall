@@ -14,15 +14,18 @@ public class UserController {
     private final UsersService service;
 
 
+
     @PutMapping("/{id}")
-    public ResponseEntity<Users> updateUser(@PathVariable String id, @RequestBody Users user) throws UserNotFoundException {
-        return new ResponseEntity<>(service.update(id,user),HttpStatus.OK);
+    public ResponseEntity<Users> updateUser(@PathVariable String id, @RequestBody Users user)
+            throws UserNotFoundException {
+        return new ResponseEntity<>(service.update(id, user), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable String id) throws UserNotFoundException{
+    public ResponseEntity<Void> deleteUser(@PathVariable String id)
+            throws UserNotFoundException {
         service.delete(id);
-        return new ResponseEntity<>("delete the id : "+id,HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 

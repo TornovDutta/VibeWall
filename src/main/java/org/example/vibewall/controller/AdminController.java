@@ -37,7 +37,7 @@ public class AdminController {
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteAdmin(@PathVariable String id)throws AdminNotFoundException{
         service.delete(id);
-        return new ResponseEntity<>("Delete",HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     @GetMapping("report")
     public ResponseEntity<List<Report>> allReport(){
@@ -52,10 +52,10 @@ public class AdminController {
         return new ResponseEntity<>(service.getPending(),HttpStatus.OK);
     }
     @GetMapping("report/pending/{id}")
-    public ResponseEntity<List<Report>> allPendingReport(@PathVariable String id){
+    public ResponseEntity<Report> allPendingReport(@PathVariable String id){
         return new ResponseEntity<>(service.getPendingById(id),HttpStatus.OK);
     }
-    @PostMapping("report/Reviewed/{id}/{status}")
+    @PatchMapping("report/Reviewed/{id}/{status}")
     public ResponseEntity<?> review(@PathVariable String id,@PathVariable String status) throws ReportNotFoundException{
         return new ResponseEntity<>(service.reslove(id,status),HttpStatus.OK);
     }

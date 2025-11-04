@@ -70,7 +70,7 @@ public class AdminService {
         return reportRepo.findByStatus("PENDING");
     }
 
-    public List<Report> getPendingById(String id) {
+    public Report getPendingById(String id) {
         return reportRepo.findByStatusAndId("PENDING",id);
     }
 
