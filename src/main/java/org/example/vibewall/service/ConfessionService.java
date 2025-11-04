@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.ConfessionRepo;
 import org.example.vibewall.DAO.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
+import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Users;
@@ -20,10 +21,14 @@ public class ConfessionService {
     private final ConfessionRepo repo;
     private final UsersRepo usersRepo;
     private final Encryption encryption;
+    private final OpenAiService openAiService;
 
 
 
-    public Confession create(Confession confession, String userName) throws UserNotFoundException {
+    public Confession create(Confession confession, String userName) throws UserNotFoundException,PrincipalNotFollowException {
+        if(openAiService.safe(confession.getContent())){
+            throw new PrincipalNotFollowException();
+        }
         Optional<Users> user = usersRepo.findByUsername(encryption.encode(userName));
         String id=user.get().getId();
 
@@ -33,6 +38,7 @@ public class ConfessionService {
     }
 
     public void delete(String id,String username) {
+
 
         Optional<Users> userOpt = usersRepo.findByUsername(username);
         if (userOpt.isEmpty()) {
@@ -57,7 +63,10 @@ public class ConfessionService {
     }
 
 
-    public void update(String id, Confession confession,String username) {
+    public void update(String id, Confession confession,String username) throws PrincipalNotFollowException {
+        if(openAiService.safe(confession.getContent())){
+            throw new PrincipalNotFollowException();
+        }
 
         Optional<Users> userOpt = usersRepo.findByUsername(username);
         if (userOpt.isEmpty()) {

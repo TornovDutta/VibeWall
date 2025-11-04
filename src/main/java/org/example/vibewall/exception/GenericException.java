@@ -40,4 +40,9 @@ public class GenericException {
         ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"no feedback");
         return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(PrincipalNotFollowException.class)
+    public ResponseEntity<?> missUse(PrincipalNotFollowException e){
+        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"sorry you can not post it");
+        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    }
 }

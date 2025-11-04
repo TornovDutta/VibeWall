@@ -1,5 +1,6 @@
 package org.example.vibewall.controller;
 
+import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.model.Feedback;
 import org.example.vibewall.service.FeedbackService;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,7 @@ public class FeedbackController {
     }
 
     @PostMapping("{id}")
-    public ResponseEntity<String> create(@PathVariable String id, @RequestBody Feedback feedback){
+    public ResponseEntity<String> create(@PathVariable String id, @RequestBody Feedback feedback) throws PrincipalNotFollowException {
         try{
 
             service.giveFeedback(id,feedback);
@@ -45,7 +46,7 @@ public class FeedbackController {
         }
     }
     @PutMapping("update/{id}")
-    public ResponseEntity<String> update(@PathVariable String id,@RequestBody String feedback){
+    public ResponseEntity<String> update(@PathVariable String id,@RequestBody Feedback feedback) throws PrincipalNotFollowException{
         try{
             return new ResponseEntity<>(service.update(id,feedback),HttpStatus.ACCEPTED);
         } catch (RuntimeException e) {

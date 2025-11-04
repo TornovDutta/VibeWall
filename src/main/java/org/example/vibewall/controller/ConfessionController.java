@@ -1,6 +1,7 @@
 package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.service.ConfessionService;
@@ -21,13 +22,14 @@ public class ConfessionController {
 
 
     @PostMapping
-    public ResponseEntity<Confession> create(@RequestBody Confession  confession,Authentication authentication) throws UserNotFoundException {
+    public ResponseEntity<Confession> create(@RequestBody Confession  confession,Authentication authentication) throws UserNotFoundException , PrincipalNotFollowException {
         String name=authentication.getName();
         return new ResponseEntity<>(service.create(confession,name),HttpStatus.CREATED);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Confession confession,Authentication authentication) {
+    public ResponseEntity<?> update(@PathVariable String id, @RequestBody Confession confession,
+                                    Authentication authentication) throws PrincipalNotFollowException {
         String userName=authentication.getName();
         service.update(id,confession,userName);
         return new ResponseEntity<>(HttpStatus.OK);

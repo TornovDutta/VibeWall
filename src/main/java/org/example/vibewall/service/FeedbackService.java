@@ -1,7 +1,9 @@
 package org.example.vibewall.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.ConfessionRepo;
 import org.example.vibewall.DAO.FeedbackRepo;
+import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Feedback;
 import org.springframework.stereotype.Service;
@@ -11,17 +13,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class FeedbackService {
 
     private final ConfessionRepo confessionRepo;
     private final FeedbackRepo feedbackRepo;
+    private final OpenAiService openAiService;
 
-    public FeedbackService(ConfessionRepo confessionRepo, FeedbackRepo feedbackRepo) {
-        this.confessionRepo = confessionRepo;
-        this.feedbackRepo = feedbackRepo;
-    }
 
-    public void giveFeedback(String id, Feedback feedback) {
+    public void giveFeedback(String id, Feedback feedback) throws PrincipalNotFollowException {
+        if(openAiService.safe(feedback.getFeedback())){
+            throw new PrincipalNotFollowException();
+        }
         Optional<Confession> confession=confessionRepo.findById(id);
         if(confession.isPresent()){
             Confession con=confession.get();
@@ -45,11 +48,14 @@ public class FeedbackService {
         }
     }
 
-    public String update(String id,String contest) {
+    public String update(String id,Feedback feedback) throws PrincipalNotFollowException {
+        if(openAiService.safe(feedback.getFeedback())){
+            throw new PrincipalNotFollowException();
+        }
         Optional<Feedback> feedbackOptional=feedbackRepo.findById(id);
         if(feedbackOptional.isPresent()){
-            Feedback feedback=feedbackOptional.get();
-            feedback.setFeedback(contest);
+            Feedback newfeedback=feedbackOptional.get();
+            newfeedback.setFeedback(feedback.getFeedback());
             feedbackRepo.save(feedback);
             return "Update";
         }
