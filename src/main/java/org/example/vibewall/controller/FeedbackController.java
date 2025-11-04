@@ -36,7 +36,7 @@ public class FeedbackController {
         return new ResponseEntity<>(service.update(feedbackId,feedback),HttpStatus.OK);
     }
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id){
+    public ResponseEntity<Void> delete(@PathVariable String id) throws FeedbackNotFoundException{
         service.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
