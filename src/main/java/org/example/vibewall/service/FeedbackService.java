@@ -1,73 +1,100 @@
 package org.example.vibewall.service;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DAO.ConfessionRepo;
 import org.example.vibewall.DAO.FeedbackRepo;
+import org.example.vibewall.encryption.Encryption;
+import org.example.vibewall.exception.ConfessionNotFoundException;
+import org.example.vibewall.exception.FeedbackNotFoundException;
+import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Feedback;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class FeedbackService {
 
     private final ConfessionRepo confessionRepo;
     private final FeedbackRepo feedbackRepo;
+    private final OpenAiService openAiService;
+    private final Encryption encryption;
 
-    public FeedbackService(ConfessionRepo confessionRepo, FeedbackRepo feedbackRepo) {
-        this.confessionRepo = confessionRepo;
-        this.feedbackRepo = feedbackRepo;
-    }
 
-    public void giveFeedback(String id, Feedback feedback) {
-        Optional<Confession> confession=confessionRepo.findById(id);
-        if(confession.isPresent()){
-            Confession con=confession.get();
-            con.getFeedbacks().add(feedback);
-            confessionRepo.save(con);
-        }else{
-            System.out.println("Error");
+    public String giveFeedback(String id, Feedback feedback)
+            throws PrincipalNotFollowException, ConfessionNotFoundException {
+        if (openAiService.safe(feedback.getFeedback())) {
+            throw new PrincipalNotFollowException("Feedback violates safety policy");
         }
-
+        Confession confession = confessionRepo.findById(id)
+                .orElseThrow(() -> new ConfessionNotFoundException("Confession not found for ID: " + id));
+        String encryptedFeedbackText = encryption.encode(feedback.getFeedback());
+        Feedback encryptedFeedback = new Feedback(encryptedFeedbackText);
+        confession.getFeedbacks().add(encryptedFeedback);
+        confessionRepo.save(confession);
+        return "Feedback added successfully!";
     }
 
-    public List<Feedback> get(String id) {
-        Optional<Confession> confessionOptional= confessionRepo.findById(id);
-        if(confessionOptional.isPresent()){
-            Confession confession=confessionOptional.get();
 
-            return new ArrayList<>(confession.getFeedbacks());
-        }else{
-            System.out.println("Error");
-            return new ArrayList<>();
+
+    public List<Feedback> get(String id) throws ConfessionNotFoundException {
+        Confession confession = confessionRepo.findById(id)
+                .orElseThrow(() -> new ConfessionNotFoundException("Confession not found for ID: " + id));
+
+
+        return confession.getFeedbacks().stream()
+                .map(fb -> {
+
+                    String decodedText = encryption.decode(fb.getFeedback());
+
+
+                    Feedback decodedFeedback = new Feedback();
+                    decodedFeedback.setId(fb.getId());
+                    decodedFeedback.setDate(fb.getDate());
+                    decodedFeedback.setFeedback(decodedText);
+
+                    return decodedFeedback;
+                })
+                .toList();
+    }
+
+
+
+
+    public String update(String id, Feedback feedback) throws PrincipalNotFollowException, FeedbackNotFoundException {
+        if (openAiService.safe(feedback.getFeedback())) {
+            throw new PrincipalNotFollowException("Feedback violates safety policy");
         }
+        Feedback existingFeedback = feedbackRepo.findById(id)
+                .orElseThrow(() -> new FeedbackNotFoundException("Feedback not found for ID: " + id));
+        String encryptedText = encryption.encode(feedback.getFeedback());
+        existingFeedback.setFeedback(encryptedText);
+        existingFeedback.setDate(new Date());
+        feedbackRepo.save(existingFeedback);
+
+        return "Feedback updated successfully!";
     }
 
-    public String update(String id,String contest) {
-        Optional<Feedback> feedbackOptional=feedbackRepo.findById(id);
-        if(feedbackOptional.isPresent()){
-            Feedback feedback=feedbackOptional.get();
-            feedback.setFeedback(contest);
-            feedbackRepo.save(feedback);
-            return "Update";
-        }
-        return null;
+
+    public Feedback getById(String id) throws FeedbackNotFoundException {
+        Feedback feedback = feedbackRepo.findById(id)
+                .orElseThrow(() -> new FeedbackNotFoundException("Feedback not found for ID: " + id));
+        String decodedText = encryption.decode(feedback.getFeedback());
+        feedback.setFeedback(decodedText);
+
+        return feedback;
     }
 
-    public Feedback getById(String id) {
-        Optional<Feedback> feedback=feedbackRepo.findById(id);
-        if(feedback.isPresent()){
-            return  feedback.get();
-        }
-        return new Feedback();
+
+
+    public String delete(String id) throws FeedbackNotFoundException {
+        Feedback feedback = feedbackRepo.findById(id)
+                .orElseThrow(() -> new FeedbackNotFoundException("Feedback not found for ID: " + id));
+
+        feedbackRepo.deleteById(id);
+        return "Feedback deleted successfully!";
     }
 
-    public void delete(String id) {
-        Optional<Feedback> feedback=feedbackRepo.findById(id);
-        if(feedback.isPresent()){
-            feedbackRepo.removeById(id);
-        }
-    }
 }

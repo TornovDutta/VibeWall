@@ -1,4 +1,6 @@
 package org.example.vibewall.controller;
+import lombok.RequiredArgsConstructor;
+import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.UsersService;
 import org.springframework.http.HttpStatus;
@@ -6,45 +8,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
     private final UsersService service;
 
-    public UserController(UsersService service) {
-        this.service = service;
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Users> updateUser(@PathVariable String id, @RequestBody Users user)
+            throws UserNotFoundException {
+        return new ResponseEntity<>(service.update(id, user), HttpStatus.OK);
     }
 
-    @PostMapping("add")
-    public ResponseEntity<String> addUser(@RequestBody Users user){
-        try{
-            service.add(user);
-            return new ResponseEntity<>("add the user", HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String id)
+            throws UserNotFoundException {
+        service.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("update")
-    public ResponseEntity<String> update(@RequestBody Users user){
-        try{
-            service.update(user);
-            return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-
-    @DeleteMapping("delete")
-    public ResponseEntity<String> delete(@PathVariable String id){
-        try{
-            service.delete(id);
-            return new ResponseEntity<>("delete",HttpStatus.OK);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
 }

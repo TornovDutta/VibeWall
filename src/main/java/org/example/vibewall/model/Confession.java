@@ -25,9 +25,10 @@ public class Confession {
     public Confession(){
         this.time=new Date();
     }
-    public Confession(String content,String userId){
+    public Confession(String content){
         this.content=content;
-        this.userId=userId;
+        this.userId=null;
         this.time=new Date();
     }
+
 }

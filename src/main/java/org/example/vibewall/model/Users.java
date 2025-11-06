@@ -1,11 +1,15 @@
 package org.example.vibewall.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collation = "users")
+@Document(collection= "users")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Users {
     @Id
     private String id;
@@ -13,15 +17,18 @@ public class Users {
     private String password;
     private String role="USER";
 
+
     public Users( String username, String password, String role) {
 
         this.username = username;
         this.password = password;
         this.role = role;
+
     }
 
     public Users(String username, String password) {
         this.username = username;
         this.password = password;
+
     }
 }

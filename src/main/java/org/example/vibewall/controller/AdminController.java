@@ -1,45 +1,63 @@
 package org.example.vibewall.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.example.vibewall.exception.AdminNotFoundException;
+import org.example.vibewall.exception.ReportNotFoundException;
+import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
-import org.example.vibewall.service.UsersService;
+import org.example.vibewall.service.AdminService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/admin")
+@RequiredArgsConstructor
 public class AdminController {
-    private final UsersService service;
+    private final AdminService service;
 
-    public AdminController(UsersService service) {
-        this.service = service;
+
+    @GetMapping
+    public ResponseEntity<List<Users>> getAll(){
+        return new ResponseEntity<>(service.getAll(),HttpStatus.OK);
     }
 
-    @PostMapping("add")
-    public ResponseEntity<String> addAdmin(@RequestBody Users users){
-        try{
-            service.addAdmin(users);
-            return new ResponseEntity<>("add the user", HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
+    @PostMapping
+    public ResponseEntity<Users> addAdmin(@RequestBody Users users){
+        return new ResponseEntity<>(service.addAdmin(users), HttpStatus.CREATED);
     }
-    @PutMapping("update")
-    public ResponseEntity<String> updateAdmin(@RequestBody Users user){
-        try{
-            service.update(user);
-            return new ResponseEntity<>("update",HttpStatus.ACCEPTED);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateAdmin(@PathVariable String id,@RequestBody Users user) throws AdminNotFoundException {
+
+        return new ResponseEntity<>(service.update(id,user),HttpStatus.OK);
+
     }
-    @DeleteMapping("delete")
-    public ResponseEntity<String> deleteAdmin(@PathVariable String id){
-        try{
-            service.delete(id);
-            return new ResponseEntity<>("delete",HttpStatus.OK);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deleteAdmin(@PathVariable String id)throws AdminNotFoundException{
+        service.delete(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    @GetMapping("report")
+    public ResponseEntity<List<Report>> allReport(){
+        return new ResponseEntity<>(service.getReport(),HttpStatus.OK);
+    }
+    @GetMapping("report/{id}")
+    public ResponseEntity<Report> allReport(@PathVariable String id) throws ReportNotFoundException {
+        return new ResponseEntity<>(service.getReportById(id),HttpStatus.OK);
+    }
+    @GetMapping("report/pending")
+    public ResponseEntity<List<Report>> allPendingReport(){
+        return new ResponseEntity<>(service.getPending(),HttpStatus.OK);
+    }
+    @GetMapping("report/pending/{id}")
+    public ResponseEntity<Report> allPendingReport(@PathVariable String id){
+        return new ResponseEntity<>(service.getPendingById(id),HttpStatus.OK);
+    }
+    @PatchMapping("report/Reviewed/{id}/{status}")
+    public ResponseEntity<?> review(@PathVariable String id,@PathVariable String status) throws ReportNotFoundException{
+        return new ResponseEntity<>(service.reslove(id,status),HttpStatus.OK);
+    }
+
 }
