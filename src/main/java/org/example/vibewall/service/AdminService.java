@@ -10,6 +10,7 @@ import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ import java.util.List;
 public class AdminService {
     private final UsersRepo userRepo;
     private final ReportRepo reportRepo;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final Encryption encryption;
     private static final Logger logger= LoggerFactory.getLogger(AdminService.class);
 
