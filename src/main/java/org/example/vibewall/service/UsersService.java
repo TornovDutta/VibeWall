@@ -21,13 +21,6 @@ public class UsersService {
     private final static Logger logger= LoggerFactory.getLogger(UsersService.class);
     private final Encryption encryption;
 
-
-
-
-
-
-
-
     public Users update(String id, Users user) {
 
         Users existingUser = repo.findById(id)
@@ -38,7 +31,6 @@ public class UsersService {
         return repo.save(existingUser);
 
     }
-
 
     public void delete(String id) throws UserNotFoundException {
        repo.findById(id).orElseThrow(()->

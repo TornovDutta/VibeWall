@@ -19,7 +19,7 @@ public class Confession {
     private String content;
     @CreatedDate
     private Date time;
-    private String userId;
+    private String createBy;
     private List<Feedback> feedbacks=new ArrayList<>();
 
     public Confession(){
@@ -27,7 +27,12 @@ public class Confession {
     }
     public Confession(String content){
         this.content=content;
-        this.userId=null;
+        this.createBy=null;
+        this.time=new Date();
+    }
+    public Confession(String content,String createBy){
+        this.content=content;
+        this.createBy=createBy;
         this.time=new Date();
     }
 

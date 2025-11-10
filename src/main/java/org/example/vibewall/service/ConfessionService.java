@@ -32,7 +32,7 @@ public class ConfessionService {
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
 
         confession.setContent(encryption.encode(confession.getContent()));
-        confession.setUserId(user.getId());
+        confession.setCreateBy(user.getId());
         confession.setTime(new Date());
 
         return repo.save(confession);
@@ -46,7 +46,7 @@ public class ConfessionService {
                 .orElseThrow(() -> new RuntimeException("Confession not found with ID: " + id));
 
 
-        boolean isOwner = existingConfession.getUserId().equals(user.getId());
+        boolean isOwner = existingConfession.getCreateBy().equals(user.getId());
         boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
 
         if (!isOwner && !isAdmin) {
@@ -65,7 +65,7 @@ public class ConfessionService {
         Confession existingConfession = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Confession not found with ID: " + id));
 
-        if (!existingConfession.getUserId().equals(user.getId())) {
+        if (!existingConfession.getCreateBy().equals(user.getId())) {
             throw new RuntimeException("Unauthorized: you are not the owner of this confession");
         }
 
