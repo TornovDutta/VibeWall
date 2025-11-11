@@ -1,8 +1,8 @@
 package org.example.vibewall.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DAO.ConfessionRepo;
-import org.example.vibewall.DAO.UsersRepo;
+import org.example.vibewall.repo.ConfessionRepo;
+import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.exception.UserNotFoundException;

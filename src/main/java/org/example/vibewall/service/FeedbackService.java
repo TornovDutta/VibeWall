@@ -1,8 +1,8 @@
 package org.example.vibewall.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DAO.ConfessionRepo;
-import org.example.vibewall.DAO.FeedbackRepo;
+import org.example.vibewall.repo.ConfessionRepo;
+import org.example.vibewall.repo.FeedbackRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.ConfessionNotFoundException;
 import org.example.vibewall.exception.FeedbackNotFoundException;

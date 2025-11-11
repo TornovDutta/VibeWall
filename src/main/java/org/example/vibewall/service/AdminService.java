@@ -1,8 +1,8 @@
 package org.example.vibewall.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DAO.ReportRepo;
-import org.example.vibewall.DAO.UsersRepo;
+import org.example.vibewall.repo.ReportRepo;
+import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
@@ -11,7 +11,6 @@ import org.example.vibewall.model.Users;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package org.example.vibewall.service;
 
-import org.example.vibewall.DAO.ReportRepo;
+import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.slf4j.Logger;
