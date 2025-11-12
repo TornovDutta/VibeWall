@@ -1,4 +1,4 @@
-package org.example.vibewall.service;
+package org.example.vibewall.service.serviceImple;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.repo.UsersRepo;
