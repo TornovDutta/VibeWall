@@ -1,16 +1,9 @@
 package org.example.vibewall.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import org.example.vibewall.model.Feedback;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ConfessionDTO {
-    private String id;
-    private String content;
-    private List<FeedbackDTO> feedbacks;
+
+public record ConfessionDTO (String id, String content, List<Feedback> feedbacks){
 }
