@@ -1,6 +1,7 @@
 package org.example.vibewall.service.serviceImple;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.DTO.UsersDTO;
 import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
@@ -9,6 +10,7 @@ import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
+import org.example.vibewall.service.utilly.UsersMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,12 +26,15 @@ public class AdminServiceImple implements AdminService {
     private final ReportRepo reportRepo;
     private final BCryptPasswordEncoder passwordEncoder;
     private final Encryption encryption;
+    private final UsersMapper usersMapper;
     private static final Logger logger= LoggerFactory.getLogger(AdminServiceImple.class);
 
 
     @Override
-    public List<Users> getAll() {
-        return userRepo.findAll();
+    public List<UsersDTO> getAll() {
+        List<Users> users=userRepo.findAll();
+        return usersMapper.toDtoList(users);
+
     }
 
 

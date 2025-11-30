@@ -1,6 +1,7 @@
 package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.DTO.UsersDTO;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
@@ -21,7 +22,7 @@ public class AdminController {
 
 
     @GetMapping
-    public ResponseEntity<List<Users>> getAll(){
+    public ResponseEntity<List<UsersDTO>> getAll(){
         return new ResponseEntity<>(service.getAll(),HttpStatus.OK);
     }
 

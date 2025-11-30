@@ -26,9 +26,9 @@ public class Users {
 
     }
 
-    public Users(String username, String password) {
+    public Users(String id,String username) {
         this.username = username;
-        this.password = password;
+        this.id= id;
 
     }
 }
