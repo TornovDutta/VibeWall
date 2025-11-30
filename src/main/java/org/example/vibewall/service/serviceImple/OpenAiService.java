@@ -1,4 +1,4 @@
-package org.example.vibewall.service;
+package org.example.vibewall.service.serviceImple;
 
 
 import org.springframework.ai.chat.client.ChatClient;

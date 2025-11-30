@@ -1,7 +1,7 @@
 package org.example.vibewall.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.service.CustomUserDetailsService;
+import org.example.vibewall.service.serviceImple.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

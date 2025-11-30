@@ -3,6 +3,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.UsersService;
+import org.example.vibewall.service.serviceImple.UsersServiceImple;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
