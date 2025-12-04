@@ -26,4 +26,11 @@ public class Report {
         this.dateTime = LocalDateTime.now();
         this.status = "PENDING";
     }
+
+    public Report(String id, String reportContent,String status ) {
+        this.id = id;
+        this.reportContent = reportContent;
+        this.status=status;
+
+    }
 }
