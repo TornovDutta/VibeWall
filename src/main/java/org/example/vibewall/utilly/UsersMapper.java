@@ -1,4 +1,4 @@
-package org.example.vibewall.service.utilly;
+package org.example.vibewall.utilly;
 
 import org.example.vibewall.DTO.UsersDTO;
 import org.example.vibewall.model.Users;

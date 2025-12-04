@@ -10,7 +10,7 @@ import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
-import org.example.vibewall.service.utilly.UsersMapper;
+import org.example.vibewall.utilly.UsersMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
