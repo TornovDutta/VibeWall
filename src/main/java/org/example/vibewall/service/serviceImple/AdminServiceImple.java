@@ -1,6 +1,7 @@
 package org.example.vibewall.service.serviceImple;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.DTO.ReportDTO;
 import org.example.vibewall.DTO.UsersDTO;
 import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.repo.UsersRepo;
@@ -10,6 +11,7 @@ import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
+import org.example.vibewall.utilly.ReportMapper;
 import org.example.vibewall.utilly.UsersMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ public class AdminServiceImple implements AdminService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final Encryption encryption;
     private final UsersMapper usersMapper;
+    private final ReportMapper reportMapper;
     private static final Logger logger= LoggerFactory.getLogger(AdminServiceImple.class);
 
 
@@ -39,23 +42,25 @@ public class AdminServiceImple implements AdminService {
 
 
     @Override
-    public Users addAdmin(Users user) {
+    public UsersDTO addAdmin(Users user) {
         user.setUsername(encryption.encode(user.getUsername()));
         user.setRole("ADMIN");
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("new admin add");
-        return userRepo.save(user);
+        Users users=userRepo.save(user);
+        return usersMapper.toDto(users);
     }
 
     @Override
-    public Users update(String id, Users user) throws AdminNotFoundException{
+    public UsersDTO update(String id, Users user) throws AdminNotFoundException{
         Users existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
         existingUser.setUsername(encryption.encode(user.getUsername()));
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("admin of id: "+id+" update");
-        return userRepo.save(existingUser);
+        Users realUsers=userRepo.save(existingUser);
+        return usersMapper.toDto(realUsers);
     }
 
     @Override
@@ -68,33 +73,38 @@ public class AdminServiceImple implements AdminService {
     }
 
     @Override
-    public List<Report> getReport() {
-        return reportRepo.findAll();
+    public List<ReportDTO> getReport() {
+        List<Report> reports=reportRepo.findAll();
+        return reportMapper.toDtoList(reports);
     }
 
     @Override
 
-    public Report getReportById(String id) throws ReportNotFoundException{
-        return reportRepo.findById(id).orElseThrow(()->
+    public ReportDTO getReportById(String id) throws ReportNotFoundException{
+        Report report=reportRepo.findById(id).orElseThrow(()->
                 new ReportNotFoundException());
+        return reportMapper.toDto(report);
     }
 
     @Override
-    public List<Report> getPending() {
-        return reportRepo.findByStatus("PENDING");
+    public List<ReportDTO> getPending() {
+        List<Report> reports=reportRepo.findByStatus("PENDING");
+        return reportMapper.toDtoList(reports);
     }
     @Override
-    public Report getPendingById(String id) {
-        return reportRepo.findByStatusAndId("PENDING",id);
+    public ReportDTO getPendingById(String id) {
+        Report report=reportRepo.findByStatusAndId("PENDING",id);
+        return reportMapper.toDto(report);
     }
 
 
     @Override
-    public Report reslove(String id, String status) throws ReportNotFoundException {
+    public ReportDTO reslove(String id, String status) throws ReportNotFoundException {
         Report report=reportRepo.findById(id).orElseThrow(()->
                 new ReportNotFoundException());
         logger.info("id: "+id +" , reslove by admin");
         report.setStatus(status);
-        return reportRepo.save(report);
+        Report report1=reportRepo.save(report);
+        return reportMapper.toDto(report1);
     }
 }

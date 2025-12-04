@@ -27,4 +27,7 @@ public class UsersMapper {
                usersDTO.username()
         );
     }
+    public List<Users> toEntityList(List<UsersDTO> usersDTOS){
+        return usersDTOS.stream().map(this::toEntity).collect(Collectors.toList());
+    }
 }

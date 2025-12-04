@@ -1,5 +1,6 @@
 package org.example.vibewall.service;
 
+import org.example.vibewall.DTO.ReportDTO;
 import org.example.vibewall.DTO.UsersDTO;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
@@ -10,16 +11,16 @@ import java.util.List;
 
 public interface AdminService {
     List<UsersDTO> getAll();
-    Users addAdmin(Users user);
-    Users update(String id, Users user) throws AdminNotFoundException;
+    UsersDTO addAdmin(Users user);
+    UsersDTO update(String id, Users user) throws AdminNotFoundException;
     void delete(String id) throws AdminNotFoundException;
-    List<Report> getReport();
-    Report getReportById(String id) throws ReportNotFoundException;
-    List<Report> getPending();
+    List<ReportDTO> getReport();
+    ReportDTO getReportById(String id) throws ReportNotFoundException;
+    List<ReportDTO> getPending();
 
-    Report getPendingById(String id);
+    ReportDTO getPendingById(String id);
 
-    Report reslove(String id, String status) throws ReportNotFoundException;
+    ReportDTO reslove(String id, String status) throws ReportNotFoundException;
 
 
 }

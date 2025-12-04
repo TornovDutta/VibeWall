@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authentication->
                         authentication.requestMatchers("/users/**").hasRole("USER")
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/v2/auth").permitAll())
+                                .requestMatchers("/auth/**").permitAll())
                 .formLogin(form->form.permitAll())
                 .httpBasic(basic->{});
         return http.build();
