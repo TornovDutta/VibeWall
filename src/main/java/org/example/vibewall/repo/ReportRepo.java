@@ -1,4 +1,4 @@
-package org.example.vibewall.DAO;
+package org.example.vibewall.repo;
 
 import org.example.vibewall.model.Report;
 import org.springframework.data.mongodb.repository.MongoRepository;

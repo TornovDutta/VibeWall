@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.service.ReportService;
+import org.example.vibewall.service.serviceImple.ReportServiceImple;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
