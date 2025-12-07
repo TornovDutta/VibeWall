@@ -54,7 +54,7 @@ public class AdminController {
         return new ResponseEntity<>(service.getPending(),HttpStatus.OK);
     }
     @GetMapping("reports/pending/{id}")
-    public ResponseEntity<Report> allPendingReport(@PathVariable String id){
+    public ResponseEntity<ReportDTO> allPendingReport(@PathVariable String id){
         return new ResponseEntity<>(service.getPendingById(id),HttpStatus.OK);
     }
     @PatchMapping("reports/Reviewed/{id}/{status}")
