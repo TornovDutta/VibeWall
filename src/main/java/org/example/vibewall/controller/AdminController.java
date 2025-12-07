@@ -2,10 +2,10 @@ package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportDTO;
-import org.example.vibewall.DTO.UsersDTO;
+import org.example.vibewall.DTO.UsersRequestedDTO;
+import org.example.vibewall.DTO.UsersResponseDTO;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
-import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
 import org.springframework.http.HttpStatus;
@@ -22,16 +22,16 @@ public class AdminController {
 
 
     @GetMapping
-    public ResponseEntity<List<UsersDTO>> getAll(){
+    public ResponseEntity<List<UsersResponseDTO>> getAll(){
         return new ResponseEntity<>(service.getAll(),HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<UsersDTO> addAdmin(@RequestBody Users users){
+    public ResponseEntity<UsersResponseDTO> addAdmin(@RequestBody UsersRequestedDTO users){
         return new ResponseEntity<>(service.addAdmin(users), HttpStatus.CREATED);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAdmin(@PathVariable String id,@RequestBody Users user) throws AdminNotFoundException {
+    public ResponseEntity<?> updateAdmin(@PathVariable String id,@RequestBody UsersRequestedDTO user) throws AdminNotFoundException {
 
         return new ResponseEntity<>(service.update(id,user),HttpStatus.OK);
 

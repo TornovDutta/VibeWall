@@ -1,6 +1,6 @@
 package org.example.vibewall.utilly;
 
-import org.example.vibewall.DTO.UsersDTO;
+import org.example.vibewall.DTO.UsersResponseDTO;
 import org.example.vibewall.model.Users;
 import org.springframework.stereotype.Component;
 
@@ -9,25 +9,25 @@ import java.util.stream.Collectors;
 
 @Component
 public class UsersMapper {
-    public UsersDTO toDto(Users user){
-        return new UsersDTO(
+    public UsersResponseDTO toDto(Users user){
+        return new UsersResponseDTO(
                 user.getId(),
                 user.getUsername()
         );
 
     }
-    public List<UsersDTO> toDtoList(List<Users> users) {
+    public List<UsersResponseDTO> toDtoList(List<Users> users) {
         return users.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
-    public Users toEntity(UsersDTO usersDTO){
+    public Users toEntity(UsersResponseDTO usersResponseDTO){
         return new Users(
-               usersDTO.id(),
-               usersDTO.username()
+               usersResponseDTO.id(),
+               usersResponseDTO.username()
         );
     }
-    public List<Users> toEntityList(List<UsersDTO> usersDTOS){
-        return usersDTOS.stream().map(this::toEntity).collect(Collectors.toList());
+    public List<Users> toEntityList(List<UsersResponseDTO> usersResponseDTOS){
+        return usersResponseDTOS.stream().map(this::toEntity).collect(Collectors.toList());
     }
 }
