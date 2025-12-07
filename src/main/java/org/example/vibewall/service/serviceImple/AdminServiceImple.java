@@ -2,7 +2,8 @@ package org.example.vibewall.service.serviceImple;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportDTO;
-import org.example.vibewall.DTO.UsersDTO;
+import org.example.vibewall.DTO.UsersRequestedDTO;
+import org.example.vibewall.DTO.UsersResponseDTO;
 import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
@@ -34,7 +35,7 @@ public class AdminServiceImple implements AdminService {
 
 
     @Override
-    public List<UsersDTO> getAll() {
+    public List<UsersResponseDTO> getAll() {
         List<Users> users=userRepo.findAll();
         return usersMapper.toDtoList(users);
 
@@ -42,22 +43,23 @@ public class AdminServiceImple implements AdminService {
 
 
     @Override
-    public UsersDTO addAdmin(Users user) {
-        user.setUsername(encryption.encode(user.getUsername()));
-        user.setRole("ADMIN");
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public UsersResponseDTO addAdmin(UsersRequestedDTO user) {
+        Users dbUsers=new Users();
+        dbUsers.setUsername(encryption.encode(user.username()));
+        dbUsers.setPassword(passwordEncoder.encode(user.password()));
+        dbUsers.setRole("ADMIN");
+        Users users=userRepo.save(dbUsers);
         logger.info("new admin add");
-        Users users=userRepo.save(user);
         return usersMapper.toDto(users);
     }
 
     @Override
-    public UsersDTO update(String id, Users user) throws AdminNotFoundException{
+    public UsersResponseDTO update(String id, UsersRequestedDTO user) throws AdminNotFoundException{
         Users existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
-        existingUser.setUsername(encryption.encode(user.getUsername()));
-        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        existingUser.setUsername(encryption.encode(user.username()));
+        existingUser.setPassword(passwordEncoder.encode(user.password()));
         logger.info("admin of id: "+id+" update");
         Users realUsers=userRepo.save(existingUser);
         return usersMapper.toDto(realUsers);

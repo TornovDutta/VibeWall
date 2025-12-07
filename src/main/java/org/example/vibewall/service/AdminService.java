@@ -1,18 +1,18 @@
 package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ReportDTO;
-import org.example.vibewall.DTO.UsersDTO;
+import org.example.vibewall.DTO.UsersRequestedDTO;
+import org.example.vibewall.DTO.UsersResponseDTO;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
-import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 
 import java.util.List;
 
 public interface AdminService {
-    List<UsersDTO> getAll();
-    UsersDTO addAdmin(Users user);
-    UsersDTO update(String id, Users user) throws AdminNotFoundException;
+    List<UsersResponseDTO> getAll();
+    UsersResponseDTO addAdmin(UsersRequestedDTO user);
+    UsersResponseDTO update(String id, UsersRequestedDTO user) throws AdminNotFoundException;
     void delete(String id) throws AdminNotFoundException;
     List<ReportDTO> getReport();
     ReportDTO getReportById(String id) throws ReportNotFoundException;
