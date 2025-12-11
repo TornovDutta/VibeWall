@@ -1,7 +1,9 @@
 package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.model.Users;
+import org.example.vibewall.DTO.UsersRequestedDTO;
+import org.example.vibewall.DTO.UsersResponseDTO;
+import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.service.RegistrationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +19,11 @@ public class AuthenticationController {
 
 
 
-    @PostMapping("")
-    public ResponseEntity<Users> create(@RequestBody Users user){
+    @PostMapping("/register")
+    public ResponseEntity<UsersResponseDTO> create(@RequestBody UsersRequestedDTO user) throws UserNotFoundException {
         return new ResponseEntity<>(service.adduser(user), HttpStatus.CREATED);
     }
+
 
 
 
