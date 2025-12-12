@@ -1,8 +1,8 @@
 package org.example.vibewall.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DAO.ConfessionRepo;
-import org.example.vibewall.DAO.FeedbackRepo;
+import org.example.vibewall.repo.ConfessionRepo;
+import org.example.vibewall.repo.FeedbackRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.ConfessionNotFoundException;
 import org.example.vibewall.exception.FeedbackNotFoundException;
@@ -32,7 +32,7 @@ public class FeedbackService {
                 .orElseThrow(() -> new ConfessionNotFoundException("Confession not found for ID: " + id));
         String encryptedFeedbackText = encryption.encode(feedback.getFeedback());
         Feedback encryptedFeedback = new Feedback(encryptedFeedbackText);
-        confession.getFeedbacks().add(encryptedFeedback);
+
         confessionRepo.save(confession);
         return "Feedback added successfully!";
     }
@@ -44,20 +44,7 @@ public class FeedbackService {
                 .orElseThrow(() -> new ConfessionNotFoundException("Confession not found for ID: " + id));
 
 
-        return confession.getFeedbacks().stream()
-                .map(fb -> {
-
-                    String decodedText = encryption.decode(fb.getFeedback());
-
-
-                    Feedback decodedFeedback = new Feedback();
-                    decodedFeedback.setId(fb.getId());
-                    decodedFeedback.setDate(fb.getDate());
-                    decodedFeedback.setFeedback(decodedText);
-
-                    return decodedFeedback;
-                })
-                .toList();
+       return null;
     }
 
 

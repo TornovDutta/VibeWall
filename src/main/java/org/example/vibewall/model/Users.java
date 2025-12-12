@@ -20,18 +20,9 @@ public class Users {
     private String role="USER";
     private List<Confession> confessionList;
 
-
-    public Users( String username, String password, String role) {
-
+    public Users(String username, String password,String role) {
         this.username = username;
         this.password = password;
-        this.role = role;
-
-    }
-
-    public Users(String username, String password) {
-        this.username = username;
-        this.password = password;
-
+        this.role=role;
     }
 }

@@ -1,8 +1,8 @@
 package org.example.vibewall.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DAO.ConfessionRepo;
-import org.example.vibewall.DAO.UsersRepo;
+import org.example.vibewall.repo.ConfessionRepo;
+import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.exception.UserNotFoundException;
@@ -32,8 +32,7 @@ public class ConfessionService {
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
 
         confession.setContent(encryption.encode(confession.getContent()));
-        confession.setCreateBy(user.getId());
-        confession.setTime(new Date());
+
 
         return repo.save(confession);
     }
@@ -46,12 +45,10 @@ public class ConfessionService {
                 .orElseThrow(() -> new RuntimeException("Confession not found with ID: " + id));
 
 
-        boolean isOwner = existingConfession.getCreateBy().equals(user.getId());
+
         boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getRole());
 
-        if (!isOwner && !isAdmin) {
-            throw new RuntimeException("Unauthorized: you cannot delete this confession");
-        }
+
         repo.removeById(id);
     }
 
@@ -65,12 +62,10 @@ public class ConfessionService {
         Confession existingConfession = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Confession not found with ID: " + id));
 
-        if (!existingConfession.getCreateBy().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized: you are not the owner of this confession");
-        }
+
 
         existingConfession.setContent(encryption.encode(updatedConfession.getContent()));
-        existingConfession.setTime(new Date());
+
 
         repo.save(existingConfession);
     }

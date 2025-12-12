@@ -1,39 +1,36 @@
 package org.example.vibewall.model;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.List;
 
 @Document
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Confession {
     @Id
     private String id;
     @NotBlank
     private String content;
-    @CreatedDate
-    private Date time;
-    private String createBy;
 
+    private LocalDateTime create;
+    private LocalDateTime update;
 
-    public Confession(){
-        this.time=new Date();
+    public Confession(String content) {
+        this.content = content;
+        if(this.create==null){
+            this.create = LocalDateTime.now();
+        }
+        this.update = LocalDateTime.now();
     }
-    public Confession(String content){
-        this.content=content;
-        this.createBy=null;
-        this.time=new Date();
-    }
-    public Confession(String content,String createBy){
-        this.content=content;
-        this.createBy=createBy;
-        this.time=new Date();
-    }
+
 
 }
