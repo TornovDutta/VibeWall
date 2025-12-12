@@ -20,7 +20,7 @@ public class Confession {
     @CreatedDate
     private Date time;
     private String createBy;
-    private List<Feedback> feedbacks=new ArrayList<>();
+
 
     public Confession(){
         this.time=new Date();
