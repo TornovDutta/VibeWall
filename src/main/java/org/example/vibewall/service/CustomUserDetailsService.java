@@ -1,6 +1,7 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.config.CustomUserDetails;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.model.Users;
@@ -20,14 +21,15 @@ public class CustomUserDetailsService implements UserDetailsService{
 
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = userRepository.findByUsername(encryption.encode(username))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
-        );
+        Users user = userRepository
+                .findByUsername(encryption.encode(username))
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found: " + username));
+
+        return new CustomUserDetails(user);
     }
+
 }
