@@ -40,7 +40,7 @@ public class UsersService {
     public void delete(String id) throws UserNotFoundException {
        repo.findById(id).orElseThrow(()->
                new UserNotFoundException("user of id: "+id+"not found"));
-       logger.info("user remove");
+       logger.info("the user remove");
        repo.removeById(id);
     }
 

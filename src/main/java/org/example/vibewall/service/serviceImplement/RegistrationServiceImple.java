@@ -3,6 +3,7 @@ package org.example.vibewall.service.serviceImplement;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.config.JwtUtil;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.model.Users;
@@ -21,18 +22,30 @@ public class RegistrationServiceImple implements RegistrationService {
     private final static Logger logger= LoggerFactory.getLogger(RegistrationServiceImple.class);
     private final Encryption encryption;
     private final UserMapper mapper;
+    private final JwtUtil jwtUtil;
 
     @Override
-    public UsersResponse adduser(UsersRequested user){
+    public UsersResponse adduser(UsersRequested request){
 
-        String name= encryption.encode(user.name());
-        String password=passwordEncoder.encode(user.password());
+        Users user = new Users();
+        user.setUsername(encryption.encode(request.name()));
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setRole("USER");
 
-        Users newUser=new Users(name,password,"USER");
-        logger.info("new user add");
-        repo.save(newUser);
+        Users savedUser = repo.save(user);
 
-        return mapper.toDTO(newUser);
+
+        String token = jwtUtil.generateToken(
+                savedUser.getId(),
+                savedUser.getUsername(),
+                savedUser.getRole()
+        );
+
+
+        System.out.println("JWT TOKEN (DEV ONLY): " + token);
+
+        return mapper.toDTO(savedUser);
+
     }
 
 

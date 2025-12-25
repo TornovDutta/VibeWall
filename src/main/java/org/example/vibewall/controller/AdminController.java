@@ -1,13 +1,19 @@
 package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.DTO.ReportResponse;
+import org.example.vibewall.DTO.UsersRequested;
+import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.config.CustomUserDetails;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
+import org.example.vibewall.service.serviceImplement.AdminServiceImplements;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,43 +26,45 @@ public class AdminController {
 
 
     @GetMapping
-    public ResponseEntity<List<Users>> getAll(){
+    public ResponseEntity<List<UsersResponse>> getAll(){
         return new ResponseEntity<>(service.getAll(),HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<Users> addAdmin(@RequestBody Users users){
+    public ResponseEntity<UsersResponse> addAdmin(@RequestBody UsersRequested users){
         return new ResponseEntity<>(service.addAdmin(users), HttpStatus.CREATED);
     }
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateAdmin(@PathVariable String id,@RequestBody Users user) throws AdminNotFoundException {
-
+    @PutMapping("/me")
+    public ResponseEntity<?> updateAdmin(@AuthenticationPrincipal CustomUserDetails details,
+                                         @RequestBody UsersRequested user) throws AdminNotFoundException {
+        String id=details.getId();
         return new ResponseEntity<>(service.update(id,user),HttpStatus.OK);
 
     }
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> deleteAdmin(@PathVariable String id)throws AdminNotFoundException{
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteAdmin(@AuthenticationPrincipal CustomUserDetails details)throws AdminNotFoundException{
+        String id=details.getId();
         service.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     @GetMapping("report")
-    public ResponseEntity<List<Report>> allReport(){
+    public ResponseEntity<List<ReportResponse>> allReport(){
         return new ResponseEntity<>(service.getReport(),HttpStatus.OK);
     }
     @GetMapping("report/{id}")
-    public ResponseEntity<Report> allReport(@PathVariable String id) throws ReportNotFoundException {
+    public ResponseEntity<ReportResponse> allReport(@PathVariable String id) throws ReportNotFoundException {
         return new ResponseEntity<>(service.getReportById(id),HttpStatus.OK);
     }
     @GetMapping("report/pending")
-    public ResponseEntity<List<Report>> allPendingReport(){
+    public ResponseEntity<List<ReportResponse>> allPendingReport(){
         return new ResponseEntity<>(service.getPending(),HttpStatus.OK);
     }
     @GetMapping("report/pending/{id}")
-    public ResponseEntity<Report> allPendingReport(@PathVariable String id){
+    public ResponseEntity<ReportResponse> allPendingReport(@PathVariable String id){
         return new ResponseEntity<>(service.getPendingById(id),HttpStatus.OK);
     }
-    @PatchMapping("report/Reviewed/{id}/{status}")
-    public ResponseEntity<?> review(@PathVariable String id,@PathVariable String status) throws ReportNotFoundException{
+    @PatchMapping("report/Reviewed/{id}")
+    public ResponseEntity<?> review(@PathVariable String id,@RequestParam String status) throws ReportNotFoundException{
         return new ResponseEntity<>(service.reslove(id,status),HttpStatus.OK);
     }
 
