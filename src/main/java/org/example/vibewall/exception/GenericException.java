@@ -9,40 +9,54 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GenericException {
+
     @ExceptionHandler(AdminNotFoundException.class)
-    public ResponseEntity<?> handleAdminNotFound(AdminNotFoundException adminNotFoundException){
-        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),adminNotFoundException.getMessage(),"admin " +
-                "not found");
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> handleAdminNotFound(AdminNotFoundException e) {
+        return build(e.getMessage(), "admin not found", HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<?> handleUserNotFound(UserNotFoundException e){
-        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"User not found");
-        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> handleUserNotFound(UserNotFoundException e) {
+        return build(e.getMessage(), "user not found", HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(ReportNotFoundException.class)
-    public ResponseEntity<?> handleReportNotFound(ReportNotFoundException e){
-        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"no Report");
-        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> handleReportNotFound(ReportNotFoundException e) {
+        return build(e.getMessage(), "no report", HttpStatus.NOT_FOUND);
     }
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleGenericException(Exception e){
-        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"error by server");
-        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
-    }
+
     @ExceptionHandler(ConfessionNotFoundException.class)
-    public ResponseEntity<?> handleConfessionNotFound(ConfessionNotFoundException e){
-        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"Confession not found");
-        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> handleConfessionNotFound(ConfessionNotFoundException e) {
+        return build(e.getMessage(), "confession not found", HttpStatus.NOT_FOUND);
     }
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleFeedbackNotFound(FeedbackNotFoundException e){
-        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"no feedback");
-        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+
+    @ExceptionHandler(FeedbackNotFoundException.class)
+    public ResponseEntity<?> handleFeedbackNotFound(FeedbackNotFoundException e) {
+        return build(e.getMessage(), "no feedback", HttpStatus.NOT_FOUND);
     }
+
     @ExceptionHandler(PrincipalNotFollowException.class)
-    public ResponseEntity<?> missUse(PrincipalNotFollowException e){
-        ErrorResponse errorResponse=new ErrorResponse(LocalDateTime.now(),e.getMessage(),"sorry you can not post it");
-        return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> missUse(PrincipalNotFollowException e) {
+        return build(e.getMessage(), "sorry you cannot post it", HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleGeneric(Exception e) {
+        return build(e.getMessage(), "server error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(UnSafeExecption.class)
+    public ResponseEntity<?> handleUnsafe(UnSafeExecption e) {
+        return build(e.getMessage(), "voilated the principal", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<ErrorResponse> build(
+            String message,
+            String details,
+            HttpStatus status
+    ) {
+        return new ResponseEntity<>(
+                new ErrorResponse(LocalDateTime.now(), message, details),
+                status
+        );
     }
 }

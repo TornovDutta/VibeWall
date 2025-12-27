@@ -1,0 +1,45 @@
+package org.example.vibewall.service.serviceImple;
+
+import lombok.RequiredArgsConstructor;
+import org.example.vibewall.DTO.PostRequested;
+import org.example.vibewall.DTO.PostResponse;
+import org.example.vibewall.encryption.Encryption;
+import org.example.vibewall.exception.UnSafeExecption;
+import org.example.vibewall.model.Confession;
+import org.example.vibewall.model.Users;
+import org.example.vibewall.repo.ConfessionRepo;
+import org.example.vibewall.repo.UsersRepo;
+import org.example.vibewall.service.ConfessionService;
+import org.example.vibewall.service.OpenAiService;
+import org.example.vibewall.utility.PostMapper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class ConfessionServiceImplement implements ConfessionService {
+    private final UsersRepo usersRepo;
+    private final ConfessionRepo confessionRepo;
+    private final PostMapper mapper;
+    private final Encryption encryption;
+    private final OpenAiService openAiService;
+
+    @Override
+    public PostResponse create(String userId, PostRequested requested) {
+
+        if(openAiService.safe(requested.content())){
+            throw new UnSafeExecption("unsafe");
+        }
+        Users user = usersRepo.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+
+        Confession confession = new Confession();
+        confession.setContent(encryption.encode(requested.content()));
+       confession.setUserId(userId);
+        confessionRepo.save(confession);
+
+
+        return mapper.toDTO(confession);
+    }
+}

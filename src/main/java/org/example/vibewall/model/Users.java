@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document(collection= "users")
 @Data
 @NoArgsConstructor
@@ -16,6 +19,7 @@ public class Users {
     private String username;
     private String password;
     private String role="USER";
+
 
 
     public Users( String username, String password, String role) {
