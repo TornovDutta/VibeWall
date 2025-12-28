@@ -48,6 +48,10 @@ public class GenericException {
     public ResponseEntity<?> handleUnsafe(UnSafeExecption e) {
         return build(e.getMessage(), "voilated the principal", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException e) {
+        return build(e.getMessage(), "wrong user", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     private ResponseEntity<ErrorResponse> build(
             String message,

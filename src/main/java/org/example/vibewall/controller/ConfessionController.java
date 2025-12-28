@@ -2,17 +2,13 @@ package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.PostRequested;
-import org.example.vibewall.DTO.PostResponse;
 import org.example.vibewall.config.CustomUserDetails;
+import org.example.vibewall.exception.ConfessionNotFoundException;
 import org.example.vibewall.service.ConfessionService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users/confession")
@@ -25,5 +21,18 @@ public class ConfessionController {
                                                @RequestBody PostRequested requested){
         String usersid=details.getId();
         return new ResponseEntity<>(service.create(usersid,requested), HttpStatus.CREATED);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@AuthenticationPrincipal CustomUserDetails details,
+                                    @RequestBody PostRequested requested,@PathVariable String id) throws ConfessionNotFoundException {
+        String userId= details.getId();
+        return new ResponseEntity<>(service.update(userId,requested,id),HttpStatus.ACCEPTED);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@AuthenticationPrincipal CustomUserDetails details,
+                                    @PathVariable String id) throws ConfessionNotFoundException {
+        String userId= details.getId();
+        service.delete(userId,id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
