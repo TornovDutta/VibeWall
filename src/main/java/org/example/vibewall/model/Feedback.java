@@ -9,11 +9,13 @@ import java.util.Date;
 @Document()
 @Data
 public class Feedback {
-    @Id
-    private String id;
+
+    private Integer id;
+
     @NotBlank
     private String feedback;
     private Date date;
+
 
     public Feedback(){
         this.date=new Date();

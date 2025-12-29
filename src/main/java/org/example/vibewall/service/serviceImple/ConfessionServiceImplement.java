@@ -1,8 +1,8 @@
 package org.example.vibewall.service.serviceImple;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.PostRequested;
-import org.example.vibewall.DTO.PostResponse;
+import org.example.vibewall.DTO.ConfessionRequested;
+import org.example.vibewall.DTO.ConfessionResponse;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AccessDeniedException;
 import org.example.vibewall.exception.ConfessionNotFoundException;
@@ -12,7 +12,7 @@ import org.example.vibewall.repo.ConfessionRepo;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.service.ConfessionService;
 import org.example.vibewall.service.OpenAiService;
-import org.example.vibewall.utility.PostMapper;
+import org.example.vibewall.utility.ConfessionMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,12 +20,12 @@ import org.springframework.stereotype.Service;
 public class ConfessionServiceImplement implements ConfessionService {
     private final UsersRepo usersRepo;
     private final ConfessionRepo confessionRepo;
-    private final PostMapper mapper;
+    private final ConfessionMapper mapper;
     private final Encryption encryption;
     private final OpenAiService openAiService;
 
     @Override
-    public PostResponse create(String userId, PostRequested requested) {
+    public ConfessionResponse create(String userId, ConfessionRequested requested) {
 
         if(openAiService.safe(requested.content())){
             throw new UnSafeExecption("unsafe");
@@ -43,7 +43,7 @@ public class ConfessionServiceImplement implements ConfessionService {
     }
 
     @Override
-    public PostResponse update(String userId, PostRequested requested, String id) throws ConfessionNotFoundException {
+    public ConfessionResponse update(String userId, ConfessionRequested requested, String id) throws ConfessionNotFoundException {
         Confession confession=confessionRepo.findById(id).orElseThrow(()->
                 new ConfessionNotFoundException("wrong id"));
         if(!confession.getUserId().equals(userId)){

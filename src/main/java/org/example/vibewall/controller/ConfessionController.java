@@ -1,7 +1,7 @@
 package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.PostRequested;
+import org.example.vibewall.DTO.ConfessionRequested;
 import org.example.vibewall.config.CustomUserDetails;
 import org.example.vibewall.exception.ConfessionNotFoundException;
 import org.example.vibewall.service.ConfessionService;
@@ -18,13 +18,13 @@ public class ConfessionController {
 
     @PostMapping()
     public ResponseEntity<?> create(@AuthenticationPrincipal CustomUserDetails details,
-                                               @RequestBody PostRequested requested){
+                                               @RequestBody ConfessionRequested requested){
         String usersid=details.getId();
         return new ResponseEntity<>(service.create(usersid,requested), HttpStatus.CREATED);
     }
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@AuthenticationPrincipal CustomUserDetails details,
-                                    @RequestBody PostRequested requested,@PathVariable String id) throws ConfessionNotFoundException {
+                                    @RequestBody ConfessionRequested requested, @PathVariable String id) throws ConfessionNotFoundException {
         String userId= details.getId();
         return new ResponseEntity<>(service.update(userId,requested,id),HttpStatus.ACCEPTED);
     }

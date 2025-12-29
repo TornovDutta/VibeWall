@@ -1,14 +1,13 @@
 package org.example.vibewall.service;
 
-import org.example.vibewall.DTO.PostRequested;
-import org.example.vibewall.DTO.PostResponse;
+import org.example.vibewall.DTO.ConfessionRequested;
+import org.example.vibewall.DTO.ConfessionResponse;
 import org.example.vibewall.exception.ConfessionNotFoundException;
-import org.springframework.http.HttpStatusCode;
 
 public interface ConfessionService {
-    PostResponse create(String usersid, PostRequested requested);
+    ConfessionResponse create(String usersid, ConfessionRequested requested);
 
-    PostResponse update(String userId, PostRequested requested, String id) throws ConfessionNotFoundException;
+    ConfessionResponse update(String userId, ConfessionRequested requested, String id) throws ConfessionNotFoundException;
 
     void delete(String userId, String id) throws ConfessionNotFoundException;
 }
