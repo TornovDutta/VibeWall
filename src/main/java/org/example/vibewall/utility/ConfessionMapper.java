@@ -26,7 +26,7 @@ public class ConfessionMapper {
             feedbackList.add(feedback1);
         }
 
-        return new ConfessionResponse(confession.getId(),content,confession.getFeedbacks());
+        return new ConfessionResponse(confession.getId(),content,feedbackList);
     }
 
     public List<ConfessionResponse> toDTO(List<Confession> confessions) {

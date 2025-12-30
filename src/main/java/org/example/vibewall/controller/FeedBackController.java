@@ -21,4 +21,26 @@ public class FeedBackController {
        return new ResponseEntity<>(service.giveFeedback(Confessionid,requested), HttpStatus.CREATED);
 
     }
+    @PutMapping("/{confessionId}/{feedbackId}")
+    public ResponseEntity<?> update(
+            @PathVariable String confessionId,
+            @PathVariable int feedbackId,
+            @RequestBody FeedbackRequested requested)
+            throws PrincipalNotFollowException, ConfessionNotFoundException {
+
+        return ResponseEntity.ok(
+                service.updateFeedback(confessionId, feedbackId, requested)
+        );
+    }
+    @DeleteMapping("/{confessionId}/{feedbackId}")
+    public ResponseEntity<?> delete(
+            @PathVariable String confessionId,
+            @PathVariable int feedbackId)
+            throws ConfessionNotFoundException {
+
+        return ResponseEntity.ok(
+                service.deleteFeedback(confessionId, feedbackId)
+        );
+    }
+
 }

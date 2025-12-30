@@ -18,7 +18,7 @@ public class OpenAiServiceImplement implements OpenAiService {
         return chatClient.prompt().user(prompt).call().content().trim();
     }
     @Override
-    public boolean safe(String str) {
+    public boolean unSafe(String str) {
         String prompt = """
                 You are a content safety checker for the platform VibeWall.
 

@@ -24,4 +24,10 @@ public class Feedback {
         this.feedback=feedback;
         this.date=new Date();
     }
+
+    public Feedback(Integer id, String feedback) {
+        this.id = id;
+        this.feedback = feedback;
+        this.date = new Date();
+    }
 }

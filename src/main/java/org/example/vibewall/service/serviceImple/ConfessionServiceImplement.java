@@ -27,7 +27,7 @@ public class ConfessionServiceImplement implements ConfessionService {
     @Override
     public ConfessionResponse create(String userId, ConfessionRequested requested) {
 
-        if(openAiService.safe(requested.content())){
+        if(openAiService.unSafe(requested.content())){
             throw new UnSafeExecption("unsafe");
         }
 
@@ -49,7 +49,7 @@ public class ConfessionServiceImplement implements ConfessionService {
         if(!confession.getUserId().equals(userId)){
             throw new AccessDeniedException("access denied");
         }
-        if(openAiService.safe(requested.content())){
+        if(openAiService.unSafe(requested.content())){
             throw new UnSafeExecption("unsafe");
         }
         confession.setContent(encryption.encode(requested.content()));
