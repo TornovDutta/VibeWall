@@ -5,19 +5,19 @@ It allows students to freely share their thoughts and emotions while ensuring co
 With advanced encryption, AI-powered moderation, reporting features, and admin management, VibeWall promotes open communication in a safe and judgment-free environment.
 
 ---
-
 ## Features
 
 - **Anonymous Confessions:** Users can share emotions or thoughts without revealing their identity.
-- **End-to-End Encryption:** Usernames, passwords, confessions, and feedback are stored in encrypted form to protect privacy—even admins cannot view the raw emotions.
-- **AI-Powered Moderation:** Integrated **OpenAI** API automatically detects and blocks harmful or unsafe posts and feedback to maintain a positive space.
-- **Report System:** Users can report confessions, feedback, or activities they find unsafe or inappropriate, ensuring continuous community safety.
-- **Admin Management:** Admins can manage users, confessions, and reports while maintaining platform integrity.
-- **User Management:** Admins can add, update, or delete user accounts securely.
+- **Server-Side Encryption:** Sensitive data such as usernames, confessions, and feedback are encrypted before being stored in the database. Raw content is never persisted in plaintext, ensuring strong privacy protection.
+- **Secure Password Handling:** User passwords are safely hashed using industry-standard algorithms and are never stored or retrievable in plain form.
+- **AI-Powered Moderation:** Integrated **OpenAI** API automatically detects and blocks harmful or unsafe posts and feedback to maintain a positive and emotionally safe environment.
+- **Report System:** Users can report confessions, feedback, or activities they find unsafe or inappropriate, supporting continuous community safety.
+- **Admin Management:** Admins manage reports and oversee platform activity to maintain integrity and safety.
+- **User Profile Management:** Users can create, update, and delete their own profiles securely.
 - **Feedback System:** Users can share and view supportive feedback on confessions.
-- **Optional Login:** Offers flexibility to engage anonymously or through optional authentication.
-- **Swagger UI Integration:** Enables interactive API documentation and testing for developers.
-- **Simple UI:** Intuitive and minimal interface for a distraction-free experience.
+- **Optional Login:** Users may interact anonymously or choose to authenticate for additional features.
+- **Swagger UI Integration:** Provides interactive API documentation and testing support for developers.
+
 
 ---
 
