@@ -28,11 +28,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+
+        if (path.startsWith("/auth") ||
+                path.startsWith("/feed") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs")) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String header = request.getHeader("Authorization");
 
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
 
+        if (header == null || !header.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            String token = header.substring(7);
             Claims claims = jwtUtil.extractClaims(token);
 
             String username = claims.getSubject();
@@ -49,10 +66,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             List.of(new SimpleGrantedAuthority("ROLE_" + role))
                     );
 
-            auth.setDetails(new WebAuthenticationDetailsSource()
-                    .buildDetails(request));
+            auth.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
 
             SecurityContextHolder.getContext().setAuthentication(auth);
+
+        } catch (Exception e) {
+
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
