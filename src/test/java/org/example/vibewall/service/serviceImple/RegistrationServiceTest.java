@@ -6,6 +6,7 @@ import org.example.vibewall.config.JwtUtil;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.UsersRepo;
+import org.example.vibewall.service.RegistrationService;
 import org.example.vibewall.utility.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RegistrationServiceImpleTest {
+class RegistrationServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
@@ -37,7 +38,7 @@ class RegistrationServiceImpleTest {
     private JwtUtil jwtUtil;
 
     @InjectMocks
-    private RegistrationServiceImple registrationService;
+    private RegistrationService registrationService;
 
     @Test
     void adduser_shouldEncryptEncodeSaveAndReturnResponse() {
