@@ -1,4 +1,4 @@
-package org.example.vibewall.service;
+package org.example.vibewall.service.serviceImple;
 
 import org.example.vibewall.DTO.ConfessionResponse;
 import org.example.vibewall.DTO.FeedbackRequested;
@@ -8,7 +8,7 @@ import org.example.vibewall.exception.PrincipalNotFollowException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Feedback;
 import org.example.vibewall.repo.ConfessionRepo;
-import org.example.vibewall.service.serviceImple.FeedbackServiceImplement;
+import org.example.vibewall.service.OpenAiService;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.Optional;
