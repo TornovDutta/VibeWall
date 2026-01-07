@@ -1,5 +1,6 @@
 package org.example.vibewall.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tags;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.UsersRequested;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
+
 public class AdminController {
     private final AdminService service;
 
