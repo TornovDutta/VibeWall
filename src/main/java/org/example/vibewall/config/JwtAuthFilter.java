@@ -30,26 +30,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-
-        if (path.startsWith("/auth") ||
-                path.startsWith("/feed") ||
-                path.startsWith("/swagger-ui") ||
-                path.startsWith("/v3/api-docs")) {
-
+        // Public endpoints (NO JWT REQUIRED)
+        if (path.startsWith("/auth") || path.startsWith("/feed")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String header = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
-
-        if (header == null || !header.startsWith("Bearer ")) {
+        // No token → continue (Spring Security will block later)
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            String token = header.substring(7);
+            String token = authHeader.substring(7);
             Claims claims = jwtUtil.extractClaims(token);
 
             String username = claims.getSubject();
@@ -59,21 +55,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             CustomUserDetails principal =
                     new CustomUserDetails(userId, username, role);
 
-            UsernamePasswordAuthenticationToken auth =
+            UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             principal,
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + role))
                     );
 
-            auth.setDetails(
+            authentication.setDetails(
                     new WebAuthenticationDetailsSource().buildDetails(request)
             );
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception e) {
-
+            // Invalid or expired token
             SecurityContextHolder.clearContext();
         }
 
