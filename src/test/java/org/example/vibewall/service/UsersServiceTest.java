@@ -1,4 +1,4 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
@@ -6,7 +6,6 @@ import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.UsersRepo;
-import org.example.vibewall.service.UsersService;
 import org.example.vibewall.utility.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

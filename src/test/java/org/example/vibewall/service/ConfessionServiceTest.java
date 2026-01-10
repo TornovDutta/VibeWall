@@ -1,4 +1,4 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ConfessionRequested;
 import org.example.vibewall.DTO.ConfessionResponse;
@@ -9,7 +9,7 @@ import org.example.vibewall.exception.UnSafeExecption;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.repo.ConfessionRepo;
 import org.example.vibewall.repo.UsersRepo;
-import org.example.vibewall.service.OpenAiService;
+import org.example.vibewall.service.serviceImple.ConfessionServiceImplement;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
