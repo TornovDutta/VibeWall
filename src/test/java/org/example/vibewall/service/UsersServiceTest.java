@@ -6,6 +6,7 @@ import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.UsersRepo;
+import org.example.vibewall.service.serviceImple.UsersServiceImplements;
 import org.example.vibewall.utility.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,7 @@ class UsersServiceTest {
     private UserMapper userMapper;
 
     @InjectMocks
-    private UsersService usersService;
+    private UsersServiceImplements usersService;
 
     private Users existingUser;
 
