@@ -1,4 +1,4 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.UsersRequested;
@@ -11,7 +11,7 @@ import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.repo.UsersRepo;
-import org.example.vibewall.service.AdminService;
+import org.example.vibewall.service.serviceImple.AdminServiceImplements;
 import org.example.vibewall.utility.ReportMapper;
 import org.example.vibewall.utility.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +54,7 @@ class AdminServiceTest {
     private JwtUtil jwtUtil;
 
     @InjectMocks
-    private AdminService adminService;
+    private AdminServiceImplements adminService;
 
     private Users adminUser;
     private Report report;

@@ -1,4 +1,4 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
@@ -6,7 +6,7 @@ import org.example.vibewall.config.JwtUtil;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.UsersRepo;
-import org.example.vibewall.service.RegistrationService;
+import org.example.vibewall.service.serviceImple.RegistrationServiceImple;
 import org.example.vibewall.utility.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +38,7 @@ class RegistrationServiceTest {
     private JwtUtil jwtUtil;
 
     @InjectMocks
-    private RegistrationService registrationService;
+    private RegistrationServiceImple registrationService;
 
     @Test
     void adduser_shouldEncryptEncodeSaveAndReturnResponse() {
