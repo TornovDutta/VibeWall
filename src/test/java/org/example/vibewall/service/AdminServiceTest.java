@@ -112,7 +112,7 @@ class AdminServiceTest {
 
         UsersResponse response = adminService.update("1", request);
 
-        assertEquals("1", response.id());
+        assertEquals("1", response.getId());
         verify(userRepo).save(adminUser);
     }
 

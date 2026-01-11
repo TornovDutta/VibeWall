@@ -32,8 +32,8 @@ public class UsersServiceImplements implements UsersService {
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found with id: " + id));
 
-        existingUser.setUsername(encryption.encode(user.name()));
-        existingUser.setPassword(passwordEncoder.encode(user.password()));
+        existingUser.setUsername(encryption.encode(user.getName()));
+        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         return mapper.toDTO(existingUser);
     }
 

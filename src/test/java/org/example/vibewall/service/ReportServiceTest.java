@@ -47,8 +47,8 @@ class ReportServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals("report content", result.reportContent());
-        assertEquals("CREATED", result.status());
+        assertEquals("report content", result.getReportContent());
+        assertEquals("CREATED", result.getStatus());
 
         verify(reportRepo).save(any(Report.class));
         verify(mapper).toDTO(savedReport);
@@ -72,8 +72,8 @@ class ReportServiceTest {
         ReportResponse result = service.update(reportId, request);
 
         // Assert
-        assertEquals("updated content", result.reportContent());
-        assertEquals("UPDATED", result.status());
+        assertEquals("updated content", result.getReportContent());
+        assertEquals("UPDATED", result.getStatus());
 
         verify(reportRepo).findById(reportId);
         verify(reportRepo).save(existingReport);

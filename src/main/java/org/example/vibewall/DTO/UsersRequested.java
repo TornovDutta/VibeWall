@@ -1,6 +1,15 @@
 package org.example.vibewall.DTO;
 
-import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record UsersRequested(String name, String password)  {
+import java.io.Serializable;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UsersRequested implements Serializable{
+    private String name;
+    private String password;
+
 }

@@ -70,8 +70,8 @@ class UsersServiceTest {
 
         // then
         assertNotNull(response);
-        assertEquals("1", response.id());
-        assertEquals("encryptedName", response.name());
+        assertEquals("1", response.getId());
+        assertEquals("encryptedName", response.getName());
 
         verify(usersRepo).findById("1");
         verify(encryption).encode("newName");

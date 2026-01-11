@@ -46,8 +46,8 @@ public class AdminServiceImplements implements AdminService {
 
 
         Users saveUser=new Users();
-        saveUser.setUsername(encryption.encode(user.name()));
-        saveUser.setPassword(passwordEncoder.encode(user.password()));
+        saveUser.setUsername(encryption.encode(user.getName()));
+        saveUser.setPassword(passwordEncoder.encode(user.getPassword()));
         saveUser.setRole("ADMIN");
 
         userRepo.save(saveUser);
@@ -73,8 +73,8 @@ public class AdminServiceImplements implements AdminService {
         Users existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
-        existingUser.setUsername(encryption.encode(user.name()));
-        existingUser.setPassword(passwordEncoder.encode(user.password()));
+        existingUser.setUsername(encryption.encode(user.getName()));
+        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         logger.info("admin of id: "+id+" update");
         Users saveUser=userRepo.save(existingUser);
 

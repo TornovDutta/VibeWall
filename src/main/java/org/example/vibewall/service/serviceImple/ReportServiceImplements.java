@@ -18,7 +18,7 @@ public class ReportServiceImplements implements ReportService {
 
     @Override
     public ReportResponse create(ReportRequested requested) {
-        Report report = new Report(requested.content());
+        Report report = new Report(requested.getContent());
         Report saveReport=reportRepo.save(report);
 
         return mapper.toDTO(saveReport);
@@ -31,7 +31,7 @@ public class ReportServiceImplements implements ReportService {
                         new ReportNotFoundException("Report not found with id: " + reportId)
                 );
 
-        report.setReportContent(requested.content());
+        report.setReportContent(requested.getContent());
 
         Report updatedReport = reportRepo.save(report);
 

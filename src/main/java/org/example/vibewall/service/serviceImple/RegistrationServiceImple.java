@@ -28,8 +28,8 @@ public class RegistrationServiceImple implements RegistrationService {
     public UsersResponse adduser(UsersRequested request){
 
         Users user = new Users();
-        user.setUsername(encryption.encode(request.name()));
-        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setUsername(encryption.encode(request.getName()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("USER");
 
         Users savedUser = repo.save(user);

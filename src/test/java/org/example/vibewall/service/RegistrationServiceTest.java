@@ -73,8 +73,8 @@ class RegistrationServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(userId, result.id());
-        assertEquals(encryptedUsername, result.name());
+        assertEquals(userId, result.getId());
+        assertEquals(encryptedUsername, result.getName());
 
         verify(encryption).encode("tornov");
         verify(passwordEncoder).encode("password123");
