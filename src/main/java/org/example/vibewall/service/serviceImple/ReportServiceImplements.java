@@ -3,6 +3,7 @@ package org.example.vibewall.service.serviceImple;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportRequested;
 import org.example.vibewall.DTO.ReportResponse;
+import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.service.ReportService;
@@ -16,18 +17,18 @@ public class ReportServiceImplements implements ReportService {
     private final ReportMapper mapper;
 
     @Override
-    public ReportResponse create(ReportRequested requested, String confessionId) {
+    public ReportResponse create(ReportRequested requested) {
         Report report = new Report(requested.content());
         Report saveReport=reportRepo.save(report);
 
         return mapper.toDTO(saveReport);
     }
     @Override
-    public ReportResponse update(String reportId, ReportRequested requested) {
+    public ReportResponse update(String reportId, ReportRequested requested) throws ReportNotFoundException {
 
         Report report = reportRepo.findById(reportId)
                 .orElseThrow(() ->
-                        new RuntimeException("Report not found with id: " + reportId)
+                        new ReportNotFoundException("Report not found with id: " + reportId)
                 );
 
         report.setReportContent(requested.content());
@@ -38,10 +39,10 @@ public class ReportServiceImplements implements ReportService {
     }
 
     @Override
-    public void delete(String reportId) {
+    public void delete(String reportId) throws ReportNotFoundException {
 
         if (!reportRepo.existsById(reportId)) {
-            throw new RuntimeException("Report not found with id: " + reportId);
+            throw new ReportNotFoundException("Report not found with id: " + reportId);
         }
 
         reportRepo.deleteById(reportId);

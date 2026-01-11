@@ -24,14 +24,14 @@ public class FeedbackServiceImplement implements FeedbackService {
     @Override
     public ConfessionResponse giveFeedback(String confessionId, FeedbackRequested requested) throws ConfessionNotFoundException,
             PrincipalNotFollowException {
-        if(openAiService.unSafe(requested.content())){
+        if(openAiService.unSafe(requested.getContent())){
             throw new PrincipalNotFollowException("don't follow the principal");
         }
         Confession confession=confessionRepo.findById(confessionId).orElseThrow(()->
                 new ConfessionNotFoundException("wrong id"));
         int feedbackId = confession.getFeedbacks().size();
 
-        Feedback feedback=new Feedback(feedbackId,encryption.encode(requested.content()));
+        Feedback feedback=new Feedback(feedbackId,encryption.encode(requested.getContent()));
 
         confession.getFeedbacks().add(feedback);
         confessionRepo.save(confession);
@@ -45,7 +45,7 @@ public class FeedbackServiceImplement implements FeedbackService {
             FeedbackRequested requested)
             throws ConfessionNotFoundException, PrincipalNotFollowException {
 
-        if (openAiService.unSafe(requested.content())) {
+        if (openAiService.unSafe(requested.getContent())) {
             throw new PrincipalNotFollowException("don't follow the principal");
         }
 
@@ -57,7 +57,7 @@ public class FeedbackServiceImplement implements FeedbackService {
         }
 
         Feedback feedback = confession.getFeedbacks().get(feedbackId);
-        feedback.setFeedback(encryption.encode(requested.content()));
+        feedback.setFeedback(encryption.encode(requested.getContent()));
 
         confessionRepo.save(confession);
         return mapper.toDTO(confession);

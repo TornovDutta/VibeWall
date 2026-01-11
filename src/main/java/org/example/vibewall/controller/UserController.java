@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class UserController {
 
 
     @PutMapping("/me")
-    public ResponseEntity<UsersResponse> updateUser(@RequestBody UsersRequested user,
+    public ResponseEntity<UsersResponse> updateUser(@Valid @RequestBody UsersRequested user,
                                                     @AuthenticationPrincipal CustomUserDetails details)
 
             throws UserNotFoundException {
