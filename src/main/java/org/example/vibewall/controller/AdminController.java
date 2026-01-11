@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -30,12 +31,12 @@ public class AdminController {
     }
 
     @PostMapping
-    public ResponseEntity<UsersResponse> addAdmin(@RequestBody UsersRequested users){
+    public ResponseEntity<UsersResponse> addAdmin(@Valid  @RequestBody UsersRequested users){
         return new ResponseEntity<>(service.addAdmin(users), HttpStatus.CREATED);
     }
     @PutMapping("/me")
     public ResponseEntity<?> updateAdmin(@AuthenticationPrincipal CustomUserDetails details,
-                                         @RequestBody UsersRequested user) throws AdminNotFoundException {
+                                         @Valid @RequestBody UsersRequested user) throws AdminNotFoundException {
         String id=details.getId();
         return new ResponseEntity<>(service.update(id,user),HttpStatus.OK);
 

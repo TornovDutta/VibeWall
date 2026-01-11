@@ -1,4 +1,6 @@
 package org.example.vibewall.DTO;
 
-public record UsersRequested(String name,String password) {
+import java.io.Serializable;
+
+public record UsersRequested(String name, String password)  {
 }

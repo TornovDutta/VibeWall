@@ -27,14 +27,14 @@ public class ConfessionServiceImplement implements ConfessionService {
     @Override
     public ConfessionResponse create(String userId, ConfessionRequested requested) {
 
-        if(openAiService.unSafe(requested.content())){
+        if(openAiService.unSafe(requested.getContent())){
             throw new UnSafeExecption("unsafe");
         }
 
 
 
         Confession confession = new Confession();
-        confession.setContent(encryption.encode(requested.content()));
+        confession.setContent(encryption.encode(requested.getContent()));
        confession.setUserId(userId);
         confessionRepo.save(confession);
 
@@ -49,10 +49,10 @@ public class ConfessionServiceImplement implements ConfessionService {
         if(!confession.getUserId().equals(userId)){
             throw new AccessDeniedException("access denied");
         }
-        if(openAiService.unSafe(requested.content())){
+        if(openAiService.unSafe(requested.getContent())){
             throw new UnSafeExecption("unsafe");
         }
-        confession.setContent(encryption.encode(requested.content()));
+        confession.setContent(encryption.encode(requested.getContent()));
 
         confessionRepo.save(confession);
         return mapper.toDTO(confession);
