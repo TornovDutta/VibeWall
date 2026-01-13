@@ -21,3 +21,4 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_MONGODB_URI: mongodb://host.docker.internal:27017/vibewall
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+
