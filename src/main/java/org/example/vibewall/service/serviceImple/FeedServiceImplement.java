@@ -19,7 +19,7 @@ public class FeedServiceImplement implements FeedService {
 
 
     @Override
-    @Cacheable(cacheNames = "feed")
+
     public List<ConfessionResponse> get() {
         List<Confession> confessions = repo.findAll();
         return mapper.toDTO(confessions);
