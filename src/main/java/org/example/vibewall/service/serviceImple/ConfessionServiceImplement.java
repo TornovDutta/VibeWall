@@ -15,6 +15,8 @@ import org.example.vibewall.service.OpenAiService;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 @RequiredArgsConstructor
 public class ConfessionServiceImplement implements ConfessionService {
@@ -33,9 +35,8 @@ public class ConfessionServiceImplement implements ConfessionService {
 
 
 
-        Confession confession = new Confession();
-        confession.setContent(encryption.encode(requested.getContent()));
-       confession.setUserId(userId);
+        Confession confession = new Confession(encryption.encode(requested.getContent()),userId);
+
         confessionRepo.save(confession);
 
 
@@ -52,10 +53,10 @@ public class ConfessionServiceImplement implements ConfessionService {
         if(openAiService.unSafe(requested.getContent())){
             throw new UnSafeExecption("unsafe");
         }
-        confession.setContent(encryption.encode(requested.getContent()));
+        Confession newConfession = new Confession(encryption.encode(requested.getContent()),userId);
 
-        confessionRepo.save(confession);
-        return mapper.toDTO(confession);
+        confessionRepo.save(newConfession);
+        return mapper.toDTO(newConfession);
     }
 
     @Override

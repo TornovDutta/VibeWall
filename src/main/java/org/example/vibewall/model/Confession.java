@@ -29,9 +29,9 @@ public class Confession {
 
     private List<Feedback> feedbacks=new ArrayList<>();
 
-    public Confession(String content){
+    public Confession(String content,String userId){
         this.content=content;
-
+        this.userId=userId;
         this.time=new Date();
     }
 
