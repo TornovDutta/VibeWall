@@ -12,6 +12,7 @@ import org.example.vibewall.repo.ConfessionRepo;
 import org.example.vibewall.service.FeedbackService;
 import org.example.vibewall.service.OpenAiService;
 import org.example.vibewall.utility.ConfessionMapper;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,23 +23,10 @@ public class FeedbackServiceImplement implements FeedbackService {
     private final Encryption encryption;
     private final ConfessionMapper mapper;
     @Override
-    public ConfessionResponse giveFeedback(String confessionId, FeedbackRequested requested) throws ConfessionNotFoundException,
-            PrincipalNotFollowException {
-        if(openAiService.unSafe(requested.getContent())){
-            throw new PrincipalNotFollowException("don't follow the principal");
-        }
-        Confession confession=confessionRepo.findById(confessionId).orElseThrow(()->
-                new ConfessionNotFoundException("wrong id"));
-        int feedbackId = confession.getFeedbacks().size();
-
-        Feedback feedback=new Feedback(feedbackId,encryption.encode(requested.getContent()));
-
-        confession.getFeedbacks().add(feedback);
-        confessionRepo.save(confession);
-
-        return mapper.toDTO(confession);
-    }
-    @Override
+    @CacheEvict(
+            value = {"confession-feed", "confession-by-id"},
+            allEntries = true
+    )
     public ConfessionResponse updateFeedback(
             String confessionId,
             int feedbackId,
@@ -63,6 +51,31 @@ public class FeedbackServiceImplement implements FeedbackService {
         return mapper.toDTO(confession);
     }
     @Override
+    @CacheEvict(
+            value = {"confession-feed" },
+            allEntries = true
+    )
+    public ConfessionResponse giveFeedback(String confessionId, FeedbackRequested requested) throws ConfessionNotFoundException,
+            PrincipalNotFollowException {
+        if(openAiService.unSafe(requested.getContent())){
+            throw new PrincipalNotFollowException("don't follow the principal");
+        }
+        Confession confession=confessionRepo.findById(confessionId).orElseThrow(()->
+                new ConfessionNotFoundException("wrong id"));
+        int feedbackId = confession.getFeedbacks().size();
+
+        Feedback feedback=new Feedback(feedbackId,encryption.encode(requested.getContent()));
+
+        confession.getFeedbacks().add(feedback);
+        confessionRepo.save(confession);
+
+        return mapper.toDTO(confession);
+    }
+    @Override
+    @CacheEvict(
+            value = {"confession-feed"},
+            allEntries = true
+    )
     public ConfessionResponse deleteFeedback(
             String confessionId,
             int feedbackId)

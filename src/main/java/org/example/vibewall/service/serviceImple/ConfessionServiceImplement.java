@@ -13,6 +13,7 @@ import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.service.ConfessionService;
 import org.example.vibewall.service.OpenAiService;
 import org.example.vibewall.utility.ConfessionMapper;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -27,6 +28,10 @@ public class ConfessionServiceImplement implements ConfessionService {
     private final OpenAiService openAiService;
 
     @Override
+    @CacheEvict(
+            value = {"confession-feed"},
+            allEntries = true
+    )
     public ConfessionResponse create(String userId, ConfessionRequested requested) {
 
         if(openAiService.unSafe(requested.getContent())){
@@ -44,6 +49,11 @@ public class ConfessionServiceImplement implements ConfessionService {
     }
 
     @Override
+
+    @CacheEvict(
+            value = {"confession-feed"},
+            allEntries = true
+    )
     public ConfessionResponse update(String userId, ConfessionRequested requested, String id) throws ConfessionNotFoundException {
         Confession confession=confessionRepo.findById(id).orElseThrow(()->
                 new ConfessionNotFoundException("wrong id"));
@@ -60,6 +70,10 @@ public class ConfessionServiceImplement implements ConfessionService {
     }
 
     @Override
+    @CacheEvict(
+            value = {"confession-feed"},
+            allEntries = true
+    )
     public void delete(String userId, String id) throws ConfessionNotFoundException {
         Confession confession=confessionRepo.findById(id).orElseThrow(()->
                 new ConfessionNotFoundException("wrong id"));
