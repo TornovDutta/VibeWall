@@ -9,6 +9,7 @@ import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.security.JwtUtil;
+import org.example.vibewall.service.RefreshTokenService;
 import org.example.vibewall.service.RegistrationService;
 import org.example.vibewall.utility.UserMapper;
 import org.slf4j.Logger;
@@ -16,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +29,7 @@ public class RegistrationServiceImple implements RegistrationService {
     private final Encryption encryption;
     private final UserMapper mapper;
     private final JwtUtil jwtUtil;
-    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenService refreshTokenServiceImplements;
 
 
     @Override
@@ -73,7 +72,7 @@ public class RegistrationServiceImple implements RegistrationService {
         );
 
         RefreshToken refreshToken =
-                refreshTokenService.createRefreshToken(user.getId());
+                refreshTokenServiceImplements.createRefreshToken(user.getId());
 
         return TokenResponse.builder()
                 .jwt(accessToken)
@@ -84,7 +83,7 @@ public class RegistrationServiceImple implements RegistrationService {
     public TokenResponse refresh(String refreshToken) {
 
         RefreshToken token =
-                refreshTokenService.findByToken(refreshToken);
+                refreshTokenServiceImplements.findByToken(refreshToken);
 
         Users user = repo.findById(token.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -106,7 +105,7 @@ public class RegistrationServiceImple implements RegistrationService {
         String userId =
                 SecurityContextHolder.getContext().getAuthentication().getName();
 
-        refreshTokenService.deleteByUserId(userId);
+        refreshTokenServiceImplements.deleteByUserId(userId);
         SecurityContextHolder.clearContext();
     }
 }

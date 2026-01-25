@@ -3,6 +3,7 @@ package org.example.vibewall.service.serviceImple;
 import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.repo.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.service.RefreshTokenService;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -10,7 +11,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class RefreshTokenService {
+public class RefreshTokenServiceImplements implements RefreshTokenService {
 
     private final RefreshTokenRepository repo;
 
