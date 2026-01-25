@@ -1,6 +1,7 @@
 package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.DTO.TokenRequested;
 import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
@@ -31,6 +32,13 @@ public class AuthenticationController {
             @Valid @RequestBody UsersRequested user) {
 
         return ResponseEntity.ok(service.login(user));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenResponse> refresh(
+            @Valid @RequestBody TokenRequested requested) {
+        String token=requested.getToken();
+        return ResponseEntity.ok(service.refresh(token));
     }
 
     @PostMapping("/logout")

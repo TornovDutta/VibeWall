@@ -5,6 +5,7 @@ import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
 import org.example.vibewall.encryption.Encryption;
+import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.security.JwtUtil;
@@ -29,6 +30,7 @@ public class RegistrationServiceImple implements RegistrationService {
     private final Encryption encryption;
     private final UserMapper mapper;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
 
     @Override
@@ -57,30 +59,54 @@ public class RegistrationServiceImple implements RegistrationService {
 
         String encodedUsername = encryption.encode(request.getName());
 
-        Optional<Users> optionalUser = repo.findByUsername(encodedUsername);
-
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("Invalid username or password");
-        }
-
-        Users user = optionalUser.get();
+        Users user = repo.findByUsername(encodedUsername)
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new RuntimeException("Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(
+        String accessToken = jwtUtil.generateToken(
                 user.getId(),
                 user.getUsername(),
                 user.getRole()
         );
 
-        logger.info("User logged in: {}", user.getId());
-        return TokenResponse.builder().jwt(token).refresh("").build();
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(user.getId());
+
+        return TokenResponse.builder()
+                .jwt(accessToken)
+                .refresh(refreshToken.getToken())
+                .build();
+    }
+    @Override
+    public TokenResponse refresh(String refreshToken) {
+
+        RefreshToken token =
+                refreshTokenService.findByToken(refreshToken);
+
+        Users user = repo.findById(token.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String newAccessToken = jwtUtil.generateToken(
+                user.getId(),
+                user.getUsername(),
+                user.getRole()
+        );
+
+        return TokenResponse.builder()
+                .jwt(newAccessToken)
+                .refresh(refreshToken)
+                .build();
     }
 
     @Override
     public void logout() {
+        String userId =
+                SecurityContextHolder.getContext().getAuthentication().getName();
+
+        refreshTokenService.deleteByUserId(userId);
         SecurityContextHolder.clearContext();
     }
 }

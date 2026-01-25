@@ -11,4 +11,6 @@ public interface RegistrationService {
     TokenResponse login(UsersRequested user);
 
     void logout();
+
+    TokenResponse refresh(String token);
 }
