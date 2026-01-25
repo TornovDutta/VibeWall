@@ -1,17 +1,14 @@
-package org.example.vibewall.service;
+package org.example.vibewall.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.config.CustomUserDetails;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.model.Users;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService{

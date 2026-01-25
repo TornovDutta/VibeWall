@@ -2,7 +2,7 @@ package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ConfessionRequested;
-import org.example.vibewall.config.CustomUserDetails;
+import org.example.vibewall.security.CustomUserDetails;
 import org.example.vibewall.exception.ConfessionNotFoundException;
 import org.example.vibewall.service.ConfessionService;
 import org.springframework.http.HttpStatus;

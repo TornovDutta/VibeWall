@@ -3,7 +3,7 @@ package org.example.vibewall.service;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
-import org.example.vibewall.config.JwtUtil;
+import org.example.vibewall.security.JwtUtil;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;

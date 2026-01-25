@@ -1,4 +1,4 @@
-package org.example.vibewall.config;
+package org.example.vibewall.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -34,4 +34,5 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
 }

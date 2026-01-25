@@ -1,4 +1,4 @@
-package org.example.vibewall.config;
+package org.example.vibewall.security;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -19,7 +19,16 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
+
     private final JwtUtil jwtUtil;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/auth")
+                || path.startsWith("/feed")
+                || request.getMethod().equalsIgnoreCase("OPTIONS");
+    }
 
     @Override
     protected void doFilterInternal(
@@ -28,49 +37,49 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-
-        // Public endpoints (NO JWT REQUIRED)
-        if (path.startsWith("/auth") || path.startsWith("/feed")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String authHeader = request.getHeader("Authorization");
 
-        // No token → continue (Spring Security will block later)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
+        String token = authHeader.substring(7);
+
         try {
-            String token = authHeader.substring(7);
             Claims claims = jwtUtil.extractClaims(token);
 
             String username = claims.getSubject();
             String userId = claims.get("id", String.class);
             String role = claims.get("role", String.class);
 
-            CustomUserDetails principal =
-                    new CustomUserDetails(userId, username, role);
+            if (username == null || role == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            principal,
-                            null,
-                            List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                    );
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                CustomUserDetails principal =
+                        new CustomUserDetails(userId, username, role);
 
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                principal,
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                        );
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
 
         } catch (Exception e) {
-            // Invalid or expired token
             SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
         filterChain.doFilter(request, response);
