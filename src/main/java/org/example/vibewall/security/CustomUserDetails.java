@@ -1,12 +1,10 @@
-package org.example.vibewall.config;
+package org.example.vibewall.security;
 
 import lombok.Getter;
 import org.example.vibewall.model.Users;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Collection;
 import java.util.List;

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
-import org.example.vibewall.config.JwtUtil;
+import org.example.vibewall.security.JwtUtil;
 import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.encryption.Encryption;

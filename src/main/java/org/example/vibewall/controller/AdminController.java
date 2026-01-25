@@ -1,11 +1,10 @@
 package org.example.vibewall.controller;
 
-import io.swagger.v3.oas.annotations.tags.Tags;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
-import org.example.vibewall.config.CustomUserDetails;
+import org.example.vibewall.security.CustomUserDetails;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.service.AdminService;
