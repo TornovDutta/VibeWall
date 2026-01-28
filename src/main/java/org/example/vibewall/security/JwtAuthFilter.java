@@ -24,7 +24,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
+        // IMPORTANT: removes context-path (/api/v3)
+        String path = request.getServletPath();
+
         return path.startsWith("/auth")
                 || path.startsWith("/feed")
                 || request.getMethod().equalsIgnoreCase("OPTIONS");
@@ -39,8 +41,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        // If no token → just continue (let Spring Security decide)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -53,12 +56,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String userId = claims.get("id", String.class);
             String role = claims.get("role", String.class);
 
-            if (username == null || role == null) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+            if (username != null && role != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 CustomUserDetails principal =
                         new CustomUserDetails(userId, username, role);
 
