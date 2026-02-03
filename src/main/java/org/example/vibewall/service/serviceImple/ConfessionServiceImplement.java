@@ -34,9 +34,9 @@ public class ConfessionServiceImplement implements ConfessionService {
     )
     public ConfessionResponse create(String userId, ConfessionRequested requested) {
 
-//        if(openAiService.unSafe(requested.getContent())){
-//            throw new UnSafeExecption("unsafe");
-//        }
+        if(openAiService.unSafe(requested.getContent())){
+            throw new UnSafeExecption("unsafe");
+        }
 
 
 
