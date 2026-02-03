@@ -11,12 +11,10 @@ import org.example.vibewall.model.Confession;
 import org.example.vibewall.repo.ConfessionRepo;
 import org.example.vibewall.repo.UsersRepo;
 import org.example.vibewall.service.ConfessionService;
-import org.example.vibewall.service.OpenAiService;
+import org.example.vibewall.service.AiService;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +23,7 @@ public class ConfessionServiceImplement implements ConfessionService {
     private final ConfessionRepo confessionRepo;
     private final ConfessionMapper mapper;
     private final Encryption encryption;
-    private final OpenAiService openAiService;
+    private final AiService aiService;
 
     @Override
     @CacheEvict(
@@ -34,7 +32,7 @@ public class ConfessionServiceImplement implements ConfessionService {
     )
     public ConfessionResponse create(String userId, ConfessionRequested requested) {
 
-        if(openAiService.unSafe(requested.getContent())){
+        if(aiService.unSafe(requested.getContent())){
             throw new UnSafeExecption("unsafe");
         }
 
@@ -60,7 +58,7 @@ public class ConfessionServiceImplement implements ConfessionService {
         if(!confession.getUserId().equals(userId)){
             throw new AccessDeniedException("access denied");
         }
-        if(openAiService.unSafe(requested.getContent())){
+        if(aiService.unSafe(requested.getContent())){
             throw new UnSafeExecption("unsafe");
         }
         Confession newConfession = new Confession(encryption.encode(requested.getContent()),userId);

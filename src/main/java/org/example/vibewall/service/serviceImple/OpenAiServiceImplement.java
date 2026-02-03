@@ -1,13 +1,13 @@
 package org.example.vibewall.service.serviceImple;
 
-import org.example.vibewall.service.OpenAiService;
+import org.example.vibewall.service.AiService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.stereotype.Service;
 
 @Service
 
-public class OpenAiServiceImplement implements OpenAiService {
+public class OpenAiServiceImplement implements AiService {
     private final ChatClient chatClient;
 
     public OpenAiServiceImplement(OpenAiChatModel chatModel) {

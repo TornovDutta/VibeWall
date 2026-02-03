@@ -39,7 +39,7 @@ class ConfessionServiceTest {
     private Encryption encryption;
 
     @Mock
-    private OpenAiService openAiService;
+    private AiService aiService;
 
     @InjectMocks
     private ConfessionServiceImplement confessionService;
@@ -60,7 +60,7 @@ class ConfessionServiceTest {
     void create_shouldCreateConfessionSuccessfully() {
         ConfessionRequested request = new ConfessionRequested("hello");
 
-        when(openAiService.unSafe("hello")).thenReturn(false);
+        when(aiService.unSafe("hello")).thenReturn(false);
         when(encryption.encode("hello")).thenReturn("encoded");
         when(confessionMapper.toDTO(any(Confession.class)))
                 .thenReturn(new ConfessionResponse("c1", "encoded", null));
@@ -76,7 +76,7 @@ class ConfessionServiceTest {
     void create_shouldThrowException_whenContentUnsafe() {
         ConfessionRequested request = new ConfessionRequested("bad");
 
-        when(openAiService.unSafe("bad")).thenReturn(true);
+        when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
                 UnSafeExecption.class,
@@ -93,7 +93,7 @@ class ConfessionServiceTest {
         ConfessionRequested request = new ConfessionRequested("updated");
 
         when(confessionRepo.findById("c1")).thenReturn(Optional.of(confession));
-        when(openAiService.unSafe("updated")).thenReturn(false);
+        when(aiService.unSafe("updated")).thenReturn(false);
         when(encryption.encode("updated")).thenReturn("encodedUpdated");
         when(confessionMapper.toDTO(confession))
                 .thenReturn(new ConfessionResponse("c1", "encodedUpdated", null));
@@ -135,7 +135,7 @@ class ConfessionServiceTest {
     @Test
     void update_shouldThrowException_whenContentUnsafe() {
         when(confessionRepo.findById("c1")).thenReturn(Optional.of(confession));
-        when(openAiService.unSafe("bad")).thenReturn(true);
+        when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
                 UnSafeExecption.class,

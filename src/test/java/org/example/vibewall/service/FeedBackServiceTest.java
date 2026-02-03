@@ -28,7 +28,7 @@ class FeedBackServiceTest {
     private ConfessionRepo confessionRepo;
 
     @Mock
-    private OpenAiService openAiService;
+    private AiService aiService;
 
     @Mock
     private Encryption encryption;
@@ -54,7 +54,7 @@ class FeedBackServiceTest {
     void giveFeedback_shouldAddFeedbackSuccessfully() throws PrincipalNotFollowException, ConfessionNotFoundException {
         FeedbackRequested request = new FeedbackRequested("good");
 
-        when(openAiService.unSafe("good")).thenReturn(false);
+        when(aiService.unSafe("good")).thenReturn(false);
         when(confessionRepo.findById("c1")).thenReturn(Optional.of(confession));
         when(encryption.encode("good")).thenReturn("encodedGood");
         when(confessionMapper.toDTO(confession))
@@ -74,7 +74,7 @@ class FeedBackServiceTest {
 
     @Test
     void giveFeedback_shouldThrowException_whenUnsafe() {
-        when(openAiService.unSafe("bad")).thenReturn(true);
+        when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
                 PrincipalNotFollowException.class,
@@ -87,7 +87,7 @@ class FeedBackServiceTest {
 
     @Test
     void giveFeedback_shouldThrowException_whenConfessionNotFound() {
-        when(openAiService.unSafe("ok")).thenReturn(false);
+        when(aiService.unSafe("ok")).thenReturn(false);
         when(confessionRepo.findById("x")).thenReturn(Optional.empty());
 
         assertThrows(
@@ -103,7 +103,7 @@ class FeedBackServiceTest {
     void updateFeedback_shouldUpdateSuccessfully() throws PrincipalNotFollowException, ConfessionNotFoundException {
         confession.getFeedbacks().add(new Feedback(0, "old"));
 
-        when(openAiService.unSafe("new")).thenReturn(false);
+        when(aiService.unSafe("new")).thenReturn(false);
         when(confessionRepo.findById("c1")).thenReturn(Optional.of(confession));
         when(encryption.encode("new")).thenReturn("encodedNew");
         when(confessionMapper.toDTO(confession))
@@ -122,7 +122,7 @@ class FeedBackServiceTest {
 
     @Test
     void updateFeedback_shouldThrowException_whenUnsafe() {
-        when(openAiService.unSafe("bad")).thenReturn(true);
+        when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
                 PrincipalNotFollowException.class,
@@ -133,7 +133,7 @@ class FeedBackServiceTest {
 
     @Test
     void updateFeedback_shouldThrowException_whenFeedbackNotFound() {
-        when(openAiService.unSafe("ok")).thenReturn(false);
+        when(aiService.unSafe("ok")).thenReturn(false);
         when(confessionRepo.findById("c1")).thenReturn(Optional.of(confession));
 
         assertThrows(
