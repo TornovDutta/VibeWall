@@ -26,7 +26,7 @@ public class AdminController {
 
     @GetMapping
     public ResponseEntity<List<UsersResponse>> getAll(){
-        return new ResponseEntity<>(service.getAll(),HttpStatus.OK);
+        return new ResponseEntity(service.getAll(),HttpStatus.OK);
     }
 
     @PostMapping
