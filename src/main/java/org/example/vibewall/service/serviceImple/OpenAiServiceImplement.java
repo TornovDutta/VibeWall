@@ -6,8 +6,8 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-//@Service
-//@Primary
+@Service
+@Primary
 public class OpenAiServiceImplement implements AiService {
     private final ChatClient chatClient;
 
