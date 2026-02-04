@@ -13,10 +13,7 @@ public class GeminiService implements AiService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    @PostConstruct
-    public void checkKey() {
-        System.out.println("GEMINI KEY = " + apiKey);
-    }
+
 
 
     private final RestTemplate restTemplate = new RestTemplate();
