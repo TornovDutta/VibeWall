@@ -1,103 +1,115 @@
 # VibeWall
 
-**VibeWall** is an anonymous and secure emotion-sharing platform built using **Spring Boot** and **MongoDB**.  
-It allows students to freely share their thoughts and emotions while ensuring complete privacy and emotional safety.  
-With advanced encryption, AI-powered moderation, reporting features, and admin management, VibeWall promotes open communication in a safe and judgment-free environment.
+VibeWall is a social platform designed for sharing anonymous confessions, providing feedback, and managing user interactions through a feed system. The application focuses on user privacy and community engagement, offering a secure environment for expression.
 
----
 ## Features
 
-- **Anonymous Confessions:** Users can share emotions or thoughts without revealing their identity.
-- **Server-Side Encryption:** Sensitive data such as usernames, confessions, and feedback are encrypted before being stored in the database. Raw content is never persisted in plaintext, ensuring strong privacy protection.
-- **Secure Password Handling:** User passwords are safely hashed using industry-standard algorithms and are never stored or retrievable in plain form.
-- **AI-Powered Moderation:** Integrated **OpenAI** API automatically detects and blocks harmful or unsafe posts and feedback to maintain a positive and emotionally safe environment.
-- **Report System:** Users can report confessions, feedback, or activities they find unsafe or inappropriate, supporting continuous community safety.
-- **Admin Management:** Admins manage reports and oversee platform activity to maintain integrity and safety.
-- **User Profile Management:** Users can create, update, and delete their own profiles securely.
-- **Feedback System:** Users can share and view supportive feedback on confessions.
-- **Optional Login:** Users may interact anonymously or choose to authenticate for additional features.
-- **Swagger UI Integration:** Provides interactive API documentation and testing support for developers.
+*   **User Authentication**: Secure registration and login using JWT and Spring Security.
+*   **Anonymous Confessions**: Users can post confessions without revealing their identity.
+*   **Feed System**: A dynamic feed to view confessions from other users.
+*   **Feedback Mechanism**: Users can provide feedback on confessions.
+*   **Reporting System**: Users can report inappropriate content, which is managed by admins.
+*   **Admin Dashboard**: comprehensive capabilities for administrators to manage users and reports.
+*   **Auto-Deletion (TTL)**: Confessions are automatically removed after 12 hours.
+*   **AI Content Moderation**: Integrates **OpenAI** and **Google Gemini** to analyze confessions and feedback for hurtful or inappropriate content before posting.
+*   **AI Integration**: Utilizes Spring AI for enhanced content processing.
 
+## Tech Stack
 
----
+*   **Language**: Java 17
+*   **Framework**: Spring Boot 3.5.6
+*   **Database**: MongoDB
+*   **Caching**: Redis
+*   **Security**: Spring Security, JWT (jjwt)
+*   **Containerization**: Docker
 
-## Technologies Used
+## Setup Instructions
 
-- **Backend:** Spring Boot
-- **Database:** MongoDB
-- **Language:** Java
-- **Build Tool:** Maven
-- **AI Moderation:** OpenAI API
-- **Documentation:** Swagger UI
+### Prerequisites
+*   Java Development Kit (JDK) 17
+*   Maven
+*   Docker & Docker Compose
 
+### Installation
 
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository_url>
+    cd vibewall
+    ```
 
+2.  **Configure Environment Variables:**
+    Create a `.env` file in the root directory. It should **only** contain the following keys:
+    ```properties
+    OPENAI_API_KEY=your_openai_api_key
+    GEMINI_API_KEY=your_gemini_api_key
+    ```
 
----
+3.  **Build the project:**
+    This step is required before building the Docker image.
+    ```bash
+    mvn clean package -DskipTests
+    ```
 
-## 🧩 REST API Endpoints
+4.  **Run the application (Docker Only):**
+    ```bash
+    docker-compose up --build
+    ```
 
-| Endpoint | HTTP Method | Description | Access | Example |
-|----------|--------------|-------------|--------|----------|
-| `/auth` | **POST** | Register a new user | Public | `{ "username": "user1", "password": "pass123", "email": "user@example.com" }` |
-| `/admin/users` | **POST** | Add a new admin | Admin only | `{ "username": "admin1", "password": "pass123" }` |
-| `/admin/users/{id}` | **PUT** | Update admin details by ID | Admin only | `{ "username": "admin2" }` |
-| `/admin/users/{id}` | **DELETE** | Delete an admin by ID | Admin only | `/admin/users/64f1a3` |
-| `/admin/reports` | **GET** | Get all reports | Admin only | `/admin/reports` |
-| `/admin/reports/{id}` | **GET** | Get report by ID | Admin only | `/admin/reports/64f1a9` |
-| `/admin/reports/pending` | **GET** | Get all pending reports | Admin only | `/admin/reports/pending` |
-| `/admin/reports/pending/{id}` | **GET** | Get pending report by ID | Admin only | `/admin/reports/pending/64f1a9` |
-| `/admin/reports/{id}/status/{status}` | **PATCH** | Update report status (e.g., Reviewed/Resolved) | Admin only | `/admin/reports/64f1a9/status/resolved` |
-| `/users/{id}` | **PUT** | Update user details by ID | Admin/User | `{ "email": "newmail@example.com" }` |
-| `/users/{id}` | **DELETE** | Delete a user by ID | Admin only | `/users/64f1a4` |
-| `/users/confessions` | **POST** | Create a new confession | User/Admin | `{ "content": "Feeling stressed today" }` |
-| `/users/confessions/{id}` | **PUT** | Update a confession by ID | Confession Owner/Admin | `{ "content": "Updated confession" }` |
-| `/users/confessions/{id}` | **DELETE** | Delete a confession by ID | Confession Owner/Admin | `/users/confessions/64f1a5` |
-| `/users/confessions` | **GET** | Get all confessions | User/Admin | `/users/confessions` |
-| `/users/confessions/{id}` | **GET** | Get confession by ID | User/Admin | `/users/confessions/64f1a5` |
-| `/api/v2/feedbacks/confession/{confessionId}` | **POST** | Add feedback to a confession | User/Admin | `{ "feedback": "Stay strong!" }` |
-| `/api/v2/feedbacks/confession/{confessionId}` | **GET** | Get all feedback for a confession | User/Admin | `/api/v2/feedbacks/confession/64f1a5` |
-| `/api/v2/feedbacks/{feedbackId}` | **GET** | Get feedback by ID | User/Admin | `/api/v2/feedbacks/64f1a6` |
-| `/api/v2/feedbacks/{feedbackId}` | **PUT** | Update feedback by ID | Feedback Owner/Admin | `{ "feedback": "Updated feedback" }` |
-| `/api/v2/feedbacks/{feedbackId}` | **DELETE** | Delete feedback by ID | Admin only | `/api/v2/feedbacks/64f1a6` |
-| `/users/reports` | **POST** | Create a new report | User/Admin | `{ "reason": "Abusive confession" }` |
-| `/users/reports/{id}` | **PUT** | Update a report by ID | User/Admin | `{ "reason": "Updated report reason" }` |
-| `/users/reports/{id}` | **DELETE** | Withdraw a report | User/Admin | `/users/reports/64f1a9` |
----
+## API Documentation
 
-## Project Structure
+### Authentication (`/auth`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/auth/register` | Register a new user |
+| `POST` | `/auth/login` | Login and receive a JWT token |
+| `POST` | `/auth/refresh` | Refresh the JWT token |
+| `POST` | `/auth/logout` | Logout the current user |
 
-```
-org.example.vibewall
-├── controller
-│   ├── AdminController.java
-│   ├── UserController.java
-│   ├── ConfessionController.java
-│   └── FeedbackController.java
-├── model
-│   ├── Users.java
-│   ├── Confession.java
-│   └── Feedback.java
-├── service
-│   ├── UsersService.java
-│   ├── ConfessionService.java
-│   └── FeedbackService.java
-├── repository
-└── VibeWallApplication.java
-```
+### Confessions (`/users/confession`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/users/confession` | Create a new confession |
+| `PUT` | `/users/confession/{id}` | Update an existing confession |
+| `DELETE` | `/users/confession/{id}` | Delete a confession |
 
----
+### Feed (`/feed`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/feed/` | Get the feed of confessions |
 
-## Usage
+### Users (`/users`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `PUT` | `/users/me` | Update current user's profile |
+| `DELETE` | `/users/me` | Delete current user's account |
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/TornovDutta/VibeWall.git
-   ```
-2. Open the project in your IDE (IntelliJ/Eclipse).
-3. Configure **MongoDB** connection in `application.properties`.
-4. Run the Spring Boot application.
-5. Use Postman or any REST client to interact with the APIs.
+### Reports (`/users/report`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/users/report/` | Create a new report |
+| `PUT` | `/users/report/{reportId}` | Update a report |
+| `DELETE` | `/users/report/{reportId}` | Delete a report |
+
+### Feedback (`/users/feedback`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/users/feedback/{confessionId}` | Give feedback on a confession |
+| `PUT` | `/users/feedback/{confessionId}/{feedbackId}` | Update feedback |
+| `DELETE` | `/users/feedback/{confessionId}/{feedbackId}` | Delete feedback |
+
+### Admin (`/admin`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/admin` | Get all users |
+| `POST` | `/admin` | Add a new admin |
+| `PUT` | `/admin/me` | Update admin profile |
+| `DELETE` | `/admin/me` | Delete admin account |
+| `GET` | `/admin/report` | Get all reports |
+| `GET` | `/admin/report/{id}` | Get report by ID |
+| `GET` | `/admin/report/pending` | Get all pending reports |
+| `GET` | `/admin/report/pending/{id}` | Get pending report by ID |
+| `PATCH` | `/admin/report/Reviewed/{id}` | Review/Resolve a report (status param required) |
 
 ---
 
