@@ -2,8 +2,10 @@ package org.example.vibewall.service.serviceImple;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportResponse;
+import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.security.JwtUtil;
 import org.example.vibewall.repo.ReportRepo;
 import org.example.vibewall.repo.UsersRepo;
@@ -13,6 +15,7 @@ import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
+import org.example.vibewall.service.RefreshTokenService;
 import org.example.vibewall.utility.ReportMapper;
 import org.example.vibewall.utility.UserMapper;
 import org.slf4j.Logger;
@@ -34,6 +37,7 @@ public class AdminServiceImplements implements AdminService {
     private final ReportMapper reportMapper;
     private static final Logger logger= LoggerFactory.getLogger(AdminServiceImplements.class);
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
 
     @Override
@@ -42,31 +46,38 @@ public class AdminServiceImplements implements AdminService {
         return mapper.toDTO(users);
     }
     @Override
-    public UsersResponse addAdmin(UsersRequested user) {
+    public TokenResponse addAdmin(UsersRequested request) {
+
+        String encodedUsername = encryption.encode(request.getName());
+
+        if (userRepo.existsByUsername(encodedUsername)) {
+            throw new RuntimeException("Admin already exists");
+        }
+
+        Users admin = new Users();
+        admin.setUsername(encodedUsername);
+        admin.setPassword(passwordEncoder.encode(request.getPassword()));
+        admin.setRole("ADMIN");
+
+        Users savedAdmin = userRepo.save(admin);
 
 
-        Users saveUser=new Users();
-        saveUser.setUsername(encryption.encode(user.getName()));
-        saveUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        saveUser.setRole("ADMIN");
 
-        userRepo.save(saveUser);
-
-        logger.info("new admin add");
-
-        String token = jwtUtil.generateToken(
-                saveUser.getId(),
-                saveUser.getUsername(),
-                saveUser.getRole()
+        String accessToken = jwtUtil.generateToken(
+                savedAdmin.getId(),
+                savedAdmin.getUsername(),
+                savedAdmin.getRole()
         );
 
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(savedAdmin.getId());
 
-        System.out.println("JWT TOKEN (DEV ONLY): " + token);
-
-        return mapper.toDTO(saveUser);
-
-
+        return TokenResponse.builder()
+                .jwt(accessToken)
+                .refresh(refreshToken.getToken())
+                .build();
     }
+
 
     @Override
     public UsersResponse update(String id, UsersRequested user) throws AdminNotFoundException {
@@ -75,7 +86,7 @@ public class AdminServiceImplements implements AdminService {
 
         existingUser.setUsername(encryption.encode(user.getName()));
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        logger.info("admin of id: "+id+" update");
+
         Users saveUser=userRepo.save(existingUser);
 
         return mapper.toDTO(saveUser);
@@ -88,7 +99,7 @@ public class AdminServiceImplements implements AdminService {
         userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
-        logger.info("admin of id: "+id+" remove");
+
         userRepo.removeById(id);
     }
 
@@ -115,7 +126,7 @@ public class AdminServiceImplements implements AdminService {
     public ReportResponse reslove(String id, String status) throws ReportNotFoundException {
         Report report=reportRepo.findById(id).orElseThrow(()->
                 new ReportNotFoundException());
-        logger.info("id: "+id +" , reslove by admin");
+
         report.setStatus(status);
         return reportMapper.toDTO(reportRepo.save(report));
     }

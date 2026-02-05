@@ -47,7 +47,7 @@ public class RegistrationServiceImple implements RegistrationService {
         Users savedUser = repo.save(user);
 
 
-        logger.info("User registered: {}", savedUser.getId());
+
 
         return UsersResponse.builder().name(encryption.decode(savedUser.getUsername())).id(user.getId()).build();
     }

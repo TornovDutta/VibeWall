@@ -1,6 +1,7 @@
 package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ReportResponse;
+import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
 import org.example.vibewall.security.JwtUtil;
@@ -92,7 +93,7 @@ class AdminServiceTest {
         when(userMapper.toDTO(any(Users.class)))
                 .thenReturn(new UsersResponse("1", "encryptedAdmin"));
 
-        UsersResponse response = adminService.addAdmin(request);
+        TokenResponse response = adminService.addAdmin(request);
 
         assertNotNull(response);
         verify(userRepo).save(any(Users.class));

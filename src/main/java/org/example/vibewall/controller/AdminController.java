@@ -2,6 +2,7 @@ package org.example.vibewall.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportResponse;
+import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
 import org.example.vibewall.security.CustomUserDetails;
@@ -30,7 +31,7 @@ public class AdminController {
     }
 
     @PostMapping
-    public ResponseEntity<UsersResponse> addAdmin(@Valid  @RequestBody UsersRequested users){
+    public ResponseEntity<TokenResponse> addAdmin(@Valid  @RequestBody UsersRequested users){
         return new ResponseEntity<>(service.addAdmin(users), HttpStatus.CREATED);
     }
     @PutMapping("/me")

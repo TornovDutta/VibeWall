@@ -1,6 +1,7 @@
 package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ReportResponse;
+import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
 import org.example.vibewall.exception.AdminNotFoundException;
@@ -13,7 +14,7 @@ import java.util.List;
 public interface AdminService {
     List<UsersResponse> getAll();
 
-    UsersResponse addAdmin(UsersRequested users);
+    TokenResponse addAdmin(UsersRequested users);
 
     UsersResponse update(String id, UsersRequested user) throws AdminNotFoundException;
 
