@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Slf4j
 public class ReportAspect {
-    @After("")
+    @After("execution(* org.example.vibewall.service.serviceImple.ReportServiceImplements.create(..))")
     public void newReport(){
         log.info("new Report add");
     }
 
-    @After("")
+    @After("execution(* org.example.vibewall.service.serviceImple.AdminServiceImplements.reslove(..))")
     public  void reportSolve(){
         log.info("report solve");
     }
