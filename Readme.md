@@ -5,6 +5,8 @@ VibeWall is a social platform designed for sharing anonymous confessions, provid
 ## Features
 
 *   **User Authentication**: Secure registration and login using JWT and Spring Security.
+*   **Access & Refresh Tokens**: Implements **short-lived access tokens** and **long-lived refresh tokens** for 
+   secure and seamless session management.
 *   **Anonymous Confessions**: Users can post confessions without revealing their identity.
 *   **Feed System**: A dynamic feed to view confessions from other users.
 *   **Feedback Mechanism**: Users can provide feedback on confessions.
@@ -57,48 +59,61 @@ VibeWall is a social platform designed for sharing anonymous confessions, provid
     ```
 
 ## API Documentation
+## 🔐 API Endpoints & Access Control
 
-### Authentication (`/auth`)
+### Authentication (`/auth`) — **Public**
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `POST` | `/auth/register` | Register a new user |
-| `POST` | `/auth/login` | Login and receive a JWT token |
-| `POST` | `/auth/refresh` | Refresh the JWT token |
-| `POST` | `/auth/logout` | Logout the current user |
+| `POST` | `/auth/login` | Login and receive access & refresh tokens |
+| `POST` | `/auth/refresh` | Refresh the access token using refresh token |
+| `POST` | `/auth/logout` | Logout and invalidate refresh token |
 
-### Confessions (`/users/confession`)
+---
+
+### Feed (`/feed`) — **Public**
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/feed` | Get the feed of confessions |
+
+---
+
+### Confessions (`/users/confession`) — **USER**
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `POST` | `/users/confession` | Create a new confession |
 | `PUT` | `/users/confession/{id}` | Update an existing confession |
 | `DELETE` | `/users/confession/{id}` | Delete a confession |
 
-### Feed (`/feed`)
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/feed/` | Get the feed of confessions |
+---
 
-### Users (`/users`)
+### Users (`/users`) — **USER**
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `PUT` | `/users/me` | Update current user's profile |
 | `DELETE` | `/users/me` | Delete current user's account |
 
-### Reports (`/users/report`)
+---
+
+### Reports (`/users/report`) — **USER**
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/users/report/` | Create a new report |
+| `POST` | `/users/report` | Create a new report |
 | `PUT` | `/users/report/{reportId}` | Update a report |
 | `DELETE` | `/users/report/{reportId}` | Delete a report |
 
-### Feedback (`/users/feedback`)
+---
+
+### Feedback (`/users/feedback`) — **USER**
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `POST` | `/users/feedback/{confessionId}` | Give feedback on a confession |
 | `PUT` | `/users/feedback/{confessionId}/{feedbackId}` | Update feedback |
 | `DELETE` | `/users/feedback/{confessionId}/{feedbackId}` | Delete feedback |
 
-### Admin (`/admin`)
+---
+
+### Admin (`/admin`) — **ADMIN**
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/admin` | Get all users |
@@ -109,7 +124,16 @@ VibeWall is a social platform designed for sharing anonymous confessions, provid
 | `GET` | `/admin/report/{id}` | Get report by ID |
 | `GET` | `/admin/report/pending` | Get all pending reports |
 | `GET` | `/admin/report/pending/{id}` | Get pending report by ID |
-| `PATCH` | `/admin/report/Reviewed/{id}` | Review/Resolve a report (status param required) |
+| `PATCH` | `/admin/report/reviewed/{id}` | Review or resolve a report (status parameter required) |
+
+---
+
+## 🔒 Access Rules Summary
+
+- **Public**: `/auth/**`, `/feed/**`
+- **Authenticated USER**: `/users/**`
+- **Authenticated ADMIN**: `/admin/**`
+- **JWT Authentication** required for USER and ADMIN routes
 
 ---
 
