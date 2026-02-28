@@ -44,7 +44,7 @@ public class GeminiService implements AiService {
         ResponseEntity<String> response =
                 restTemplate.postForEntity(url, request, String.class);
 
-        System.out.println(response.getBody());
+
 
         return extractText(response.getBody());
     }
