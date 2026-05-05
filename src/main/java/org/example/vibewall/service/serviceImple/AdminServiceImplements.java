@@ -20,7 +20,7 @@ import org.example.vibewall.utility.ReportMapper;
 import org.example.vibewall.utility.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.List;
 public class AdminServiceImplements implements AdminService {
     private final UsersRepo userRepo;
     private final ReportRepo reportRepo;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final Encryption encryption;
     private final UserMapper mapper;
     private final ReportMapper reportMapper;

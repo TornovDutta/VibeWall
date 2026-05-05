@@ -61,10 +61,9 @@ public class ConfessionServiceImplement implements ConfessionService {
         if(aiService.unSafe(requested.getContent())){
             throw new UnSafeExecption("unsafe");
         }
-        Confession newConfession = new Confession(encryption.encode(requested.getContent()),userId);
-
-        confessionRepo.save(newConfession);
-        return mapper.toDTO(newConfession);
+        confession.setContent(encryption.encode(requested.getContent()));
+        confessionRepo.save(confession);
+        return mapper.toDTO(confession);
     }
 
     @Override

@@ -18,7 +18,7 @@ public class GenericException {
             ConfessionNotFoundException.class,
             FeedbackNotFoundException.class
     })
-    public ResponseEntity<?> handleNotFound(RuntimeException e) {
+    public ResponseEntity<?> handleNotFound(Exception e) {
         return build(e.getMessage(), "resource not found", HttpStatus.NOT_FOUND);
     }
 

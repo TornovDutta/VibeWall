@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ConfessionRepo extends MongoRepository<Confession,Integer> {
+public interface ConfessionRepo extends MongoRepository<Confession, String> {
 
 
     Optional<Confession> findById(String id);
