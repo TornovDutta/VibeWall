@@ -14,6 +14,7 @@ import org.example.vibewall.service.RegistrationService;
 import org.example.vibewall.utility.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.example.vibewall.security.CustomUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -102,10 +103,9 @@ public class RegistrationServiceImple implements RegistrationService {
 
     @Override
     public void logout() {
-        String userId =
-                SecurityContextHolder.getContext().getAuthentication().getName();
-
-        refreshTokenServiceImplements.deleteByUserId(userId);
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        refreshTokenServiceImplements.deleteByUserId(userDetails.getId());
         SecurityContextHolder.clearContext();
     }
 }

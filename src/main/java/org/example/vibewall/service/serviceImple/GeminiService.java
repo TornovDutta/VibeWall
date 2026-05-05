@@ -1,6 +1,5 @@
 package org.example.vibewall.service.serviceImple;
 
-import jakarta.annotation.PostConstruct;
 import org.example.vibewall.service.AiService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -13,9 +12,6 @@ public class GeminiService implements AiService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-
-
-
     private final RestTemplate restTemplate = new RestTemplate();
 
     private static final String GEMINI_URL =
@@ -23,7 +19,6 @@ public class GeminiService implements AiService {
 
     @Override
     public String getResponse(String prompt) {
-
         String url = String.format(GEMINI_URL, apiKey);
 
         String body = """
@@ -40,22 +35,17 @@ public class GeminiService implements AiService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<String> request = new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response =
-                restTemplate.postForEntity(url, request, String.class);
-
-
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
         return extractText(response.getBody());
     }
 
     @Override
     public boolean unSafe(String str) {
-
         String prompt = """
                 You are a content safety checker for the platform VibeWall.
 
-                VibeWall is an anonymous and secure emotion-sharing platform for students. 
+                VibeWall is an anonymous and secure emotion-sharing platform for students.
                 It allows emotional expression but strictly prohibits harmful, offensive, or unsafe content.
 
                 ### Platform Principles ###
@@ -71,24 +61,21 @@ public class GeminiService implements AiService {
                 Message: "%s"
                 """.formatted(str);
 
-        String result = getResponse(prompt).trim();
-        System.out.println(result);
-
-        if (result.equals("1")) return true;
-        if (result.equals("0")) return false;
-
-        return true; // fail-safe
+        try {
+            String result = getResponse(prompt).trim();
+            if (result.equals("1")) return true;
+            if (result.equals("0")) return false;
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    // 🔽 Simple text extractor (no Jackson needed)
     private String extractText(String json) {
-        // crude but works for Gemini response
         int index = json.indexOf("\"text\":");
         if (index == -1) return "";
-
         int start = json.indexOf("\"", index + 7) + 1;
         int end = json.indexOf("\"", start);
-
         return json.substring(start, end);
     }
 }

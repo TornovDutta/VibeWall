@@ -14,16 +14,18 @@ public class OpenAiServiceImplement implements AiService {
     public OpenAiServiceImplement(OpenAiChatModel chatModel) {
         this.chatClient = ChatClient.builder(chatModel).build();
     }
+
     @Override
-    public String getResponse(String prompt){
+    public String getResponse(String prompt) {
         return chatClient.prompt().user(prompt).call().content().trim();
     }
+
     @Override
     public boolean unSafe(String str) {
         String prompt = """
                 You are a content safety checker for the platform VibeWall.
 
-                VibeWall is an anonymous and secure emotion-sharing platform for students. 
+                VibeWall is an anonymous and secure emotion-sharing platform for students.
                 It allows emotional expression but strictly prohibits harmful, offensive, or unsafe content.
 
                 ### Platform Principles ###
@@ -39,17 +41,18 @@ public class OpenAiServiceImplement implements AiService {
                 Message: "%s"
                 """.formatted(str);
 
-        String response = chatClient.prompt()
-                .user(prompt)
-                .call()
-                .content()
-                .trim();
+        try {
+            String response = chatClient.prompt()
+                    .user(prompt)
+                    .call()
+                    .content()
+                    .trim();
 
-
-        if (response.equals("1")) return true;
-        if (response.equals("0")) return false;
-
-
-        return true;
+            if (response.equals("1")) return true;
+            if (response.equals("0")) return false;
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
