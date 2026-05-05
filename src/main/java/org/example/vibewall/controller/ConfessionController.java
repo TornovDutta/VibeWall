@@ -2,7 +2,6 @@ package org.example.vibewall.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ConfessionRequested;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users/confession")
 @RequiredArgsConstructor
 @Tag(name = "Confessions", description = "Create, update, and delete your confessions")
-@SecurityRequirement(name = "bearerAuth")
 public class ConfessionController {
     private final ConfessionService service;
 

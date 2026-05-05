@@ -2,7 +2,6 @@ package org.example.vibewall.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportRequested;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/users/report")
 @Tag(name = "Reports", description = "Submit and manage content reports")
-@SecurityRequirement(name = "bearerAuth")
 public class ReportController {
     private final ReportService service;
 

@@ -2,7 +2,6 @@ package org.example.vibewall.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.TokenRequested;
@@ -14,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,7 +24,6 @@ public class AuthenticationController {
     private final RegistrationService service;
 
     @PostMapping("/register")
-    @SecurityRequirements
     @Operation(summary = "Register a new user")
     @ApiResponse(responseCode = "201", description = "User registered successfully")
     @ApiResponse(responseCode = "400", description = "Validation error or user already exists")
@@ -35,7 +33,6 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    @SecurityRequirements
     @Operation(summary = "Login and get JWT tokens")
     @ApiResponse(responseCode = "200", description = "Login successful — returns access and refresh tokens")
     @ApiResponse(responseCode = "401", description = "Invalid credentials")
@@ -45,7 +42,6 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    @SecurityRequirements
     @Operation(summary = "Refresh access token using a refresh token")
     @ApiResponse(responseCode = "200", description = "New access token issued")
     @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token")

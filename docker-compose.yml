@@ -34,6 +34,8 @@ services:
       SPRING_DATA_MONGODB_URI: mongodb://database:27017/vibewall
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      JWT_SECRET: ${JWT_SECRET}
 
 volumes:
   mongo_data:

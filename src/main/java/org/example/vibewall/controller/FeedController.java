@@ -2,7 +2,6 @@ package org.example.vibewall.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ConfessionResponse;
@@ -23,7 +22,6 @@ public class FeedController {
     private final FeedService service;
 
     @GetMapping("/")
-    @SecurityRequirements
     @Operation(summary = "Get all confessions (public, cached)")
     @ApiResponse(responseCode = "200", description = "List of confessions returned")
     public ResponseEntity<List<ConfessionResponse>> getAll() {
