@@ -1,5 +1,9 @@
 package org.example.vibewall.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.FeedbackRequested;
 import org.example.vibewall.exception.ConfessionNotFoundException;
@@ -12,33 +16,40 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users/feedback")
 @RequiredArgsConstructor
+@Tag(name = "Feedback", description = "Give and manage feedback on confessions")
+@SecurityRequirement(name = "bearerAuth")
 public class FeedBackController {
     private final FeedbackService service;
-    @PostMapping("/{confessionId}")
-    public ResponseEntity<?> create(@PathVariable String confessionId, @RequestBody FeedbackRequested requested) throws PrincipalNotFollowException, ConfessionNotFoundException {
-       return new ResponseEntity<>(service.giveFeedback(confessionId,requested), HttpStatus.CREATED);
 
+    @PostMapping("/{confessionId}")
+    @Operation(summary = "Add feedback to a confession")
+    @ApiResponse(responseCode = "201", description = "Feedback added")
+    @ApiResponse(responseCode = "404", description = "Confession not found")
+    @ApiResponse(responseCode = "422", description = "Content failed safety check")
+    public ResponseEntity<?> create(
+            @PathVariable String confessionId,
+            @RequestBody FeedbackRequested requested) throws PrincipalNotFollowException, ConfessionNotFoundException {
+        return new ResponseEntity<>(service.giveFeedback(confessionId, requested), HttpStatus.CREATED);
     }
+
     @PutMapping("/{confessionId}/{feedbackId}")
+    @Operation(summary = "Update feedback on a confession")
+    @ApiResponse(responseCode = "200", description = "Feedback updated")
+    @ApiResponse(responseCode = "404", description = "Confession or feedback not found")
     public ResponseEntity<?> update(
             @PathVariable String confessionId,
             @PathVariable int feedbackId,
-            @RequestBody FeedbackRequested requested)
-            throws PrincipalNotFollowException, ConfessionNotFoundException {
-
-        return ResponseEntity.ok(
-                service.updateFeedback(confessionId, feedbackId, requested)
-        );
+            @RequestBody FeedbackRequested requested) throws PrincipalNotFollowException, ConfessionNotFoundException {
+        return ResponseEntity.ok(service.updateFeedback(confessionId, feedbackId, requested));
     }
+
     @DeleteMapping("/{confessionId}/{feedbackId}")
+    @Operation(summary = "Delete feedback from a confession")
+    @ApiResponse(responseCode = "200", description = "Feedback deleted")
+    @ApiResponse(responseCode = "404", description = "Confession or feedback not found")
     public ResponseEntity<?> delete(
             @PathVariable String confessionId,
-            @PathVariable int feedbackId)
-            throws ConfessionNotFoundException {
-
-        return ResponseEntity.ok(
-                service.deleteFeedback(confessionId, feedbackId)
-        );
+            @PathVariable int feedbackId) throws ConfessionNotFoundException {
+        return ResponseEntity.ok(service.deleteFeedback(confessionId, feedbackId));
     }
-
 }
