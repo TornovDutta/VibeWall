@@ -137,17 +137,18 @@ VibeWall is a social platform designed for sharing anonymous confessions, provid
 
 ---
 
-## 🔐 HTTPS & Security Headers
+## 🔐 HTTPS & HTTP Support
 
-The application is deployed behind Render's HTTPS reverse proxy. HTTPS is enforced at the infrastructure level, and the app is configured to trust `X-Forwarded-Proto` headers forwarded by the proxy.
+The application supports **both HTTP and HTTPS**. No redirect is enforced — both protocols are accepted.
 
-**HSTS (HTTP Strict Transport Security)** is enabled with the following policy:
+**How HTTPS works on Render:**
+- Render terminates TLS at the load balancer and forwards requests with the `X-Forwarded-Proto: https` header.
+- `server.forward-headers-strategy=framework` tells Spring Boot to trust that header so it correctly identifies the original protocol.
+
+**HSTS (HTTP Strict Transport Security):**
 - `max-age=31536000` (1 year)
 - `includeSubDomains`
-
-Any request that arrives over HTTP via a reverse proxy is automatically redirected to HTTPS.
-
-> **Local development:** HTTPS redirect is only triggered when the `X-Forwarded-Proto` header is present (i.e., behind a proxy). Running locally on HTTP works without any redirect.
+- Once a browser visits over HTTPS, it will continue to use HTTPS automatically on future visits. HTTP still works for clients that have not visited before.
 
 ---
 
