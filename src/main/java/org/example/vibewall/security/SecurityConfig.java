@@ -27,12 +27,16 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers
-                        .httpStrictTransportSecurity(hsts -> hsts
+                .headers(headers -> {
+                    if (sslEnabled) {
+                        headers.httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
                                 .maxAgeInSeconds(31536000)
-                        )
-                );
+                        );
+                    } else {
+                        headers.httpStrictTransportSecurity(hsts -> hsts.disable());
+                    }
+                });
 
         if (sslEnabled) {
             http.requiresChannel(channel -> channel.anyRequest().requiresSecure());

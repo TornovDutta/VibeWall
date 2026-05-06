@@ -34,6 +34,7 @@ services:
     container_name: spring-boot-app
     ports:
       - "8080:8080"
+      - "8443:8443"
     depends_on:
       redis:
         condition: service_healthy
@@ -45,6 +46,9 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_MONGODB_URI: mongodb://database:27017/vibewall
+      SSL_ENABLED: true
+      SSL_KEY_STORE_PASSWORD: ${SSL_KEY_STORE_PASSWORD:-changeit}
+      SSL_KEY_ALIAS: ${SSL_KEY_ALIAS:-vibewall}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
