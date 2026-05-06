@@ -22,7 +22,7 @@ VibeWall is a social platform designed for sharing anonymous confessions, provid
 *   **Framework**: Spring Boot 3.5.6
 *   **Database**: MongoDB
 *   **Caching**: Redis
-*   **Security**: Spring Security, JWT (jjwt)
+*   **Security**: Spring Security, JWT (jjwt), HTTPS (HSTS)
 *   **Containerization**: Docker
 
 ## Setup Instructions
@@ -134,6 +134,20 @@ VibeWall is a social platform designed for sharing anonymous confessions, provid
 - **Authenticated USER**: `/users/**`
 - **Authenticated ADMIN**: `/admin/**`
 - **JWT Authentication** required for USER and ADMIN routes
+
+---
+
+## 🔐 HTTPS & Security Headers
+
+The application is deployed behind Render's HTTPS reverse proxy. HTTPS is enforced at the infrastructure level, and the app is configured to trust `X-Forwarded-Proto` headers forwarded by the proxy.
+
+**HSTS (HTTP Strict Transport Security)** is enabled with the following policy:
+- `max-age=31536000` (1 year)
+- `includeSubDomains`
+
+Any request that arrives over HTTP via a reverse proxy is automatically redirected to HTTPS.
+
+> **Local development:** HTTPS redirect is only triggered when the `X-Forwarded-Proto` header is present (i.e., behind a proxy). Running locally on HTTP works without any redirect.
 
 ---
 
