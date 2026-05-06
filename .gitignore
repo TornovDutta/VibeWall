@@ -1,5 +1,7 @@
 .env
 *.env
+*.p12
+*.jks
 
 HELP.md
 target/

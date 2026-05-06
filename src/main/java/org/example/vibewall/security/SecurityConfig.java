@@ -1,6 +1,7 @@
 package org.example.vibewall.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,9 @@ public class SecurityConfig {
     private final CustomUserDetailsService detailsService;
     private final JwtAuthFilter jwtAuthFilter;
 
+    @Value("${server.ssl.enabled:false}")
+    private boolean sslEnabled;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -28,7 +32,13 @@ public class SecurityConfig {
                                 .includeSubDomains(true)
                                 .maxAgeInSeconds(31536000)
                         )
-                )
+                );
+
+        if (sslEnabled) {
+            http.requiresChannel(channel -> channel.anyRequest().requiresSecure());
+        }
+
+        http
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
