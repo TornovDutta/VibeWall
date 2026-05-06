@@ -29,10 +29,6 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(31536000)
                         )
                 )
-                .requiresChannel(channel -> channel
-                        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-                        .requiresSecure()
-                )
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
