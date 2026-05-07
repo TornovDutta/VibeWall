@@ -1,51 +1,15 @@
 services:
 
-  redis:
-    image: redis:7
-    container_name: redis-cache
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  database:
-    image: mongo:7
-    container_name: mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-
   app:
     build: .
     container_name: spring-boot-app
     ports:
       - "8080:8080"
       - "8443:8443"
-    depends_on:
-      redis:
-        condition: service_healthy
-      database:
-        condition: service_healthy
     restart: on-failure
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-      SPRING_DATA_MONGODB_URI: mongodb://database:27017/vibewall
+      SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
+      SPRING_DATA_REDIS_URL: ${SPRING_DATA_REDIS_URL}
       SSL_ENABLED: true
       SSL_KEY_STORE_PASSWORD: ${SSL_KEY_STORE_PASSWORD:-changeit}
       SSL_KEY_ALIAS: ${SSL_KEY_ALIAS:-vibewall}
@@ -54,7 +18,3 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       JWT_SECRET: ${JWT_SECRET}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173}
-
-volumes:
-  mongo_data:
-  redis_data:
