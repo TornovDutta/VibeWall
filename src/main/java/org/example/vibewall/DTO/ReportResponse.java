@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -13,5 +14,5 @@ public class ReportResponse implements Serializable {
     private String id;
     private String reportContent;
     private String status;
-
+    private LocalDateTime dateTime;
 }

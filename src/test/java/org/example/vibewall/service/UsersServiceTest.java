@@ -62,6 +62,7 @@ class UsersServiceTest {
         when(usersRepo.findById("1")).thenReturn(Optional.of(existingUser));
         when(encryption.encode("newName")).thenReturn("encryptedName");
         when(passwordEncoder.encode("newPassword")).thenReturn("encodedPassword");
+        when(usersRepo.save(existingUser)).thenReturn(existingUser);
         when(userMapper.toDTO(existingUser))
                 .thenReturn(new UsersResponse("1", "encryptedName"));
 
@@ -76,6 +77,7 @@ class UsersServiceTest {
         verify(usersRepo).findById("1");
         verify(encryption).encode("newName");
         verify(passwordEncoder).encode("newPassword");
+        verify(usersRepo).save(existingUser);
         verify(userMapper).toDTO(existingUser);
     }
 

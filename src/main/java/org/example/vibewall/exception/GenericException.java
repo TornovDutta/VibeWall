@@ -45,9 +45,13 @@ public class GenericException {
         );
     }
 
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(GenericException.class);
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception e) {
-        return build(e.getMessage(), "server error",
+        log.error("Unhandled exception: {}", e.getMessage(), e);
+        return build("An unexpected error occurred", "server error",
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

@@ -34,6 +34,7 @@ public class UsersServiceImplements implements UsersService {
 
         existingUser.setUsername(encryption.encode(user.getName()));
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        repo.save(existingUser);
         return mapper.toDTO(existingUser);
     }
 

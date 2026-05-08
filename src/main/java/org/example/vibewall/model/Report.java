@@ -15,22 +15,21 @@ import java.time.LocalDateTime;
 public class Report {
     @Id
     private String id;
+    private String userId;
     private String reportContent;
     private LocalDateTime dateTime;
-    private String status="PENDING";
+    private String status = "PENDING";
 
-
-    public Report( String reportContent) {
-
+    public Report(String userId, String reportContent) {
+        this.userId = userId;
         this.reportContent = reportContent;
         this.dateTime = LocalDateTime.now();
         this.status = "PENDING";
     }
 
-    public Report(String id, String reportContent,String status ) {
+    public Report(String id, String reportContent, String status) {
         this.id = id;
         this.reportContent = reportContent;
-        this.status=status;
-
+        this.status = status;
     }
 }

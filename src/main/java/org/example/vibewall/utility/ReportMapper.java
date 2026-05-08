@@ -11,8 +11,7 @@ import java.util.List;
 @Component
 public class ReportMapper {
     public ReportResponse toDTO(Report report) {
-
-        return new ReportResponse(report.getId(), report.getReportContent(), report.getStatus());
+        return new ReportResponse(report.getId(), report.getReportContent(), report.getStatus(), report.getDateTime());
     }
 
     public List<ReportResponse> toDTO(List<Report> reports) {

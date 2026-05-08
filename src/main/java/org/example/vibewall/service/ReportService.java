@@ -4,9 +4,11 @@ import org.example.vibewall.DTO.ReportRequested;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.exception.ReportNotFoundException;
 
-public interface ReportService {
-    ReportResponse create(ReportRequested requested);
-    ReportResponse update(String reportId, ReportRequested requested) throws ReportNotFoundException;
+import java.util.List;
 
-    void delete(String reportId) throws ReportNotFoundException;
+public interface ReportService {
+    ReportResponse create(String userId, ReportRequested requested);
+    List<ReportResponse> getByUser(String userId);
+    ReportResponse update(String userId, String reportId, ReportRequested requested) throws ReportNotFoundException;
+    void delete(String userId, String reportId) throws ReportNotFoundException;
 }
