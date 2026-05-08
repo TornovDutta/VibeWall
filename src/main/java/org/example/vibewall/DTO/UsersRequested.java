@@ -11,5 +11,5 @@ import java.io.Serializable;
 public class UsersRequested implements Serializable{
     private String name;
     private String password;
-
+    private String role;
 }
