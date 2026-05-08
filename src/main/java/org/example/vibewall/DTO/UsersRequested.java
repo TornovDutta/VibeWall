@@ -12,4 +12,9 @@ public class UsersRequested implements Serializable{
     private String name;
     private String password;
     private String role;
+
+    public UsersRequested(String name, String password) {
+        this.name = name;
+        this.password = password;
+    }
 }
