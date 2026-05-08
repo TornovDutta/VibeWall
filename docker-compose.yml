@@ -5,14 +5,10 @@ services:
     container_name: spring-boot-app
     ports:
       - "8080:8080"
-      - "8443:8443"
     restart: on-failure
     environment:
       SPRING_DATA_MONGODB_URI: ${SPRING_DATA_MONGODB_URI}
       SPRING_DATA_REDIS_URL: ${SPRING_DATA_REDIS_URL}
-      SSL_ENABLED: true
-      SSL_KEY_STORE_PASSWORD: ${SSL_KEY_STORE_PASSWORD:-changeit}
-      SSL_KEY_ALIAS: ${SSL_KEY_ALIAS:-vibewall}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}

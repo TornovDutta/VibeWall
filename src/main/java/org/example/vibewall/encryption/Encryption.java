@@ -9,7 +9,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Base64;
 
 @Service
@@ -32,8 +33,9 @@ public class Encryption {
     public String encode(String str) {
         if (str == null) return null;
         try {
-            byte[] iv = new byte[GCM_IV_LENGTH];
-            new SecureRandom().nextBytes(iv);
+            // Deterministic IV so the same plaintext always produces the same ciphertext (required for DB lookups)
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(str.getBytes(StandardCharsets.UTF_8));
+            byte[] iv = Arrays.copyOf(digest, GCM_IV_LENGTH);
 
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, new GCMParameterSpec(GCM_TAG_LENGTH, iv));

@@ -40,17 +40,26 @@ public class RegistrationServiceImple implements RegistrationService {
             throw new RuntimeException("User already exists");
         }
 
+        String role = "USER";
+        if (request.getRole() != null) {
+            String normalized = request.getRole().toUpperCase();
+            if (!normalized.equals("ADMIN") && !normalized.equals("USER")) {
+                throw new RuntimeException("Invalid role: must be ADMIN or USER");
+            }
+            role = normalized;
+        }
+
         Users user = new Users();
         user.setUsername(encryption.encode(request.getName()));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("USER");
+        user.setRole(role);
 
         Users savedUser = repo.save(user);
 
 
 
 
-        return UsersResponse.builder().name(encryption.decode(savedUser.getUsername())).id(user.getId()).build();
+        return UsersResponse.builder().name(request.getName()).id(savedUser.getId()).build();
     }
 
 
@@ -78,6 +87,7 @@ public class RegistrationServiceImple implements RegistrationService {
         return TokenResponse.builder()
                 .jwt(accessToken)
                 .refresh(refreshToken.getToken())
+                .role(user.getRole())
                 .build();
     }
     @Override

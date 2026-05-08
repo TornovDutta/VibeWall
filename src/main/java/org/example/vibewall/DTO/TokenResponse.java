@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class TokenResponse {
     private String jwt;
-    private String refresh ;
+    private String refresh;
+    private String role;
 }
