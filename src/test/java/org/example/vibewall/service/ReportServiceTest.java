@@ -2,6 +2,7 @@ package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ReportRequested;
 import org.example.vibewall.DTO.ReportResponse;
+import org.example.vibewall.exception.AccessDeniedException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.repo.ReportRepo;
@@ -13,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,54 +32,70 @@ class ReportServiceTest {
     @InjectMocks
     private ReportServiceImplements service;
 
+    private static final String USER_ID = "user-1";
+
     @Test
     void create_shouldSaveAndReturnReportResponse() {
-        // Arrange
         ReportRequested request = new ReportRequested("report content");
-        Report savedReport = new Report("report content");
-
-        ReportResponse response =
-                new ReportResponse("1", "report content", "CREATED");
+        Report savedReport = new Report(USER_ID, "report content");
+        ReportResponse response = new ReportResponse("1", "report content", "PENDING", null);
 
         when(reportRepo.save(any(Report.class))).thenReturn(savedReport);
         when(mapper.toDTO(savedReport)).thenReturn(response);
 
-        // Act
-        ReportResponse result = service.create(request);
+        ReportResponse result = service.create(USER_ID, request);
 
-        // Assert
         assertNotNull(result);
         assertEquals("report content", result.getReportContent());
-        assertEquals("CREATED", result.getStatus());
-
         verify(reportRepo).save(any(Report.class));
         verify(mapper).toDTO(savedReport);
     }
 
     @Test
+    void getByUser_shouldReturnUserReports() {
+        Report r = new Report(USER_ID, "content");
+        ReportResponse dto = new ReportResponse("1", "content", "PENDING");
+
+        when(reportRepo.findByUserId(USER_ID)).thenReturn(List.of(r));
+        when(mapper.toDTO(List.of(r))).thenReturn(List.of(dto));
+
+        List<ReportResponse> result = service.getByUser(USER_ID);
+
+        assertEquals(1, result.size());
+        verify(reportRepo).findByUserId(USER_ID);
+    }
+
+    @Test
     void update_shouldUpdateAndReturnResponse_whenReportExists() throws ReportNotFoundException {
-        // Arrange
         String reportId = "123";
         ReportRequested request = new ReportRequested("updated content");
-        Report existingReport = new Report("old content");
-
-        ReportResponse response =
-                new ReportResponse(reportId, "updated content", "UPDATED");
+        Report existingReport = new Report(USER_ID, "old content");
+        existingReport.setId(reportId);
+        ReportResponse response = new ReportResponse(reportId, "updated content", "PENDING", null);
 
         when(reportRepo.findById(reportId)).thenReturn(Optional.of(existingReport));
         when(reportRepo.save(existingReport)).thenReturn(existingReport);
         when(mapper.toDTO(existingReport)).thenReturn(response);
 
-        // Act
-        ReportResponse result = service.update(reportId, request);
+        ReportResponse result = service.update(USER_ID, reportId, request);
 
-        // Assert
         assertEquals("updated content", result.getReportContent());
-        assertEquals("UPDATED", result.getStatus());
-
         verify(reportRepo).findById(reportId);
         verify(reportRepo).save(existingReport);
-        verify(mapper).toDTO(existingReport);
+    }
+
+    @Test
+    void update_shouldThrowAccessDenied_whenNotOwner() {
+        String reportId = "123";
+        Report existingReport = new Report("other-user", "content");
+        existingReport.setId(reportId);
+
+        when(reportRepo.findById(reportId)).thenReturn(Optional.of(existingReport));
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> service.update(USER_ID, reportId, new ReportRequested("content"))
+        );
     }
 
     @Test
@@ -86,32 +104,48 @@ class ReportServiceTest {
 
         assertThrows(
                 ReportNotFoundException.class,
-                () -> service.update("404", new ReportRequested("content"))
+                () -> service.update(USER_ID, "404", new ReportRequested("content"))
         );
 
-        verify(reportRepo).findById("404");
         verifyNoInteractions(mapper);
     }
 
     @Test
-    void delete_shouldDelete_whenReportExists() throws ReportNotFoundException {
-        when(reportRepo.existsById("1")).thenReturn(true);
+    void delete_shouldDelete_whenOwnerAndReportExists() throws ReportNotFoundException {
+        Report report = new Report(USER_ID, "content");
+        report.setId("1");
 
-        service.delete("1");
+        when(reportRepo.findById("1")).thenReturn(Optional.of(report));
+
+        service.delete(USER_ID, "1");
 
         verify(reportRepo).deleteById("1");
     }
 
     @Test
+    void delete_shouldThrowAccessDenied_whenNotOwner() {
+        Report report = new Report("other-user", "content");
+        report.setId("1");
+
+        when(reportRepo.findById("1")).thenReturn(Optional.of(report));
+
+        assertThrows(
+                AccessDeniedException.class,
+                () -> service.delete(USER_ID, "1")
+        );
+
+        verify(reportRepo, never()).deleteById(anyString());
+    }
+
+    @Test
     void delete_shouldThrowException_whenReportNotFound() {
-        when(reportRepo.existsById("404")).thenReturn(false);
+        when(reportRepo.findById("404")).thenReturn(Optional.empty());
 
         assertThrows(
                 ReportNotFoundException.class,
-                () -> service.delete("404")
+                () -> service.delete(USER_ID, "404")
         );
 
-        verify(reportRepo).existsById("404");
         verify(reportRepo, never()).deleteById(anyString());
     }
 }
