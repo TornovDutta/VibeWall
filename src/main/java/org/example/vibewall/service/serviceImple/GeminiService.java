@@ -6,13 +6,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.example.vibewall.service.AiService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-@Primary
 public class GeminiService implements AiService {
 
     @Value("${gemini.api.key}")
@@ -49,17 +47,29 @@ public class GeminiService implements AiService {
         }
     }
 
+    private static final String MODERATION_PROMPT =
+            "You are the strictest content moderator for a student social platform called VibeWall. " +
+            "Your job is to BLOCK any message that breaks platform principles. " +
+            "Reply with ONLY the digit 1 (BLOCK) if the message contains ANY of the following:\n" +
+            "- Insults, name-calling, slurs, or disrespectful language directed at any person or group\n" +
+            "- Personal attacks, bullying, put-downs, or language that demeans or humiliates someone\n" +
+            "- Threats, intimidation, coercion, or blackmail of any kind\n" +
+            "- Harassment or targeted mockery\n" +
+            "- Hate speech based on race, religion, gender, caste, nationality, sexuality, or any identity\n" +
+            "- Violence, gore, or content that glorifies harm\n" +
+            "- Self-harm promotion or encouragement of suicide\n" +
+            "- Sexually explicit or inappropriate content\n" +
+            "- Promotion of illegal activities or substances\n" +
+            "- Shaming, guilt-tripping, or emotionally manipulating others\n" +
+            "- Any content that would make a person feel unsafe, unwelcome, or degraded\n\n" +
+            "Reply with ONLY the digit 0 (ALLOW) ONLY if the message is respectful and safe for all users. " +
+            "When in doubt, reply 1. No explanation. Just 1 or 0.\n\n" +
+            "Message: ";
+
     @Override
     public boolean unSafe(String str) {
         try {
-            String prompt = "You are a strict content moderator for a student platform. " +
-                    "Reply with ONLY the digit 1 if the message is harmful, violent, threatening, " +
-                    "abusive, promotes self-harm, hate speech, or illegal activity. " +
-                    "Reply with ONLY the digit 0 if it is safe. No explanation. Just 1 or 0.\n\n" +
-                    "Message: " + str;
-
-            // Use strict safety thresholds so Gemini also applies its own filters
-            String body = buildBody(prompt, true);
+            String body = buildBody(MODERATION_PROMPT + str, true);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -69,7 +79,7 @@ public class GeminiService implements AiService {
                     String.class);
 
             String responseBody = response.getBody();
-            if (responseBody == null) return false;
+            if (responseBody == null) return true;
 
             // Gemini blocked the content itself → definitely unsafe
             if (responseBody.contains("blockReason") || responseBody.contains("\"SAFETY\"")) {
@@ -78,20 +88,21 @@ public class GeminiService implements AiService {
 
             String text = extractText(responseBody).trim();
 
-            // Accept "1" anywhere in a short reply (handles "1.", "1\n", etc.)
+            // Empty or unrecognised reply → fail-safe, block it
+            if (text.isEmpty()) return true;
+
             if (text.length() <= 5) {
-                return text.contains("1");
+                // Explicit 0 → safe; anything else (1, error, etc.) → block
+                return !text.startsWith("0");
             }
 
-            // Longer reply: look for explicit unsafe signals
             String lower = text.toLowerCase();
-            return lower.startsWith("1") ||
-                    lower.contains("unsafe") ||
-                    lower.contains("violates") ||
-                    lower.contains("harmful");
+            // Explicit "safe" signal required; anything ambiguous is blocked
+            if (lower.startsWith("0") || lower.equals("safe")) return false;
+            return true;
 
         } catch (Exception e) {
-            return false;
+            return true;
         }
     }
 

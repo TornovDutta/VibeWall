@@ -1,167 +1,161 @@
-# VibeWall
+# VibeWall — Backend
 
-VibeWall is a social platform designed for sharing anonymous confessions, providing feedback, and managing user interactions through a feed system. The application focuses on user privacy and community engagement, offering a secure environment for expression.
+VibeWall is an anonymous confession and feedback platform built for students. Users can share confessions, give feedback, and interact with a live feed — all in a safe, moderated environment. Content is checked by two independent AI models before it is ever saved.
+
+---
 
 ## Features
 
-*   **User Authentication**: Secure registration and login using JWT and Spring Security.
-*   **Access & Refresh Tokens**: Implements **short-lived access tokens** and **long-lived refresh tokens** for 
-   secure and seamless session management.
-*   **Anonymous Confessions**: Users can post confessions without revealing their identity.
-*   **Feed System**: A dynamic feed to view confessions from other users.
-*   **Feedback Mechanism**: Users can provide feedback on confessions.
-*   **Reporting System**: Users can report inappropriate content, which is managed by admins.
-*   **Admin Dashboard**: comprehensive capabilities for administrators to manage users and reports.
-*   **Auto-Deletion (TTL)**: Confessions are automatically removed after 12 hours.
-*   **AI Content Moderation**: Integrates **OpenAI** and **Google Gemini** to analyze confessions and feedback for hurtful or inappropriate content before posting.
-*   **AI Integration**: Utilizes Spring AI for enhanced content processing.
+- **Anonymous Confessions** — Post confessions without revealing your identity
+- **Feedback System** — Reply to any confession with feedback
+- **Live Feed** — Browse the latest confessions from all users
+- **Dual AI Content Moderation** — Every confession and feedback is screened by both Google Gemini and OpenRouter (Mistral) before being saved; content flagged by either model is rejected
+- **JWT Authentication** — Short-lived access tokens + long-lived refresh tokens for secure, seamless sessions
+- **Auto-Deletion (TTL)** — Confessions are automatically removed from the database after 12 hours
+- **Reporting System** — Users can report content; admins resolve reports from a dedicated dashboard
+- **AES-GCM Encryption** — All confession and feedback content is encrypted at rest
+- **Redis Caching** — Feed and confession responses are cached for fast reads
+- **Admin Dashboard** — Full user and report management for administrators
+- **Role-Based Access Control** — Separate permission levels for public visitors, authenticated users, and admins
+
+---
 
 ## Tech Stack
 
-*   **Language**: Java 17
-*   **Framework**: Spring Boot 3.5.6
-*   **Database**: MongoDB
-*   **Caching**: Redis
-*   **Security**: Spring Security, JWT (jjwt), HTTPS (HSTS)
-*   **Containerization**: Docker
+| Layer | Technology |
+|---|---|
+| Language | Java 17 |
+| Framework | Spring Boot 3.5.6 |
+| Database | MongoDB (Atlas) |
+| Cache | Redis |
+| Security | Spring Security, JWT (jjwt 0.11.5) |
+| Encryption | AES/GCM/NoPadding (256-bit) |
+| AI Moderation | Google Gemini 2.0 Flash + OpenRouter (Mistral 7B) |
+| API Docs | SpringDoc OpenAPI (Swagger UI) |
+| Containerization | Docker + Docker Compose |
 
-## Setup Instructions
+---
+
+## Getting Started
 
 ### Prerequisites
-*   Java Development Kit (JDK) 17
-*   Maven
-*   Docker & Docker Compose
 
-### Installation
+- Java 17+
+- Maven 3.8+
+- Docker & Docker Compose
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/TornovDutta/VibeWall.git
-    cd vibewall
-    ```
+### 1. Clone the repository
 
-2.  **Configure Environment Variables:**
-    Create a `.env` file in the root directory. It should **only** contain the following keys:
-    ```properties
-    OPENAI_API_KEY=your_openai_api_key
-    GEMINI_API_KEY=your_gemini_api_key
-    ```
+```bash
+git clone https://github.com/TornovDutta/VibeWall.git
+cd VibeWall/backend
+```
 
-3.  **Build the project:**
-    This step is required before building the Docker image.
-    ```bash
-    mvn clean package -DskipTests
-    ```
+### 2. Configure environment variables
 
-4.  **Run the application (Docker Only):**
-    ```bash
-    docker-compose up --build
-    ```
+Copy the example file and fill in your own values:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Description |
+|---|---|
+| `GEMINI_API_KEY` | Google Gemini API key |
+| `OPENROUTER_API_KEY` | OpenRouter API key (`sk-or-v1-...`) |
+| `ENCRYPTION_KEY` | Base64-encoded 32-byte AES key — generate with `openssl rand -base64 32` |
+| `JWT_SECRET` | Long random string (min 32 chars) — generate with `openssl rand -base64 48` |
+| `SPRING_DATA_MONGODB_URI` | MongoDB Atlas connection URI |
+| `SPRING_DATA_REDIS_URL` | Redis connection URL |
+| `ALLOWED_ORIGINS` | Frontend origin for CORS (e.g. `http://localhost:5173`) |
+| `SERVER_PORT` | Server port (default `8080`) |
+
+### 3. Build the project
+
+```bash
+mvn clean package -DskipTests
+```
+
+### 4. Run with Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+The API will be available at `http://localhost:8080/api/v3`.
+
+---
 
 ## API Documentation
-## 🔐 API Endpoints & Access Control
 
-### Authentication (`/auth`) — **Public**
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/auth/register` | Register a new user |
-| `POST` | `/auth/login` | Login and receive access & refresh tokens |
-| `POST` | `/auth/refresh` | Refresh the access token using refresh token |
-| `POST` | `/auth/logout` | Logout and invalidate refresh token |
+Interactive API documentation is available via **Swagger UI** once the application is running:
 
----
+```
+http://localhost:8080/api/v3/swagger-ui.html
+```
 
-### Feed (`/feed`) — **Public**
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/feed` | Get the feed of confessions |
+The OpenAPI JSON spec is at:
 
----
-
-### Confessions (`/users/confession`) — **USER**
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/users/confession` | Create a new confession |
-| `PUT` | `/users/confession/{id}` | Update an existing confession |
-| `DELETE` | `/users/confession/{id}` | Delete a confession |
-
----
-
-### Users (`/users`) — **USER**
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `PUT` | `/users/me` | Update current user's profile |
-| `DELETE` | `/users/me` | Delete current user's account |
-
----
-
-### Reports (`/users/report`) — **USER**
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/users/report` | Create a new report |
-| `PUT` | `/users/report/{reportId}` | Update a report |
-| `DELETE` | `/users/report/{reportId}` | Delete a report |
-
----
-
-### Feedback (`/users/feedback`) — **USER**
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/users/feedback/{confessionId}` | Give feedback on a confession |
-| `PUT` | `/users/feedback/{confessionId}/{feedbackId}` | Update feedback |
-| `DELETE` | `/users/feedback/{confessionId}/{feedbackId}` | Delete feedback |
-
----
-
-### Admin (`/admin`) — **ADMIN**
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/admin` | Get all users |
-| `POST` | `/admin` | Add a new admin |
-| `PUT` | `/admin/me` | Update admin profile |
-| `DELETE` | `/admin/me` | Delete admin account |
-| `GET` | `/admin/report` | Get all reports |
-| `GET` | `/admin/report/{id}` | Get report by ID |
-| `GET` | `/admin/report/pending` | Get all pending reports |
-| `GET` | `/admin/report/pending/{id}` | Get pending report by ID |
-| `PATCH` | `/admin/report/reviewed/{id}` | Review or resolve a report (status parameter required) |
-
----
-
-## 🔒 Access Rules Summary
-
-- **Public**: `/auth/**`, `/feed/**`
-- **Authenticated USER**: `/users/**`
-- **Authenticated ADMIN**: `/admin/**`
-- **JWT Authentication** required for USER and ADMIN routes
-
----
-
-## 🔐 HTTPS & HTTP Support
-
-The application supports **both HTTP and HTTPS**. No redirect is enforced — both protocols are accepted.
-
-**How HTTPS works on Render:**
-- Render terminates TLS at the load balancer and forwards requests with the `X-Forwarded-Proto: https` header.
-- `server.forward-headers-strategy=framework` tells Spring Boot to trust that header so it correctly identifies the original protocol.
-
-**HSTS (HTTP Strict Transport Security):**
-- `max-age=31536000` (1 year)
-- `includeSubDomains`
-- Once a browser visits over HTTPS, it will continue to use HTTPS automatically on future visits. HTTP still works for clients that have not visited before.
+```
+http://localhost:8080/api/v3/api-docs
+```
 
 ---
 
 ## Access Control
 
-- **Admin Only:** Admin management, user management, and deleting confessions/feedback.
-- **User/Admin:** Creating confessions, adding feedback, and viewing confessions/feedback.
-- **Anonymous Access:** Confessions and feedback reading can be optionally opened.
+| Role | Accessible Routes |
+|---|---|
+| Public (no token) | `/auth/**`, `/feed/**` |
+| Authenticated User | `/users/**` |
+| Admin | `/admin/**` |
+
+All protected routes require a valid JWT `Bearer` token in the `Authorization` header.
 
 ---
 
-## Contribution
+## AI Content Moderation
 
-Contributions are welcome! Please fork the repository, make changes, and create a pull requestUpdate.
+Before any confession or feedback is saved, it passes through two independent AI models:
 
+1. **Google Gemini 2.0 Flash** — Primary check with strict safety filters
+2. **OpenRouter / Mistral 7B** — Secondary check for content that may pass Gemini
 
+If **either** model flags the content as harmful, violent, hateful, sexually explicit, or otherwise unsafe, the request is rejected with a `422 Unprocessable Entity` response. Both models must clear the content before it is accepted.
+
+---
+
+## Security
+
+- Passwords are hashed with BCrypt
+- All confession and feedback text is encrypted with AES-GCM (256-bit) before storage
+- JWT access tokens are short-lived; refresh tokens are long-lived and stored server-side
+- HSTS headers are sent when running behind HTTPS (e.g. Render)
+- CORS is restricted to the configured `ALLOWED_ORIGINS`
+
+---
+
+## Project Structure
+
+```
+src/main/java/org/example/vibewall/
+├── annotation/          Custom validation annotations
+├── AOP/                 Logging aspects
+├── config/              Redis and CORS configuration
+├── controller/          REST controllers
+├── DTO/                 Request and response objects
+├── encryption/          AES-GCM encryption utility
+├── exception/           Custom exceptions and global handler
+├── model/               MongoDB document models
+├── repo/                MongoDB repositories
+├── security/            JWT filter and Spring Security config
+├── service/             Service interfaces
+│   └── serviceImple/    Service implementations (including AI services)
+└── utility/             Mappers and helpers
+```
+
+---
+
+## Contributing
+
+Contributions are welcome. Fork the repository, create a feature branch, and open a pull request.
