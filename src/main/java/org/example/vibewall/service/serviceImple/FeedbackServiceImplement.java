@@ -45,7 +45,7 @@ public class FeedbackServiceImplement implements FeedbackService {
         }
 
         Feedback feedback = confession.getFeedbacks().get(feedbackId);
-        feedback.setFeedback(encryption.encode(requested.getContent()));
+        feedback.setContent(encryption.encode(requested.getContent()));
 
         confessionRepo.save(confession);
         return mapper.toDTO(confession);

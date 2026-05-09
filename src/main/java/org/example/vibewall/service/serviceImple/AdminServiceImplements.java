@@ -66,7 +66,8 @@ public class AdminServiceImplements implements AdminService {
         String accessToken = jwtUtil.generateToken(
                 savedAdmin.getId(),
                 savedAdmin.getUsername(),
-                savedAdmin.getRole()
+                savedAdmin.getRole(),
+                request.getName()
         );
 
         RefreshToken refreshToken =

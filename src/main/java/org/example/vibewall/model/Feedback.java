@@ -1,8 +1,8 @@
 package org.example.vibewall.model;
 
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Date;
 
@@ -13,21 +13,23 @@ public class Feedback {
     private Integer id;
 
     @NotBlank
-    private String feedback;
+    @Field("feedback")
+    private String content;
+
     private Date date;
 
-
-    public Feedback(){
-        this.date=new Date();
-    }
-    public Feedback(String feedback){
-        this.feedback=feedback;
-        this.date=new Date();
+    public Feedback() {
+        this.date = new Date();
     }
 
-    public Feedback(Integer id, String feedback) {
+    public Feedback(String content) {
+        this.content = content;
+        this.date = new Date();
+    }
+
+    public Feedback(Integer id, String content) {
         this.id = id;
-        this.feedback = feedback;
+        this.content = content;
         this.date = new Date();
     }
 }
