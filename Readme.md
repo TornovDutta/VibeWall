@@ -9,7 +9,7 @@ VibeWall is an anonymous confession and feedback platform built for students. Us
 - **Anonymous Confessions** — Post confessions without revealing your identity
 - **Feedback System** — Reply to any confession with feedback
 - **Live Feed** — Browse the latest confessions from all users
-- **Dual AI Content Moderation** — Every confession and feedback is screened by both Google Gemini and OpenRouter (Mistral) before being saved; content flagged by either model is rejected
+- **AI Content Moderation** — Every confession and feedback is screened by NVIDIA NIM (Llama 3.1) before being saved; content flagged by the model is rejected
 - **JWT Authentication** — Short-lived access tokens + long-lived refresh tokens for secure, seamless sessions
 - **Auto-Deletion (TTL)** — Confessions are automatically removed from the database after 12 hours
 - **Reporting System** — Users can report content; admins resolve reports from a dedicated dashboard
@@ -30,7 +30,7 @@ VibeWall is an anonymous confession and feedback platform built for students. Us
 | Cache | Redis |
 | Security | Spring Security, JWT (jjwt 0.11.5) |
 | Encryption | AES/GCM/NoPadding (256-bit) |
-| AI Moderation | Google Gemini 2.0 Flash + OpenRouter (Mistral 7B) |
+| AI Moderation | NVIDIA NIM — Meta Llama 3.1 8B Instruct |
 | API Docs | SpringDoc OpenAPI (Swagger UI) |
 | Containerization | Docker + Docker Compose |
 
@@ -61,8 +61,7 @@ cp .env.example .env
 
 | Variable | Description |
 |---|---|
-| `GEMINI_API_KEY` | Google Gemini API key |
-| `OPENROUTER_API_KEY` | OpenRouter API key (`sk-or-v1-...`) |
+| `NVDIA_API_KEY` | NVIDIA NIM API key (`nvapi-...`) — get one at [build.nvidia.com](https://build.nvidia.com) |
 | `ENCRYPTION_KEY` | Base64-encoded 32-byte AES key — generate with `openssl rand -base64 32` |
 | `JWT_SECRET` | Long random string (min 32 chars) — generate with `openssl rand -base64 48` |
 | `SPRING_DATA_MONGODB_URI` | MongoDB Atlas connection URI |
@@ -116,12 +115,11 @@ All protected routes require a valid JWT `Bearer` token in the `Authorization` h
 
 ## AI Content Moderation
 
-Before any confession or feedback is saved, it passes through two independent AI models:
+Before any confession or feedback is saved, it passes through NVIDIA NIM:
 
-1. **Google Gemini 2.0 Flash** — Primary check with strict safety filters
-2. **OpenRouter / Mistral 7B** — Secondary check for content that may pass Gemini
+- **Meta Llama 3.1 8B Instruct** (via `integrate.api.nvidia.com`) — screens for insults, threats, hate speech, violence, self-harm, explicit content, and illegal activity
 
-If **either** model flags the content as harmful, violent, hateful, sexually explicit, or otherwise unsafe, the request is rejected with a `422 Unprocessable Entity` response. Both models must clear the content before it is accepted.
+If the model flags the content as unsafe, the request is rejected with a `422 Unprocessable Entity` response. Content must be cleared by the model before it is accepted.
 
 ---
 
