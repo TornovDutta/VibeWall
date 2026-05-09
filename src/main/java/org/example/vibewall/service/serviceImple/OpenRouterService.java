@@ -21,7 +21,7 @@ public class OpenRouterService implements AiService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String MODEL = "mistralai/mistral-7b-instruct:free";
+    private static final String MODEL = "google/gemma-4-26b-a4b-it:free";
 
     private static final String MODERATION_SYSTEM_PROMPT =
             "You are a content moderator for VibeWall, a student social platform. " +
