@@ -21,7 +21,7 @@ public class GeminiService implements AiService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String MODEL = "google/gemma-4-31b-it:free";
+    private static final String MODEL = "openai/gpt-oss-20b:free";
 
     private static final String MODERATION_SYSTEM_PROMPT =
             "You are a content moderator for VibeWall, a student social platform. " +
@@ -82,18 +82,39 @@ public class GeminiService implements AiService {
             throw new AiUnavailableException("AI system is currently unavailable");
         }
 
-        String text = extractContent(responseBody).trim();
-        if (text.isEmpty()) return false;
+        return parseModeration(responseBody);
+    }
 
-        if (text.length() <= 5) {
-            return text.startsWith("1");
+    private boolean parseModeration(String responseBody) {
+        try {
+            JsonNode root = objectMapper.readTree(responseBody);
+
+            // Model refused due to its own content policy → content is harmful
+            JsonNode error = root.path("error");
+            if (!error.isMissingNode()) {
+                String msg = error.path("message").asText("").toLowerCase();
+                int code  = error.path("code").asInt(0);
+                if (msg.contains("moderat") || msg.contains("safety") || msg.contains("content policy")) {
+                    return true;
+                }
+                throw new AiUnavailableException("AI system is currently unavailable");
+            }
+
+            String text = extractContent(responseBody).trim();
+            if (text.isEmpty()) return false;
+            if (text.length() <= 5) return text.startsWith("1");
+
+            String lower = text.toLowerCase();
+            return lower.startsWith("1") ||
+                    lower.contains("unsafe") ||
+                    lower.contains("violates") ||
+                    lower.contains("harmful");
+
+        } catch (AiUnavailableException e) {
+            throw e;
+        } catch (Exception e) {
+            return false;
         }
-
-        String lower = text.toLowerCase();
-        return lower.startsWith("1") ||
-                lower.contains("unsafe") ||
-                lower.contains("violates") ||
-                lower.contains("harmful");
     }
 
     private HttpHeaders buildHeaders() {
