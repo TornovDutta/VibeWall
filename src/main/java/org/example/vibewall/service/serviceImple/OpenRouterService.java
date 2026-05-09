@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.example.vibewall.exception.AiUnavailableException;
 import org.example.vibewall.service.AiService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@Primary
 public class OpenRouterService implements AiService {
 
     @Value("${openrouter.api.key}")
