@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.example.vibewall.exception.AiUnavailableException;
 import org.example.vibewall.service.AiService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -48,62 +49,69 @@ public class GeminiService implements AiService {
     }
 
     private static final String MODERATION_PROMPT =
-            "You are the strictest content moderator for a student social platform called VibeWall. " +
-            "Your job is to BLOCK any message that breaks platform principles. " +
-            "Reply with ONLY the digit 1 (BLOCK) if the message contains ANY of the following:\n" +
-            "- Insults, name-calling, slurs, or disrespectful language directed at any person or group\n" +
-            "- Personal attacks, bullying, put-downs, or language that demeans or humiliates someone\n" +
-            "- Threats, intimidation, coercion, or blackmail of any kind\n" +
-            "- Harassment or targeted mockery\n" +
-            "- Hate speech based on race, religion, gender, caste, nationality, sexuality, or any identity\n" +
-            "- Violence, gore, or content that glorifies harm\n" +
-            "- Self-harm promotion or encouragement of suicide\n" +
-            "- Sexually explicit or inappropriate content\n" +
-            "- Promotion of illegal activities or substances\n" +
-            "- Shaming, guilt-tripping, or emotionally manipulating others\n" +
-            "- Any content that would make a person feel unsafe, unwelcome, or degraded\n\n" +
-            "Reply with ONLY the digit 0 (ALLOW) ONLY if the message is respectful and safe for all users. " +
-            "When in doubt, reply 1. No explanation. Just 1 or 0.\n\n" +
+            "You are a content moderator for VibeWall, a student social platform. " +
+            "Reply ONLY with 1 (block) or 0 (allow). No explanation.\n\n" +
+            "BLOCK (1) — message clearly contains:\n" +
+            "- Insults, slurs, or name-calling at any person or group\n" +
+            "- Bullying, personal attacks, or language that humiliates someone\n" +
+            "- Threats, intimidation, blackmail, or coercion\n" +
+            "- Hate speech (race, religion, gender, caste, nationality, sexuality)\n" +
+            "- Violence or glorifying harm to others\n" +
+            "- Encouraging self-harm or suicide\n" +
+            "- Sexually explicit content\n" +
+            "- Promoting illegal activities\n\n" +
+            "ALLOW (0) — message is:\n" +
+            "- A greeting or introduction\n" +
+            "- Sharing feelings, stress, sadness, or everyday experiences\n" +
+            "- Seeking advice or venting\n" +
+            "- Friendly, supportive, or neutral\n\n" +
+            "Examples:\n" +
+            "\"hello, I am Tornov\" → 0\n" +
+            "\"I have been feeling very stressed lately\" → 0\n" +
+            "\"can someone help me, I feel so alone\" → 0\n" +
+            "\"you are such an idiot, I hate you\" → 1\n" +
+            "\"I will hurt you if you don't stop\" → 1\n" +
+            "\"kill yourself\" → 1\n" +
+            "\"people from [group] are disgusting\" → 1\n\n" +
             "Message: ";
 
     @Override
     public boolean unSafe(String str) {
+        String responseBody;
         try {
             String body = buildBody(MODERATION_PROMPT + str, true);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             ResponseEntity<String> response = restTemplate.postForEntity(
                     String.format(GEMINI_URL, apiKey),
                     new HttpEntity<>(body, headers),
                     String.class);
-
-            String responseBody = response.getBody();
-            if (responseBody == null) return true;
-
-            // Gemini blocked the content itself → definitely unsafe
-            if (responseBody.contains("blockReason") || responseBody.contains("\"SAFETY\"")) {
-                return true;
-            }
-
-            String text = extractText(responseBody).trim();
-
-            // Empty or unrecognised reply → fail-safe, block it
-            if (text.isEmpty()) return true;
-
-            if (text.length() <= 5) {
-                // Explicit 0 → safe; anything else (1, error, etc.) → block
-                return !text.startsWith("0");
-            }
-
-            String lower = text.toLowerCase();
-            // Explicit "safe" signal required; anything ambiguous is blocked
-            if (lower.startsWith("0") || lower.equals("safe")) return false;
-            return true;
-
+            responseBody = response.getBody();
         } catch (Exception e) {
+            throw new AiUnavailableException("AI system is currently unavailable");
+        }
+
+        if (responseBody == null) {
+            throw new AiUnavailableException("AI system is currently unavailable");
+        }
+
+        // Gemini blocked the content itself → definitely unsafe
+        if (responseBody.contains("blockReason") || responseBody.contains("\"SAFETY\"")) {
             return true;
         }
+
+        String text = extractText(responseBody).trim();
+        if (text.isEmpty()) return false;
+
+        if (text.length() <= 5) {
+            return text.startsWith("1");
+        }
+
+        String lower = text.toLowerCase();
+        return lower.startsWith("1") ||
+                lower.contains("unsafe") ||
+                lower.contains("violates") ||
+                lower.contains("harmful");
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────

@@ -31,6 +31,11 @@ public class GenericException {
                 HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @ExceptionHandler(AiUnavailableException.class)
+    public ResponseEntity<?> handleAiUnavailable(AiUnavailableException e) {
+        return build(e.getMessage(), "ai system down", HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<?> handleInvalidCredentials(InvalidCredentialsException e) {
         return build(e.getMessage(), "authentication failed", HttpStatus.UNAUTHORIZED);
