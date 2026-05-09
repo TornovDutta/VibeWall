@@ -85,6 +85,50 @@ The API will be available at `http://localhost:8080/api/v3`.
 
 ---
 
+## Authentication Flow
+
+VibeWall uses a two-token strategy: a short-lived JWT **access token** for every authenticated request, and a long-lived **refresh token** to obtain a new access token without re-entering credentials.
+
+### Token Lifetimes
+
+| Token | Lifetime | Storage |
+|---|---|---|
+| Access token (JWT) | Short-lived (configured via `JWT_SECRET`) | Client memory / Authorization header |
+| Refresh token | **7 days** | MongoDB `refresh_tokens` collection (server-side) |
+
+One refresh token per user is enforced — issuing a new one automatically invalidates the previous one.
+
+### Flow
+
+```
+POST /auth/login
+  → 200 { "jwt": "<access-token>", "refresh": "<refresh-token>", "role": "USER" }
+
+# Use the access token on every protected request:
+Authorization: Bearer <access-token>
+
+# When the access token expires, exchange the refresh token for a new pair:
+POST /auth/refresh
+  Body: { "token": "<refresh-token>" }
+  → 200 { "jwt": "<new-access-token>", "refresh": "<new-refresh-token>", "role": "USER" }
+
+# On logout the refresh token is deleted server-side:
+POST /auth/logout
+  → 200 "Logged out successfully"
+```
+
+### Refresh Token Endpoints
+
+| Method | Path | Body | Description |
+|---|---|---|---|
+| `POST` | `/auth/login` | `{ "username", "password" }` | Returns access + refresh tokens |
+| `POST` | `/auth/refresh` | `{ "token": "<refresh-token>" }` | Issues a new access token; old refresh token is rotated |
+| `POST` | `/auth/logout` | — (requires `Authorization` header) | Deletes the refresh token server-side |
+
+> **Security note:** If a refresh token is expired or not found, the server returns `401 Unauthorized`. The client must redirect the user to login again.
+
+---
+
 ## API Documentation
 
 Interactive API documentation is available via **Swagger UI** once the application is running:
