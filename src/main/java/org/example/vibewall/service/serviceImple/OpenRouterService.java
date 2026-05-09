@@ -16,14 +16,14 @@ import org.springframework.web.client.RestTemplate;
 @Primary
 public class OpenRouterService implements AiService {
 
-    @Value("${openrouter.api.key}")
+    @Value("${nvidia.api.key}")
     private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String MODEL = "openai/gpt-oss-120b:free";
+    private static final String NVIDIA_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
+    private static final String MODEL = "meta/llama-3.1-8b-instruct";
 
     private static final String MODERATION_SYSTEM_PROMPT =
             "You are a content moderator for VibeWall, a student social platform. " +
@@ -57,7 +57,7 @@ public class OpenRouterService implements AiService {
         try {
             String body = buildChatBody("You are a helpful assistant.", prompt, 512);
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    OPENROUTER_URL,
+                    NVIDIA_URL,
                     new HttpEntity<>(body, buildHeaders()),
                     String.class);
             return extractContent(response.getBody());
@@ -72,7 +72,7 @@ public class OpenRouterService implements AiService {
         try {
             String body = buildChatBody(MODERATION_SYSTEM_PROMPT, "Message: " + str, 5);
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    OPENROUTER_URL,
+                    NVIDIA_URL,
                     new HttpEntity<>(body, buildHeaders()),
                     String.class);
             responseBody = response.getBody();
@@ -122,8 +122,6 @@ public class OpenRouterService implements AiService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
-        headers.set("HTTP-Referer", "https://vibewall.app");
-        headers.set("X-Title", "VibeWall");
         return headers;
     }
 
