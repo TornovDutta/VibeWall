@@ -31,6 +31,11 @@ public class GenericException {
                 HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<?> handleInvalidCredentials(InvalidCredentialsException e) {
+        return build(e.getMessage(), "authentication failed", HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException e) {
         return build(e.getMessage(), "access denied", HttpStatus.FORBIDDEN);

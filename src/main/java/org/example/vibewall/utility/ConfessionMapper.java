@@ -21,7 +21,7 @@ public class ConfessionMapper {
         for(Feedback feedback:confession.getFeedbacks()){
             Feedback feedback1=new Feedback();
             feedback1.setId(feedback.getId());
-            feedback1.setFeedback(encryption.decode(feedback.getFeedback()));
+            feedback1.setContent(encryption.decode(feedback.getContent()));
             feedback1.setDate(feedback.getDate());
             feedbackList.add(feedback1);
         }

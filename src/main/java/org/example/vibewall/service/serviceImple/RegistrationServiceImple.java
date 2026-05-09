@@ -5,6 +5,7 @@ import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UsersRequested;
 import org.example.vibewall.DTO.UsersResponse;
 import org.example.vibewall.encryption.Encryption;
+import org.example.vibewall.exception.InvalidCredentialsException;
 import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.repo.UsersRepo;
@@ -69,16 +70,17 @@ public class RegistrationServiceImple implements RegistrationService {
         String encodedUsername = encryption.encode(request.getName());
 
         Users user = repo.findByUsername(encodedUsername)
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException("Invalid credentials");
         }
 
         String accessToken = jwtUtil.generateToken(
                 user.getId(),
                 user.getUsername(),
-                user.getRole()
+                user.getRole(),
+                request.getName()
         );
 
         RefreshToken refreshToken =
@@ -102,7 +104,8 @@ public class RegistrationServiceImple implements RegistrationService {
         String newAccessToken = jwtUtil.generateToken(
                 user.getId(),
                 user.getUsername(),
-                user.getRole()
+                user.getRole(),
+                encryption.decode(user.getUsername())
         );
 
         return TokenResponse.builder()

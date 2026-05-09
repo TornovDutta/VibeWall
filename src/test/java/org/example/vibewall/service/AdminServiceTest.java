@@ -89,7 +89,7 @@ class AdminServiceTest {
 
         when(encryption.encode("admin")).thenReturn("encryptedAdmin");
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
-        when(jwtUtil.generateToken(any(), any(), any())).thenReturn("jwt-token");
+        when(jwtUtil.generateToken(any(), any(), any(), any())).thenReturn("jwt-token");
         when(userMapper.toDTO(any(Users.class)))
                 .thenReturn(new UsersResponse("1", "encryptedAdmin"));
 
@@ -97,7 +97,7 @@ class AdminServiceTest {
 
         assertNotNull(response);
         verify(userRepo).save(any(Users.class));
-        verify(jwtUtil).generateToken(any(), any(), any());
+        verify(jwtUtil).generateToken(any(), any(), any(), any());
     }
 
     @Test

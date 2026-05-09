@@ -54,7 +54,7 @@ class ReportServiceTest {
     @Test
     void getByUser_shouldReturnUserReports() {
         Report r = new Report(USER_ID, "content");
-        ReportResponse dto = new ReportResponse("1", "content", "PENDING");
+        ReportResponse dto = new ReportResponse("1", "content", "PENDING", null);
 
         when(reportRepo.findByUserId(USER_ID)).thenReturn(List.of(r));
         when(mapper.toDTO(List.of(r))).thenReturn(List.of(dto));

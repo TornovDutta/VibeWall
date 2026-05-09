@@ -67,7 +67,7 @@ class FeedBackServiceTest {
         assertEquals(1, confession.getFeedbacks().size());
         assertEquals(0, confession.getFeedbacks().get(0).getId());
         assertEquals("encodedGood",
-                confession.getFeedbacks().get(0).getFeedback());
+                confession.getFeedbacks().get(0).getContent());
 
         verify(confessionRepo).save(confession);
     }
@@ -115,7 +115,7 @@ class FeedBackServiceTest {
 
         assertNotNull(response);
         assertEquals("encodedNew",
-                confession.getFeedbacks().get(0).getFeedback());
+                confession.getFeedbacks().get(0).getContent());
 
         verify(confessionRepo).save(confession);
     }
