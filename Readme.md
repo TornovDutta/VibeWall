@@ -1,22 +1,36 @@
 # VibeWall — Backend
 
-VibeWall is an anonymous confession and feedback platform built for students. Users can share confessions, give feedback, and interact with a live feed — all in a safe, moderated environment. Content is checked by two independent AI models before it is ever saved.
+A production-ready REST API for an anonymous confession and feedback platform built for students. The backend handles secure authentication, real-time content moderation using AI, encrypted data storage, and role-based access — all containerized with Docker.
 
 ---
 
-## Features
+## What I Built
 
-- **Anonymous Confessions** — Post confessions without revealing your identity
-- **Feedback System** — Reply to any confession with feedback
-- **Live Feed** — Browse the latest confessions from all users
-- **AI Content Moderation** — Every confession and feedback is screened by NVIDIA NIM (Llama 3.1) before being saved; content flagged by the model is rejected
-- **JWT Authentication** — Short-lived access tokens + long-lived refresh tokens for secure, seamless sessions
-- **Auto-Deletion (TTL)** — Confessions are automatically removed from the database after 12 hours
-- **Reporting System** — Users can report content; admins resolve reports from a dedicated dashboard
-- **AES-GCM Encryption** — All confession and feedback content is encrypted at rest
-- **Redis Caching** — Feed and confession responses are cached for fast reads
-- **Admin Dashboard** — Full user and report management for administrators
-- **Role-Based Access Control** — Separate permission levels for public visitors, authenticated users, and admins
+This is a full-featured backend service I designed and developed from scratch. It includes:
+
+- A clean, layered architecture following MVC and SOLID principles
+- AI-powered content moderation integrated via REST API (NVIDIA NIM / Llama 3.1)
+- End-to-end encryption for all user-generated content (AES-256-GCM)
+- Stateless JWT authentication with refresh token rotation
+- Redis caching for high-performance feed responses
+- MongoDB with automatic document expiry (TTL indexes)
+- Swagger/OpenAPI documentation for all endpoints
+
+---
+
+## Core Features
+
+| Feature | Details |
+|---|---|
+| Anonymous Posting | Users post confessions without exposing identity |
+| AI Content Moderation | Every post is screened by LLM before being saved — unsafe content is rejected |
+| JWT Auth | Short-lived access token + 7-day rotating refresh token |
+| AES-256-GCM Encryption | All text content is encrypted before storage |
+| Redis Caching | Feed and confession data cached for fast reads |
+| Role-Based Access Control | Public, User, and Admin roles with separate route permissions |
+| Auto-Deletion (TTL) | Confessions automatically expire and delete after 12 hours |
+| Reporting System | Users report content; admins review from a dedicated dashboard |
+| Admin Dashboard API | Full user and report management endpoints |
 
 ---
 
@@ -25,14 +39,26 @@ VibeWall is an anonymous confession and feedback platform built for students. Us
 | Layer | Technology |
 |---|---|
 | Language | Java 17 |
-| Framework | Spring Boot 3.5.6 |
-| Database | MongoDB (Atlas) |
+| Framework | Spring Boot 3.5 |
+| Database | MongoDB Atlas (NoSQL, TTL indexes) |
 | Cache | Redis |
-| Security | Spring Security, JWT (jjwt 0.11.5) |
+| Security | Spring Security, JWT (jjwt), BCrypt |
 | Encryption | AES/GCM/NoPadding (256-bit) |
-| AI Moderation | NVIDIA NIM — Meta Llama 3.1 8B Instruct |
-| API Docs | SpringDoc OpenAPI (Swagger UI) |
+| AI Integration | NVIDIA NIM — Meta Llama 3.1 8B Instruct |
+| API Docs | SpringDoc OpenAPI 3 (Swagger UI) |
 | Containerization | Docker + Docker Compose |
+| Build Tool | Maven |
+
+---
+
+## Architecture Highlights
+
+- **Layered Architecture** — Controller → Service → Repository separation
+- **AOP Logging** — Cross-cutting concerns handled with Spring AOP
+- **Global Exception Handling** — Centralized error responses using `@ControllerAdvice`
+- **Custom Validation** — Annotation-based input validation
+- **DTO Pattern** — Clean separation between API contracts and internal models
+- **Refresh Token Rotation** — One active refresh token per user; issuing a new one invalidates the old one
 
 ---
 
@@ -51,9 +77,9 @@ git clone https://github.com/TornovDutta/VibeWall.git
 cd VibeWall/backend
 ```
 
-### 2. Configure environment variables
+### 2. Set up environment variables
 
-Copy the example file and fill in your own values:
+Copy the example file and fill in your values:
 
 ```bash
 cp .env.example .env
@@ -61,15 +87,15 @@ cp .env.example .env
 
 | Variable | Description |
 |---|---|
-| `NVDIA_API_KEY` | NVIDIA NIM API key (`nvapi-...`) — get one at [build.nvidia.com](https://build.nvidia.com) |
-| `ENCRYPTION_KEY` | Base64-encoded 32-byte AES key — generate with `openssl rand -base64 32` |
-| `JWT_SECRET` | Long random string (min 32 chars) — generate with `openssl rand -base64 48` |
+| `NVDIA_API_KEY` | NVIDIA NIM API key (`nvapi-...`) — get one at build.nvidia.com |
+| `ENCRYPTION_KEY` | Base64-encoded 32-byte AES key — `openssl rand -base64 32` |
+| `JWT_SECRET` | Random string (min 32 chars) — `openssl rand -base64 48` |
 | `SPRING_DATA_MONGODB_URI` | MongoDB Atlas connection URI |
 | `SPRING_DATA_REDIS_URL` | Redis connection URL |
-| `ALLOWED_ORIGINS` | Frontend origin for CORS (e.g. `http://localhost:5173`) |
-| `SERVER_PORT` | Server port (default `8080`) |
+| `ALLOWED_ORIGINS` | Frontend URL for CORS (e.g. `http://localhost:5173`) |
+| `SERVER_PORT` | Port to run on (default `8080`) |
 
-### 3. Build the project
+### 3. Build
 
 ```bash
 mvn clean package -DskipTests
@@ -81,64 +107,44 @@ mvn clean package -DskipTests
 docker-compose up --build
 ```
 
-The API will be available at `http://localhost:8080/api/v3`.
+API runs at: `http://localhost:8080/api/v3`
 
 ---
 
 ## Authentication Flow
 
-VibeWall uses a two-token strategy: a short-lived JWT **access token** for every authenticated request, and a long-lived **refresh token** to obtain a new access token without re-entering credentials.
-
-### Token Lifetimes
-
-| Token | Lifetime | Storage |
-|---|---|---|
-| Access token (JWT) | Short-lived (configured via `JWT_SECRET`) | Client memory / Authorization header |
-| Refresh token | **7 days** | MongoDB `refresh_tokens` collection (server-side) |
-
-One refresh token per user is enforced — issuing a new one automatically invalidates the previous one.
-
-### Flow
+Two-token strategy: a short-lived JWT **access token** for every request, and a rotating **refresh token** to keep sessions alive without asking the user to log in again.
 
 ```
 POST /auth/login
   → 200 { "jwt": "<access-token>", "refresh": "<refresh-token>", "role": "USER" }
 
-# Use the access token on every protected request:
 Authorization: Bearer <access-token>
 
-# When the access token expires, exchange the refresh token for a new pair:
 POST /auth/refresh
   Body: { "token": "<refresh-token>" }
-  → 200 { "jwt": "<new-access-token>", "refresh": "<new-refresh-token>", "role": "USER" }
+  → 200 { "jwt": "<new-access-token>", "refresh": "<new-refresh-token>" }
 
-# On logout the refresh token is deleted server-side:
 POST /auth/logout
   → 200 "Logged out successfully"
 ```
 
-### Refresh Token Endpoints
-
-| Method | Path | Body | Description |
-|---|---|---|---|
-| `POST` | `/auth/login` | `{ "username", "password" }` | Returns access + refresh tokens |
-| `POST` | `/auth/refresh` | `{ "token": "<refresh-token>" }` | Issues a new access token; old refresh token is rotated |
-| `POST` | `/auth/logout` | — (requires `Authorization` header) | Deletes the refresh token server-side |
-
-> **Security note:** If a refresh token is expired or not found, the server returns `401 Unauthorized`. The client must redirect the user to login again.
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/auth/login` | Returns access + refresh tokens |
+| `POST` | `/auth/refresh` | Rotates the refresh token and returns a new access token |
+| `POST` | `/auth/logout` | Deletes the refresh token server-side |
 
 ---
 
 ## API Documentation
 
-Interactive API documentation is available via **Swagger UI** once the application is running:
-
+Swagger UI (interactive docs):
 ```
 http://localhost:8080/api/v3/swagger-ui.html
 ```
 
-The OpenAPI JSON spec is at:
-
+OpenAPI JSON spec:
 ```
 http://localhost:8080/api/v3/api-docs
 ```
@@ -147,9 +153,9 @@ http://localhost:8080/api/v3/api-docs
 
 ## Access Control
 
-| Role | Accessible Routes |
+| Role | Routes |
 |---|---|
-| Public (no token) | `/auth/**`, `/feed/**` |
+| Public | `/auth/**`, `/feed/**` |
 | Authenticated User | `/users/**` |
 | Admin | `/admin/**` |
 
@@ -159,21 +165,23 @@ All protected routes require a valid JWT `Bearer` token in the `Authorization` h
 
 ## AI Content Moderation
 
-Before any confession or feedback is saved, it passes through NVIDIA NIM:
+Before any post is saved, it is sent to **Meta Llama 3.1 8B Instruct** via the NVIDIA NIM API. The model checks for:
 
-- **Meta Llama 3.1 8B Instruct** (via `integrate.api.nvidia.com`) — screens for insults, threats, hate speech, violence, self-harm, explicit content, and illegal activity
+- Hate speech, threats, and harassment
+- Self-harm and violent content
+- Explicit material and illegal activity
 
-If the model flags the content as unsafe, the request is rejected with a `422 Unprocessable Entity` response. Content must be cleared by the model before it is accepted.
+If the model flags the content, the request is rejected with `422 Unprocessable Entity`. Only clean content is saved.
 
 ---
 
-## Security
+## Security Practices
 
-- Passwords are hashed with BCrypt
-- All confession and feedback text is encrypted with AES-GCM (256-bit) before storage
-- JWT access tokens are short-lived; refresh tokens are long-lived and stored server-side
-- HSTS headers are sent when running behind HTTPS (e.g. Render)
-- CORS is restricted to the configured `ALLOWED_ORIGINS`
+- Passwords hashed with **BCrypt**
+- All stored content encrypted with **AES-256-GCM**
+- JWT access tokens are short-lived; refresh tokens rotate on every use
+- CORS restricted to configured origins only
+- HSTS headers enabled when running behind HTTPS
 
 ---
 
@@ -182,17 +190,17 @@ If the model flags the content as unsafe, the request is rejected with a `422 Un
 ```
 src/main/java/org/example/vibewall/
 ├── annotation/          Custom validation annotations
-├── AOP/                 Logging aspects
+├── AOP/                 Logging aspects (Spring AOP)
 ├── config/              Redis and CORS configuration
 ├── controller/          REST controllers
 ├── DTO/                 Request and response objects
 ├── encryption/          AES-GCM encryption utility
-├── exception/           Custom exceptions and global handler
+├── exception/           Global exception handler
 ├── model/               MongoDB document models
 ├── repo/                MongoDB repositories
 ├── security/            JWT filter and Spring Security config
 ├── service/             Service interfaces
-│   └── serviceImple/    Service implementations (including AI services)
+│   └── serviceImple/    Service implementations (including AI integration)
 └── utility/             Mappers and helpers
 ```
 
@@ -200,4 +208,4 @@ src/main/java/org/example/vibewall/
 
 ## Contributing
 
-Contributions are welcome. Fork the repository, create a feature branch, and open a pull request.
+Contributions are welcome. Fork the repo, create a feature branch, and open a pull request.
