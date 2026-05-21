@@ -10,7 +10,7 @@ This is a full-featured backend service I designed and developed from scratch. I
 
 - A clean, layered architecture following MVC and SOLID principles
 - AI-powered content moderation integrated via REST API (NVIDIA NIM / Llama 3.1)
-- End-to-end encryption for all user-generated content (AES-256-GCM)
+- Server-side encryption at rest for all user-generated content (AES-256-GCM)
 - Stateless JWT authentication with refresh token rotation
 - Redis caching for high-performance feed responses
 - MongoDB with automatic document expiry (TTL indexes)
