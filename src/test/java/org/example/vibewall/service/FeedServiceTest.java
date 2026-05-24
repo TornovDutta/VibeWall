@@ -2,8 +2,8 @@ package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ConfessionResponse;
 import org.example.vibewall.model.Confession;
-import org.example.vibewall.repo.ConfessionRepo;
-import org.example.vibewall.service.serviceImple.FeedServiceImplement;
+import org.example.vibewall.repo.ConfessionRepository;
+import org.example.vibewall.service.serviceImpl.FeedServiceImpl;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,17 +20,16 @@ import static org.mockito.Mockito.*;
 class FeedServiceTest {
 
     @Mock
-    private ConfessionRepo repo;
+    private ConfessionRepository repo;
 
     @Mock
     private ConfessionMapper mapper;
 
     @InjectMocks
-    private FeedServiceImplement feedService;
+    private FeedServiceImpl feedService;
 
     @Test
     void get_shouldReturnConfessionResponses() {
-        // Arrange
         Confession confession1 = new Confession();
         Confession confession2 = new Confession();
 
@@ -44,10 +43,8 @@ class FeedServiceTest {
         when(repo.findAll()).thenReturn(confessions);
         when(mapper.toDTO(confessions)).thenReturn(responses);
 
-        // Act
         List<ConfessionResponse> result = feedService.get();
 
-        // Assert
         assertEquals(2, result.size());
         assertEquals(responses, result);
 

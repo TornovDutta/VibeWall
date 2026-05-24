@@ -1,12 +1,12 @@
 package org.example.vibewall.service;
 
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
-import org.example.vibewall.repo.UsersRepo;
-import org.example.vibewall.service.serviceImple.UsersServiceImplements;
+import org.example.vibewall.repo.UserRepository;
+import org.example.vibewall.service.serviceImpl.UserServiceImpl;
 import org.example.vibewall.utility.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 class UsersServiceTest {
 
     @Mock
-    private UsersRepo usersRepo;
+    private UserRepository usersRepo;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -38,7 +38,7 @@ class UsersServiceTest {
     private UserMapper userMapper;
 
     @InjectMocks
-    private UsersServiceImplements usersService;
+    private UserServiceImpl usersService;
 
     private Users existingUser;
 
@@ -56,20 +56,17 @@ class UsersServiceTest {
 
     @Test
     void update_shouldUpdateUserSuccessfully() {
-        // given
-        UsersRequested request = new UsersRequested("newName", "newPassword");
+        UserRequest request = new UserRequest("newName", "newPassword");
 
         when(usersRepo.findById("1")).thenReturn(Optional.of(existingUser));
         when(encryption.encode("newName")).thenReturn("encryptedName");
         when(passwordEncoder.encode("newPassword")).thenReturn("encodedPassword");
         when(usersRepo.save(existingUser)).thenReturn(existingUser);
         when(userMapper.toDTO(existingUser))
-                .thenReturn(new UsersResponse("1", "encryptedName"));
+                .thenReturn(new UserResponse("1", "encryptedName"));
 
-        // when
-        UsersResponse response = usersService.update("1", request);
+        UserResponse response = usersService.update("1", request);
 
-        // then
         assertNotNull(response);
         assertEquals("1", response.getId());
         assertEquals("encryptedName", response.getName());
@@ -83,11 +80,9 @@ class UsersServiceTest {
 
     @Test
     void update_shouldThrowException_whenUserNotFound() {
-        // given
-        UsersRequested request = new UsersRequested("name", "password");
+        UserRequest request = new UserRequest("name", "password");
         when(usersRepo.findById("99")).thenReturn(Optional.empty());
 
-        // when & then
         assertThrows(
                 UsernameNotFoundException.class,
                 () -> usersService.update("99", request)
@@ -101,24 +96,19 @@ class UsersServiceTest {
 
     @Test
     void delete_shouldDeleteUserSuccessfully() throws UserNotFoundException {
-        // given
         when(usersRepo.findById("1")).thenReturn(Optional.of(existingUser));
         doNothing().when(usersRepo).removeById("1");
 
-        // when
         usersService.delete("1");
 
-        // then
         verify(usersRepo).findById("1");
         verify(usersRepo).removeById("1");
     }
 
     @Test
     void delete_shouldThrowException_whenUserNotFound() {
-        // given
         when(usersRepo.findById("2")).thenReturn(Optional.empty());
 
-        // when & then
         assertThrows(
                 UserNotFoundException.class,
                 () -> usersService.delete("2")

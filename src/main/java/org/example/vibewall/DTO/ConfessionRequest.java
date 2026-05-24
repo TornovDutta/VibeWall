@@ -11,9 +11,8 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeedbackRequested implements Serializable {
+public class ConfessionRequest implements Serializable {
     @NotBlank(message = "Content cannot be blank")
-    @Size(min = 1, max = 2000, message = "Content must be between 1 and 2000 characters")
+    @Size(min = 1, max = 5000, message = "Content must be between 1 and 5000 characters")
     private String content;
 }
-

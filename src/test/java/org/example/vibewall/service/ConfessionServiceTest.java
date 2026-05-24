@@ -1,15 +1,15 @@
 package org.example.vibewall.service;
 
-import org.example.vibewall.DTO.ConfessionRequested;
+import org.example.vibewall.DTO.ConfessionRequest;
 import org.example.vibewall.DTO.ConfessionResponse;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AccessDeniedException;
 import org.example.vibewall.exception.ConfessionNotFoundException;
-import org.example.vibewall.exception.UnSafeExecption;
+import org.example.vibewall.exception.UnsafeContentException;
 import org.example.vibewall.model.Confession;
-import org.example.vibewall.repo.ConfessionRepo;
-import org.example.vibewall.repo.UsersRepo;
-import org.example.vibewall.service.serviceImple.ConfessionServiceImplement;
+import org.example.vibewall.repo.ConfessionRepository;
+import org.example.vibewall.repo.UserRepository;
+import org.example.vibewall.service.serviceImpl.ConfessionServiceImpl;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,10 +27,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ConfessionServiceTest {
     @Mock
-    private UsersRepo usersRepo;
+    private UserRepository usersRepo;
 
     @Mock
-    private ConfessionRepo confessionRepo;
+    private ConfessionRepository confessionRepo;
 
     @Mock
     private ConfessionMapper confessionMapper;
@@ -42,7 +42,7 @@ class ConfessionServiceTest {
     private AiService aiService;
 
     @InjectMocks
-    private ConfessionServiceImplement confessionService;
+    private ConfessionServiceImpl confessionService;
 
     private Confession confession;
 
@@ -58,7 +58,7 @@ class ConfessionServiceTest {
 
     @Test
     void create_shouldCreateConfessionSuccessfully() {
-        ConfessionRequested request = new ConfessionRequested("hello");
+        ConfessionRequest request = new ConfessionRequest("hello");
 
         when(aiService.unSafe("hello")).thenReturn(false);
         when(encryption.encode("hello")).thenReturn("encoded");
@@ -74,12 +74,12 @@ class ConfessionServiceTest {
 
     @Test
     void create_shouldThrowException_whenContentUnsafe() {
-        ConfessionRequested request = new ConfessionRequested("bad");
+        ConfessionRequest request = new ConfessionRequest("bad");
 
         when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
-                UnSafeExecption.class,
+                UnsafeContentException.class,
                 () -> confessionService.create("u1", request)
         );
 
@@ -90,7 +90,7 @@ class ConfessionServiceTest {
 
     @Test
     void update_shouldUpdateConfessionSuccessfully() throws ConfessionNotFoundException {
-        ConfessionRequested request = new ConfessionRequested("updated");
+        ConfessionRequest request = new ConfessionRequest("updated");
 
         when(confessionRepo.findById("c1")).thenReturn(Optional.of(confession));
         when(aiService.unSafe("updated")).thenReturn(false);
@@ -113,7 +113,7 @@ class ConfessionServiceTest {
         assertThrows(
                 ConfessionNotFoundException.class,
                 () -> confessionService.update("u1",
-                        new ConfessionRequested("a"), "x")
+                        new ConfessionRequest("a"), "x")
         );
     }
 
@@ -126,7 +126,7 @@ class ConfessionServiceTest {
         assertThrows(
                 AccessDeniedException.class,
                 () -> confessionService.update("u1",
-                        new ConfessionRequested("a"), "c1")
+                        new ConfessionRequest("a"), "c1")
         );
 
         verify(confessionRepo, never()).save(any());
@@ -138,9 +138,9 @@ class ConfessionServiceTest {
         when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
-                UnSafeExecption.class,
+                UnsafeContentException.class,
                 () -> confessionService.update("u1",
-                        new ConfessionRequested("bad"), "c1")
+                        new ConfessionRequest("bad"), "c1")
         );
     }
 

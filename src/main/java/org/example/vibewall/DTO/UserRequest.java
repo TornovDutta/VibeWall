@@ -8,12 +8,12 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsersRequested implements Serializable{
+public class UserRequest implements Serializable{
     private String name;
     private String password;
     private String role;
 
-    public UsersRequested(String name, String password) {
+    public UserRequest(String name, String password) {
         this.name = name;
         this.password = password;
     }

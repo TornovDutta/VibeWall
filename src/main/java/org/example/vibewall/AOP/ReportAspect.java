@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Slf4j
 public class ReportAspect {
-    @After("execution(* org.example.vibewall.service.serviceImple.ReportServiceImplements.create(..))")
-    public void newReport(){
+    @After("execution(* org.example.vibewall.service.serviceImpl.ReportServiceImpl.create(..))")
+    public void newReport() {
         log.info("new Report add");
     }
 
-    @After("execution(* org.example.vibewall.service.serviceImple.AdminServiceImplements.reslove(..))")
-    public  void reportSolve(){
+    @After("execution(* org.example.vibewall.service.serviceImpl.AdminServiceImpl.reslove(..))")
+    public void reportSolve() {
         log.info("report solve");
     }
 

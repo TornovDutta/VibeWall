@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TokenRequested {
+public class TokenRequest {
     @NotBlank(message = "Token cannot be blank")
     private String token;
 }

@@ -2,17 +2,17 @@ package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.TokenResponse;
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.security.JwtUtil;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
-import org.example.vibewall.repo.ReportRepo;
-import org.example.vibewall.repo.UsersRepo;
-import org.example.vibewall.service.serviceImple.AdminServiceImplements;
+import org.example.vibewall.repo.ReportRepository;
+import org.example.vibewall.repo.UserRepository;
+import org.example.vibewall.service.serviceImpl.AdminServiceImpl;
 import org.example.vibewall.utility.ReportMapper;
 import org.example.vibewall.utility.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,10 +34,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AdminServiceTest {
     @Mock
-    private UsersRepo userRepo;
+    private UserRepository userRepo;
 
     @Mock
-    private ReportRepo reportRepo;
+    private ReportRepository reportRepo;
 
     @Mock
     private BCryptPasswordEncoder passwordEncoder;
@@ -55,7 +55,7 @@ class AdminServiceTest {
     private JwtUtil jwtUtil;
 
     @InjectMocks
-    private AdminServiceImplements adminService;
+    private AdminServiceImpl adminService;
 
     private Users adminUser;
     private Report report;
@@ -74,9 +74,9 @@ class AdminServiceTest {
     void getAll_shouldReturnAllUsers() {
         when(userRepo.findAll()).thenReturn(List.of(adminUser));
         when(userMapper.toDTO(anyList()))
-                .thenReturn(List.of(new UsersResponse("1", "admin")));
+                .thenReturn(List.of(new UserResponse("1", "admin")));
 
-        List<UsersResponse> result = adminService.getAll();
+        List<UserResponse> result = adminService.getAll();
 
         assertEquals(1, result.size());
         verify(userRepo).findAll();
@@ -85,13 +85,13 @@ class AdminServiceTest {
 
     @Test
     void addAdmin_shouldCreateAdminSuccessfully() {
-        UsersRequested request = new UsersRequested("admin", "password");
+        UserRequest request = new UserRequest("admin", "password");
 
         when(encryption.encode("admin")).thenReturn("encryptedAdmin");
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
         when(jwtUtil.generateToken(any(), any(), any(), any())).thenReturn("jwt-token");
         when(userMapper.toDTO(any(Users.class)))
-                .thenReturn(new UsersResponse("1", "encryptedAdmin"));
+                .thenReturn(new UserResponse("1", "encryptedAdmin"));
 
         TokenResponse response = adminService.addAdmin(request);
 
@@ -102,16 +102,16 @@ class AdminServiceTest {
 
     @Test
     void update_shouldUpdateAdminSuccessfully() throws AdminNotFoundException {
-        UsersRequested request = new UsersRequested("newAdmin", "newPass");
+        UserRequest request = new UserRequest("newAdmin", "newPass");
 
         when(userRepo.findById("1")).thenReturn(Optional.of(adminUser));
         when(encryption.encode("newAdmin")).thenReturn("encAdmin");
         when(passwordEncoder.encode("newPass")).thenReturn("encPass");
         when(userRepo.save(adminUser)).thenReturn(adminUser);
         when(userMapper.toDTO(adminUser))
-                .thenReturn(new UsersResponse("1", "encAdmin"));
+                .thenReturn(new UserResponse("1", "encAdmin"));
 
-        UsersResponse response = adminService.update("1", request);
+        UserResponse response = adminService.update("1", request);
 
         assertEquals("1", response.getId());
         verify(userRepo).save(adminUser);
@@ -123,7 +123,7 @@ class AdminServiceTest {
 
         assertThrows(
                 AdminNotFoundException.class,
-                () -> adminService.update("99", new UsersRequested("a", "b"))
+                () -> adminService.update("99", new UserRequest("a", "b"))
         );
     }
 

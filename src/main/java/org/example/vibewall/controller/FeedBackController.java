@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
-import org.example.vibewall.DTO.FeedbackRequested;
+import org.example.vibewall.DTO.FeedbackRequest;
 import org.example.vibewall.exception.ConfessionNotFoundException;
-import org.example.vibewall.exception.PrincipalNotFollowException;
+import org.example.vibewall.exception.PlatformMisuseException;
 import org.example.vibewall.service.FeedbackService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class FeedBackController {
     @ApiResponse(responseCode = "422", description = "Content failed safety check")
     public ResponseEntity<?> create(
             @PathVariable String confessionId,
-            @Valid @RequestBody FeedbackRequested requested) throws PrincipalNotFollowException, ConfessionNotFoundException {
+            @Valid @RequestBody FeedbackRequest requested) throws PlatformMisuseException, ConfessionNotFoundException {
         return new ResponseEntity<>(service.giveFeedback(confessionId, requested), HttpStatus.CREATED);
     }
 
@@ -38,7 +38,7 @@ public class FeedBackController {
     public ResponseEntity<?> update(
             @PathVariable String confessionId,
             @PathVariable int feedbackId,
-            @Valid @RequestBody FeedbackRequested requested) throws PrincipalNotFollowException, ConfessionNotFoundException {
+            @Valid @RequestBody FeedbackRequest requested) throws PlatformMisuseException, ConfessionNotFoundException {
         return ResponseEntity.ok(service.updateFeedback(confessionId, feedbackId, requested));
     }
 

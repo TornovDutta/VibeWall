@@ -1,4 +1,4 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service.serviceImpl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Primary
-public class OpenRouterService implements AiService {
+public class OpenRouterServiceImpl implements AiService {
 
     @Value("${nvidia.api.key}")
     private String apiKey;
@@ -91,7 +91,6 @@ public class OpenRouterService implements AiService {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
 
-            // Model refused due to its own content policy → content is harmful
             JsonNode error = root.path("error");
             if (!error.isMissingNode()) {
                 String msg = error.path("message").asText("").toLowerCase();

@@ -1,14 +1,14 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ConfessionResponse;
-import org.example.vibewall.DTO.FeedbackRequested;
+import org.example.vibewall.DTO.FeedbackRequest;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.ConfessionNotFoundException;
-import org.example.vibewall.exception.PrincipalNotFollowException;
+import org.example.vibewall.exception.PlatformMisuseException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Feedback;
-import org.example.vibewall.repo.ConfessionRepo;
+import org.example.vibewall.repo.ConfessionRepository;
 import org.example.vibewall.service.FeedbackService;
 import org.example.vibewall.service.AiService;
 import org.example.vibewall.utility.ConfessionMapper;
@@ -17,11 +17,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class FeedbackServiceImplement implements FeedbackService {
-    private final ConfessionRepo confessionRepo;
+public class FeedbackServiceImpl implements FeedbackService {
+    private final ConfessionRepository confessionRepo;
     private final AiService aiService;
     private final Encryption encryption;
     private final ConfessionMapper mapper;
+
     @Override
     @CacheEvict(
             value = {"confession-feed", "confession-by-id"},
@@ -30,11 +31,11 @@ public class FeedbackServiceImplement implements FeedbackService {
     public ConfessionResponse updateFeedback(
             String confessionId,
             int feedbackId,
-            FeedbackRequested requested)
-            throws ConfessionNotFoundException, PrincipalNotFollowException {
+            FeedbackRequest requested)
+            throws ConfessionNotFoundException, PlatformMisuseException {
 
         if (aiService.unSafe(requested.getContent())) {
-            throw new PrincipalNotFollowException("don't follow the principal");
+            throw new PlatformMisuseException("don't follow the principal");
         }
 
         Confession confession = confessionRepo.findById(confessionId)
@@ -50,27 +51,29 @@ public class FeedbackServiceImplement implements FeedbackService {
         confessionRepo.save(confession);
         return mapper.toDTO(confession);
     }
+
     @Override
     @CacheEvict(
-            value = {"confession-feed" },
+            value = {"confession-feed"},
             allEntries = true
     )
-    public ConfessionResponse giveFeedback(String confessionId, FeedbackRequested requested) throws ConfessionNotFoundException,
-            PrincipalNotFollowException {
-        if(aiService.unSafe(requested.getContent())){
-            throw new PrincipalNotFollowException("don't follow the principal");
+    public ConfessionResponse giveFeedback(String confessionId, FeedbackRequest requested)
+            throws ConfessionNotFoundException, PlatformMisuseException {
+        if (aiService.unSafe(requested.getContent())) {
+            throw new PlatformMisuseException("don't follow the principal");
         }
-        Confession confession=confessionRepo.findById(confessionId).orElseThrow(()->
+        Confession confession = confessionRepo.findById(confessionId).orElseThrow(()->
                 new ConfessionNotFoundException("wrong id"));
         int feedbackId = confession.getFeedbacks().size();
 
-        Feedback feedback=new Feedback(feedbackId,encryption.encode(requested.getContent()));
+        Feedback feedback = new Feedback(feedbackId, encryption.encode(requested.getContent()));
 
         confession.getFeedbacks().add(feedback);
         confessionRepo.save(confession);
 
         return mapper.toDTO(confession);
     }
+
     @Override
     @CacheEvict(
             value = {"confession-feed"},
@@ -88,9 +91,7 @@ public class FeedbackServiceImplement implements FeedbackService {
             throw new ConfessionNotFoundException("feedback not found");
         }
 
-
         confession.getFeedbacks().remove(feedbackId);
-
 
         for (int i = 0; i < confession.getFeedbacks().size(); i++) {
             confession.getFeedbacks().get(i).setId(i);
@@ -99,6 +100,5 @@ public class FeedbackServiceImplement implements FeedbackService {
         confessionRepo.save(confession);
         return mapper.toDTO(confession);
     }
-
 
 }

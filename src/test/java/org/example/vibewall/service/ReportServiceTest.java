@@ -1,12 +1,12 @@
 package org.example.vibewall.service;
 
-import org.example.vibewall.DTO.ReportRequested;
+import org.example.vibewall.DTO.ReportRequest;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.exception.AccessDeniedException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
-import org.example.vibewall.repo.ReportRepo;
-import org.example.vibewall.service.serviceImple.ReportServiceImplements;
+import org.example.vibewall.repo.ReportRepository;
+import org.example.vibewall.service.serviceImpl.ReportServiceImpl;
 import org.example.vibewall.utility.ReportMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,19 +24,19 @@ import static org.mockito.Mockito.*;
 class ReportServiceTest {
 
     @Mock
-    private ReportRepo reportRepo;
+    private ReportRepository reportRepo;
 
     @Mock
     private ReportMapper mapper;
 
     @InjectMocks
-    private ReportServiceImplements service;
+    private ReportServiceImpl service;
 
     private static final String USER_ID = "user-1";
 
     @Test
     void create_shouldSaveAndReturnReportResponse() {
-        ReportRequested request = new ReportRequested("report content");
+        ReportRequest request = new ReportRequest("report content");
         Report savedReport = new Report(USER_ID, "report content");
         ReportResponse response = new ReportResponse("1", "report content", "PENDING", null);
 
@@ -68,7 +68,7 @@ class ReportServiceTest {
     @Test
     void update_shouldUpdateAndReturnResponse_whenReportExists() throws ReportNotFoundException {
         String reportId = "123";
-        ReportRequested request = new ReportRequested("updated content");
+        ReportRequest request = new ReportRequest("updated content");
         Report existingReport = new Report(USER_ID, "old content");
         existingReport.setId(reportId);
         ReportResponse response = new ReportResponse(reportId, "updated content", "PENDING", null);
@@ -94,7 +94,7 @@ class ReportServiceTest {
 
         assertThrows(
                 AccessDeniedException.class,
-                () -> service.update(USER_ID, reportId, new ReportRequested("content"))
+                () -> service.update(USER_ID, reportId, new ReportRequest("content"))
         );
     }
 
@@ -104,7 +104,7 @@ class ReportServiceTest {
 
         assertThrows(
                 ReportNotFoundException.class,
-                () -> service.update(USER_ID, "404", new ReportRequested("content"))
+                () -> service.update(USER_ID, "404", new ReportRequest("content"))
         );
 
         verifyNoInteractions(mapper);

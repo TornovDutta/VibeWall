@@ -23,8 +23,8 @@ public class GenericException {
     }
 
     @ExceptionHandler({
-            PrincipalNotFollowException.class,
-            UnSafeExecption.class
+            PlatformMisuseException.class,
+            UnsafeContentException.class
     })
     public ResponseEntity<?> handlePolicyViolation(RuntimeException e) {
         return build(e.getMessage(), "content policy violation",

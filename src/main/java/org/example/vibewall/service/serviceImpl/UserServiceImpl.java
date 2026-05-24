@@ -1,9 +1,9 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
-import org.example.vibewall.repo.UsersRepo;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
+import org.example.vibewall.repo.UserRepository;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.model.Users;
@@ -17,16 +17,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 @RequiredArgsConstructor
-public class UsersServiceImplements implements UsersService {
+public class UserServiceImpl implements UsersService {
 
-    private final UsersRepo repo;
+    private final UserRepository repo;
 
     private final PasswordEncoder passwordEncoder;
     private final UserMapper mapper;
-    private final static Logger logger= LoggerFactory.getLogger(UsersServiceImplements.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final Encryption encryption;
 
-    public UsersResponse update(String id, UsersRequested user) {
+    public UserResponse update(String id, UserRequest user) {
 
         Users existingUser = repo.findById(id)
                 .orElseThrow(() ->
@@ -41,11 +41,9 @@ public class UsersServiceImplements implements UsersService {
 
     public void delete(String id) throws UserNotFoundException {
         repo.findById(id).orElseThrow(()->
-                new UserNotFoundException("user of id: "+id+"not found"));
+                new UserNotFoundException("user of id: " + id + "not found"));
 
         repo.removeById(id);
     }
-
-
 
 }

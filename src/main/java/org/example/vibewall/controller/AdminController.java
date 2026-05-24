@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.TokenResponse;
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.security.CustomUserDetails;
@@ -30,7 +30,7 @@ public class AdminController {
     @GetMapping
     @Operation(summary = "Get all users")
     @ApiResponse(responseCode = "200", description = "List of all users")
-    public ResponseEntity<List<UsersResponse>> getAll() {
+    public ResponseEntity<List<UserResponse>> getAll() {
         return new ResponseEntity<>(service.getAll(), HttpStatus.OK);
     }
 
@@ -38,7 +38,7 @@ public class AdminController {
     @Operation(summary = "Create a new admin account")
     @ApiResponse(responseCode = "201", description = "Admin created — returns JWT tokens")
     @ApiResponse(responseCode = "400", description = "Admin already exists")
-    public ResponseEntity<TokenResponse> addAdmin(@Valid @RequestBody UsersRequested users) {
+    public ResponseEntity<TokenResponse> addAdmin(@Valid @RequestBody UserRequest users) {
         return new ResponseEntity<>(service.addAdmin(users), HttpStatus.CREATED);
     }
 
@@ -48,7 +48,7 @@ public class AdminController {
     @ApiResponse(responseCode = "404", description = "Admin not found")
     public ResponseEntity<?> updateAdmin(
             @AuthenticationPrincipal CustomUserDetails details,
-            @Valid @RequestBody UsersRequested user) throws AdminNotFoundException {
+            @Valid @RequestBody UserRequest user) throws AdminNotFoundException {
         return new ResponseEntity<>(service.update(details.getId(), user), HttpStatus.OK);
     }
 

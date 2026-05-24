@@ -1,16 +1,10 @@
 package org.example.vibewall.repo;
 
-import org.example.vibewall.model.Confession;
+import org.example.vibewall.model.Feedback;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
-public interface ConfessionRepo extends MongoRepository<Confession, String> {
-
-
-    Optional<Confession> findById(String id);
-
+public interface FeedbackRepository extends MongoRepository<Feedback,String> {
     void removeById(String id);
 }

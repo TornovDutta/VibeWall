@@ -10,7 +10,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UsersResponse implements Serializable{
+public class UserResponse implements Serializable{
     private String id;
     private String name ;
 

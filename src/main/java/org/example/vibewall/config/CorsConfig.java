@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
-public class CrosOriginConfig {
+public class CorsConfig {
 
     @Value("${allowed.origins:http://localhost:5173}")
     private String allowedOriginsConfig;

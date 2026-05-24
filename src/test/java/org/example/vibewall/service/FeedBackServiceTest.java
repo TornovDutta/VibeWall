@@ -1,14 +1,14 @@
 package org.example.vibewall.service;
 
 import org.example.vibewall.DTO.ConfessionResponse;
-import org.example.vibewall.DTO.FeedbackRequested;
+import org.example.vibewall.DTO.FeedbackRequest;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.ConfessionNotFoundException;
-import org.example.vibewall.exception.PrincipalNotFollowException;
+import org.example.vibewall.exception.PlatformMisuseException;
 import org.example.vibewall.model.Confession;
 import org.example.vibewall.model.Feedback;
-import org.example.vibewall.repo.ConfessionRepo;
-import org.example.vibewall.service.serviceImple.FeedbackServiceImplement;
+import org.example.vibewall.repo.ConfessionRepository;
+import org.example.vibewall.service.serviceImpl.FeedbackServiceImpl;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,10 +22,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class FeedBackServiceTest {
     @Mock
-    private ConfessionRepo confessionRepo;
+    private ConfessionRepository confessionRepo;
 
     @Mock
     private AiService aiService;
@@ -37,7 +38,7 @@ class FeedBackServiceTest {
     private ConfessionMapper confessionMapper;
 
     @InjectMocks
-    private FeedbackServiceImplement feedbackService;
+    private FeedbackServiceImpl feedbackService;
 
     private Confession confession;
 
@@ -51,8 +52,8 @@ class FeedBackServiceTest {
     // GIVE FEEDBACK
 
     @Test
-    void giveFeedback_shouldAddFeedbackSuccessfully() throws PrincipalNotFollowException, ConfessionNotFoundException {
-        FeedbackRequested request = new FeedbackRequested("good");
+    void giveFeedback_shouldAddFeedbackSuccessfully() throws PlatformMisuseException, ConfessionNotFoundException {
+        FeedbackRequest request = new FeedbackRequest("good");
 
         when(aiService.unSafe("good")).thenReturn(false);
         when(confessionRepo.findById("c1")).thenReturn(Optional.of(confession));
@@ -77,9 +78,9 @@ class FeedBackServiceTest {
         when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
-                PrincipalNotFollowException.class,
+                PlatformMisuseException.class,
                 () -> feedbackService.giveFeedback(
-                        "c1", new FeedbackRequested("bad"))
+                        "c1", new FeedbackRequest("bad"))
         );
 
         verify(confessionRepo, never()).save(any());
@@ -93,14 +94,14 @@ class FeedBackServiceTest {
         assertThrows(
                 ConfessionNotFoundException.class,
                 () -> feedbackService.giveFeedback(
-                        "x", new FeedbackRequested("ok"))
+                        "x", new FeedbackRequest("ok"))
         );
     }
 
     // UPDATE FEEDBACK
 
     @Test
-    void updateFeedback_shouldUpdateSuccessfully() throws PrincipalNotFollowException, ConfessionNotFoundException {
+    void updateFeedback_shouldUpdateSuccessfully() throws PlatformMisuseException, ConfessionNotFoundException {
         confession.getFeedbacks().add(new Feedback(0, "old"));
 
         when(aiService.unSafe("new")).thenReturn(false);
@@ -111,7 +112,7 @@ class FeedBackServiceTest {
 
         ConfessionResponse response =
                 feedbackService.updateFeedback(
-                        "c1", 0, new FeedbackRequested("new"));
+                        "c1", 0, new FeedbackRequest("new"));
 
         assertNotNull(response);
         assertEquals("encodedNew",
@@ -125,9 +126,9 @@ class FeedBackServiceTest {
         when(aiService.unSafe("bad")).thenReturn(true);
 
         assertThrows(
-                PrincipalNotFollowException.class,
+                PlatformMisuseException.class,
                 () -> feedbackService.updateFeedback(
-                        "c1", 0, new FeedbackRequested("bad"))
+                        "c1", 0, new FeedbackRequest("bad"))
         );
     }
 
@@ -139,7 +140,7 @@ class FeedBackServiceTest {
         assertThrows(
                 ConfessionNotFoundException.class,
                 () -> feedbackService.updateFeedback(
-                        "c1", 0, new FeedbackRequested("ok"))
+                        "c1", 0, new FeedbackRequest("ok"))
         );
     }
 

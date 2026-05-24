@@ -1,12 +1,12 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.ReportRequested;
+import org.example.vibewall.DTO.ReportRequest;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.exception.AccessDeniedException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
-import org.example.vibewall.repo.ReportRepo;
+import org.example.vibewall.repo.ReportRepository;
 import org.example.vibewall.service.ReportService;
 import org.example.vibewall.utility.ReportMapper;
 import org.springframework.stereotype.Service;
@@ -15,12 +15,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ReportServiceImplements implements ReportService {
-    private final ReportRepo reportRepo;
+public class ReportServiceImpl implements ReportService {
+    private final ReportRepository reportRepo;
     private final ReportMapper mapper;
 
     @Override
-    public ReportResponse create(String userId, ReportRequested requested) {
+    public ReportResponse create(String userId, ReportRequest requested) {
         Report report = new Report(userId, requested.getContent());
         Report savedReport = reportRepo.save(report);
         return mapper.toDTO(savedReport);
@@ -32,7 +32,7 @@ public class ReportServiceImplements implements ReportService {
     }
 
     @Override
-    public ReportResponse update(String userId, String reportId, ReportRequested requested) throws ReportNotFoundException {
+    public ReportResponse update(String userId, String reportId, ReportRequest requested) throws ReportNotFoundException {
         Report report = reportRepo.findById(reportId)
                 .orElseThrow(() -> new ReportNotFoundException("Report not found with id: " + reportId));
 

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
-import org.example.vibewall.DTO.ConfessionRequested;
+import org.example.vibewall.DTO.ConfessionRequest;
 import org.example.vibewall.exception.ConfessionNotFoundException;
 import org.example.vibewall.security.CustomUserDetails;
 import org.example.vibewall.service.ConfessionService;
@@ -27,7 +27,7 @@ public class ConfessionController {
     @ApiResponse(responseCode = "422", description = "Content failed safety check")
     public ResponseEntity<?> create(
             @AuthenticationPrincipal CustomUserDetails details,
-            @Valid @RequestBody ConfessionRequested requested) {
+            @Valid @RequestBody ConfessionRequest requested) {
         return new ResponseEntity<>(service.create(details.getId(), requested), HttpStatus.CREATED);
     }
 
@@ -38,7 +38,7 @@ public class ConfessionController {
     @ApiResponse(responseCode = "404", description = "Confession not found")
     public ResponseEntity<?> update(
             @AuthenticationPrincipal CustomUserDetails details,
-            @Valid @RequestBody ConfessionRequested requested,
+            @Valid @RequestBody ConfessionRequest requested,
             @PathVariable String id) throws ConfessionNotFoundException {
         return new ResponseEntity<>(service.update(details.getId(), requested, id), HttpStatus.ACCEPTED);
     }

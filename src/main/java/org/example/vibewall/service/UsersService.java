@@ -1,11 +1,11 @@
 package org.example.vibewall.service;
 
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.exception.UserNotFoundException;
 
 public interface UsersService {
-    UsersResponse update(String id, UsersRequested user);
+    UserResponse update(String id, UserRequest user);
 
     void delete(String id) throws UserNotFoundException;
 }

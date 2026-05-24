@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.exception.UserNotFoundException;
 import org.example.vibewall.security.CustomUserDetails;
 import org.example.vibewall.service.UsersService;
@@ -27,8 +27,8 @@ public class UserController {
     @Operation(summary = "Update your profile")
     @ApiResponse(responseCode = "200", description = "Profile updated")
     @ApiResponse(responseCode = "404", description = "User not found")
-    public ResponseEntity<UsersResponse> updateUser(
-            @Valid @RequestBody UsersRequested user,
+    public ResponseEntity<UserResponse> updateUser(
+            @Valid @RequestBody UserRequest user,
             @AuthenticationPrincipal CustomUserDetails details) throws UserNotFoundException {
         return new ResponseEntity<>(service.update(details.getId(), user), HttpStatus.OK);
     }

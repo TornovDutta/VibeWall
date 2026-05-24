@@ -1,14 +1,14 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.TokenResponse;
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.security.JwtUtil;
-import org.example.vibewall.repo.ReportRepo;
-import org.example.vibewall.repo.UsersRepo;
+import org.example.vibewall.repo.ReportRepository;
+import org.example.vibewall.repo.UserRepository;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
@@ -28,25 +28,26 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AdminServiceImplements implements AdminService {
-    private final UsersRepo userRepo;
-    private final ReportRepo reportRepo;
+public class AdminServiceImpl implements AdminService {
+    private final UserRepository userRepo;
+    private final ReportRepository reportRepo;
     private final PasswordEncoder passwordEncoder;
     private final Encryption encryption;
     private final UserMapper mapper;
     private final ReportMapper reportMapper;
-    private static final Logger logger= LoggerFactory.getLogger(AdminServiceImplements.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
 
 
     @Override
-    public List<UsersResponse> getAll() {
-        List<Users> users=userRepo.findAll();
+    public List<UserResponse> getAll() {
+        List<Users> users = userRepo.findAll();
         return mapper.toDTO(users);
     }
+
     @Override
-    public TokenResponse addAdmin(UsersRequested request) {
+    public TokenResponse addAdmin(UserRequest request) {
 
         String encodedUsername = encryption.encode(request.getName());
 
@@ -60,8 +61,6 @@ public class AdminServiceImplements implements AdminService {
         admin.setRole("ADMIN");
 
         Users savedAdmin = userRepo.save(admin);
-
-
 
         String accessToken = jwtUtil.generateToken(
                 savedAdmin.getId(),
@@ -81,32 +80,30 @@ public class AdminServiceImplements implements AdminService {
 
 
     @Override
-    public UsersResponse update(String id, UsersRequested user) throws AdminNotFoundException {
+    public UserResponse update(String id, UserRequest user) throws AdminNotFoundException {
         Users existingUser = userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
 
         existingUser.setUsername(encryption.encode(user.getName()));
         existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        Users saveUser=userRepo.save(existingUser);
+        Users saveUser = userRepo.save(existingUser);
 
         return mapper.toDTO(saveUser);
     }
 
 
-
     @Override
-    public void delete(String id) throws AdminNotFoundException{
+    public void delete(String id) throws AdminNotFoundException {
         userRepo.findById(id)
                 .orElseThrow(() -> new AdminNotFoundException("admin not found with id: " + id));
-
 
         userRepo.removeById(id);
     }
 
     @Override
     public List<ReportResponse> getReport() {
-        List<Report> reports=reportRepo.findAll();
+        List<Report> reports = reportRepo.findAll();
         return reportMapper.toDTO(reports);
     }
 
@@ -115,17 +112,20 @@ public class AdminServiceImplements implements AdminService {
         return reportMapper.toDTO(reportRepo.findById(id).orElseThrow(()->
                 new ReportNotFoundException()));
     }
+
     @Override
     public List<ReportResponse> getPending() {
         return reportMapper.toDTO(reportRepo.findByStatus("PENDING"));
     }
+
     @Override
     public ReportResponse getPendingById(String id) {
-        return reportMapper.toDTO(reportRepo.findByStatusAndId("PENDING",id));
+        return reportMapper.toDTO(reportRepo.findByStatusAndId("PENDING", id));
     }
+
     @Override
     public ReportResponse reslove(String id, String status) throws ReportNotFoundException {
-        Report report=reportRepo.findById(id).orElseThrow(()->
+        Report report = reportRepo.findById(id).orElseThrow(()->
                 new ReportNotFoundException());
 
         report.setStatus(status);

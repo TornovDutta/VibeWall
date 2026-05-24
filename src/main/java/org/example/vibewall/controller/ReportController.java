@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.ReportRequested;
+import org.example.vibewall.DTO.ReportRequest;
 import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.security.CustomUserDetails;
@@ -36,7 +36,7 @@ public class ReportController {
     @Operation(summary = "Submit a new report")
     @ApiResponse(responseCode = "201", description = "Report created")
     public ResponseEntity<?> createReport(
-            @Valid @RequestBody ReportRequested requested,
+            @Valid @RequestBody ReportRequest requested,
             @AuthenticationPrincipal CustomUserDetails details) {
         return new ResponseEntity<>(service.create(details.getId(), requested), HttpStatus.CREATED);
     }
@@ -47,7 +47,7 @@ public class ReportController {
     @ApiResponse(responseCode = "403", description = "Not your report")
     @ApiResponse(responseCode = "404", description = "Report not found")
     public ResponseEntity<?> updateReport(
-            @Valid @RequestBody ReportRequested requested,
+            @Valid @RequestBody ReportRequest requested,
             @PathVariable String reportId,
             @AuthenticationPrincipal CustomUserDetails details) throws ReportNotFoundException {
         return new ResponseEntity<>(service.update(details.getId(), reportId, requested), HttpStatus.ACCEPTED);

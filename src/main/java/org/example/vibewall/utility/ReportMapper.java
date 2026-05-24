@@ -1,9 +1,7 @@
 package org.example.vibewall.utility;
 
 import org.example.vibewall.DTO.ReportResponse;
-import org.example.vibewall.DTO.UsersResponse;
 import org.example.vibewall.model.Report;
-import org.example.vibewall.model.Users;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

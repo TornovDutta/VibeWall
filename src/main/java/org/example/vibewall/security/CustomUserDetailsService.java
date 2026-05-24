@@ -1,7 +1,7 @@
 package org.example.vibewall.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.repo.UsersRepo;
+import org.example.vibewall.repo.UserRepository;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.model.Users;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,11 +11,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService{
-    private final UsersRepo userRepository;
+public class CustomUserDetailsService implements UserDetailsService {
+    private final UserRepository userRepository;
     private final Encryption encryption;
-
-
 
     @Override
     public UserDetails loadUserByUsername(String username)

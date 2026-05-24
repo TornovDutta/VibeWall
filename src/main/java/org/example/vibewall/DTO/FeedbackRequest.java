@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
-public class ReportRequested implements Serializable {
+public class FeedbackRequest implements Serializable {
     @NotBlank(message = "Content cannot be blank")
-    @Size(min = 1, max = 3000, message = "Content must be between 1 and 3000 characters")
+    @Size(min = 1, max = 2000, message = "Content must be between 1 and 2000 characters")
     private String content;
 }

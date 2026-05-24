@@ -1,14 +1,14 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.TokenResponse;
-import org.example.vibewall.DTO.UsersRequested;
-import org.example.vibewall.DTO.UsersResponse;
+import org.example.vibewall.DTO.UserRequest;
+import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.InvalidCredentialsException;
 import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.model.Users;
-import org.example.vibewall.repo.UsersRepo;
+import org.example.vibewall.repo.UserRepository;
 import org.example.vibewall.security.JwtUtil;
 import org.example.vibewall.service.RefreshTokenService;
 import org.example.vibewall.service.RegistrationService;
@@ -22,12 +22,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class RegistrationServiceImple implements RegistrationService {
+public class RegistrationServiceImpl implements RegistrationService {
 
     private final PasswordEncoder passwordEncoder;
-    private final UsersRepo repo;
-    private final static Logger logger =
-            LoggerFactory.getLogger(RegistrationServiceImple.class);
+    private final UserRepository repo;
+    private static final Logger logger =
+            LoggerFactory.getLogger(RegistrationServiceImpl.class);
     private final Encryption encryption;
     private final UserMapper mapper;
     private final JwtUtil jwtUtil;
@@ -35,9 +35,9 @@ public class RegistrationServiceImple implements RegistrationService {
 
 
     @Override
-    public UsersResponse adduser(UsersRequested request) {
+    public UserResponse adduser(UserRequest request) {
 
-        if (repo.existsByUsername((encryption.encode(request.getName())))){
+        if (repo.existsByUsername((encryption.encode(request.getName())))) {
             throw new RuntimeException("User already exists");
         }
 
@@ -57,15 +57,12 @@ public class RegistrationServiceImple implements RegistrationService {
 
         Users savedUser = repo.save(user);
 
-
-
-
-        return UsersResponse.builder().name(request.getName()).id(savedUser.getId()).build();
+        return UserResponse.builder().name(request.getName()).id(savedUser.getId()).build();
     }
 
 
     @Override
-    public TokenResponse login(UsersRequested request) {
+    public TokenResponse login(UserRequest request) {
 
         String encodedUsername = encryption.encode(request.getName());
 
@@ -92,6 +89,7 @@ public class RegistrationServiceImple implements RegistrationService {
                 .role(user.getRole())
                 .build();
     }
+
     @Override
     public TokenResponse refresh(String refreshToken) {
 

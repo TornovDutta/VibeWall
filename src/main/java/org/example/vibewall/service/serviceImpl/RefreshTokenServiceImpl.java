@@ -1,4 +1,4 @@
-package org.example.vibewall.service.serviceImple;
+package org.example.vibewall.service.serviceImpl;
 
 import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.repo.RefreshTokenRepository;
@@ -11,10 +11,9 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class RefreshTokenServiceImplements implements RefreshTokenService {
+public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository repo;
-
 
     private final long REFRESH_EXPIRATION = 7 * 24 * 60 * 60;
 
