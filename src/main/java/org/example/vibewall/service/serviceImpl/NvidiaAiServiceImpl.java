@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Primary
-public class OpenRouterServiceImpl implements AiService {
+public class NvidiaAiServiceImpl implements AiService {
 
     @Value("${nvidia.api.key}")
     private String apiKey;
