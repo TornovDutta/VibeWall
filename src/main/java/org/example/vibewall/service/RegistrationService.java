@@ -12,4 +12,6 @@ public interface RegistrationService {
     void logout();
 
     TokenResponse refresh(String token);
+
+    TokenResponse loginWithGoogle(String token);
 }

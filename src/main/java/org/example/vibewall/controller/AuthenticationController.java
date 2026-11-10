@@ -57,4 +57,13 @@ public class AuthenticationController {
         service.logout();
         return ResponseEntity.ok("Logged out successfully");
     }
+
+    @PostMapping("/google")
+    @Operation(summary = "Login or register with Google (Firebase ID Token)")
+    @ApiResponse(responseCode = "200", description = "Login successful — returns access and refresh tokens")
+    @ApiResponse(responseCode = "401", description = "Invalid Google token")
+    public ResponseEntity<TokenResponse> googleLogin(
+            @Valid @RequestBody TokenRequest requested) {
+        return ResponseEntity.ok(service.loginWithGoogle(requested.getToken()));
+    }
 }
