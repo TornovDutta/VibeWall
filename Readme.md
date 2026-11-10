@@ -9,7 +9,8 @@ A production-ready REST API for an anonymous confession and feedback platform bu
 This is a full-featured backend service I designed and developed from scratch. It includes:
 
 - A clean, layered architecture following MVC and SOLID principles
-- AI-powered content moderation integrated via REST API (NVIDIA NIM / Llama 3.1)
+- AI-powered content moderation and chatbot companion integrated via Hugging Face API
+- Real-time anonymous companion chatbot (`/api/v3/chat`)
 - Server-side encryption at rest for all user-generated content (AES-256-GCM)
 - Stateless JWT authentication with refresh token rotation
 - Redis caching for high-performance feed responses
@@ -44,7 +45,7 @@ This is a full-featured backend service I designed and developed from scratch. I
 | Cache | Redis |
 | Security | Spring Security, JWT (jjwt), BCrypt |
 | Encryption | AES/GCM/NoPadding (256-bit) |
-| AI Integration | NVIDIA NIM — Meta Llama 3.1 8B Instruct |
+| AI Integration | Hugging Face Router API (e.g. Qwen/Qwen2.5-72B-Instruct) |
 | API Docs | SpringDoc OpenAPI 3 (Swagger UI) |
 | Containerization | Docker + Docker Compose |
 | Build Tool | Maven |
@@ -87,7 +88,9 @@ cp .env.example .env
 
 | Variable | Description |
 |---|---|
-| `NVDIA_API_KEY` | NVIDIA NIM API key (`nvapi-...`) — get one at build.nvidia.com |
+| `HF_TOKEN` | Hugging Face user access token (`hf_...`) with Inference Providers access |
+| `HF_MODEL` | Hugging Face model identifier (e.g. `Qwen/Qwen2.5-72B-Instruct`) |
+| `HF_API_URL` | (Optional) Endpoint URL (defaults to `https://router.huggingface.co/v1/chat/completions`) |
 | `ENCRYPTION_KEY` | Base64-encoded 32-byte AES key — `openssl rand -base64 32` |
 | `JWT_SECRET` | Random string (min 32 chars) — `openssl rand -base64 48` |
 | `SPRING_DATA_MONGODB_URI` | MongoDB Atlas connection URI |
@@ -163,15 +166,17 @@ All protected routes require a valid JWT `Bearer` token in the `Authorization` h
 
 ---
 
-## AI Content Moderation
+## AI Content Moderation & Chatbot
 
-Before any post is saved, it is sent to **Meta Llama 3.1 8B Instruct** via the NVIDIA NIM API. The model checks for:
+Content is moderated and chat responses are generated using Hugging Face's router API (e.g. **Qwen/Qwen2.5-72B-Instruct**). The model checks for:
 
 - Hate speech, threats, and harassment
 - Self-harm and violent content
 - Explicit material and illegal activity
 
 If the model flags the content, the request is rejected with `422 Unprocessable Entity`. Only clean content is saved.
+
+Additionally, the `/api/v3/chat` endpoint powers the VibeBot companion across the website.
 
 ---
 
