@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/chat/**",
                                 "/vibes/**",
                                 "/stats/**",
+                                "/support/**",
                                 "/health",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

@@ -35,7 +35,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             throws ConfessionNotFoundException, PlatformMisuseException {
 
         if (aiService.unSafe(requested.getContent())) {
-            throw new PlatformMisuseException("don't follow the principal");
+            throw new PlatformMisuseException("Content flagged by AI safety moderation: violates community guidelines (harassment, hate speech, or offensive content).");
         }
 
         Confession confession = confessionRepo.findById(confessionId)
@@ -60,7 +60,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     public ConfessionResponse giveFeedback(String confessionId, FeedbackRequest requested)
             throws ConfessionNotFoundException, PlatformMisuseException {
         if (aiService.unSafe(requested.getContent())) {
-            throw new PlatformMisuseException("don't follow the principal");
+            throw new PlatformMisuseException("Content flagged by AI safety moderation: violates community guidelines (harassment, hate speech, or offensive content).");
         }
         Confession confession = confessionRepo.findById(confessionId).orElseThrow(()->
                 new ConfessionNotFoundException("wrong id"));

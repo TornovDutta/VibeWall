@@ -33,7 +33,7 @@ public class ConfessionServiceImpl implements ConfessionService {
     public ConfessionResponse create(String userId, ConfessionRequest requested) {
 
         if (aiService.unSafe(requested.getContent())) {
-            throw new UnsafeContentException("unsafe");
+            throw new UnsafeContentException("Content flagged by AI safety moderation: violates community guidelines (harassment, hate speech, or offensive content).");
         }
 
         Confession confession = new Confession(encryption.encode(requested.getContent()), userId);
@@ -55,7 +55,7 @@ public class ConfessionServiceImpl implements ConfessionService {
             throw new AccessDeniedException("access denied");
         }
         if (aiService.unSafe(requested.getContent())) {
-            throw new UnsafeContentException("unsafe");
+            throw new UnsafeContentException("Content flagged by AI safety moderation: violates community guidelines (harassment, hate speech, or offensive content).");
         }
         confession.setContent(encryption.encode(requested.getContent()));
         confessionRepo.save(confession);

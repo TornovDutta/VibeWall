@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.example.vibewall.security.ContentSafetyFilter;
 import org.example.vibewall.service.AiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,36 +104,27 @@ public class HuggingFaceAiServiceImpl implements AiService {
             return false;
         }
 
-        // Quick check against severe safety blocklist
-        if (ruleBasedSafetyCheck(str)) {
+        // Layer 1: High-precision regex pattern filter with leet-speak normalization
+        if (ContentSafetyFilter.isUnsafe(str)) {
+            logger.info("Content flagged as UNSAFE by ContentSafetyFilter pattern analysis");
             return true;
         }
 
-        if (hfToken == null || hfToken.isBlank()) {
-            return false;
-        }
-
-        try {
-            String body = buildChatBody(MODERATION_SYSTEM_PROMPT, "Message: " + str, 10, 0.0);
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    hfUrl,
-                    new HttpEntity<>(body, buildHeaders()),
-                    String.class
-            );
-            return parseModeration(response.getBody());
-        } catch (Exception e) {
-            logger.warn("Hugging Face moderation check failed ({}). Using rule-based safety check.", e.getMessage());
-            return ruleBasedSafetyCheck(str);
-        }
-    }
-
-    private boolean ruleBasedSafetyCheck(String str) {
-        String lower = str.toLowerCase(Locale.ROOT);
-        for (String pattern : SEVERE_BLOCKLIST) {
-            if (lower.contains(pattern)) {
-                return true;
+        // Layer 2: Hugging Face AI semantic analysis (if configured)
+        if (hfToken != null && !hfToken.isBlank()) {
+            try {
+                String body = buildChatBody(MODERATION_SYSTEM_PROMPT, "Evaluate this message: \"" + str + "\"", 25, 0.0);
+                ResponseEntity<String> response = restTemplate.postForEntity(
+                        hfUrl,
+                        new HttpEntity<>(body, buildHeaders()),
+                        String.class
+                );
+                return parseModeration(response.getBody());
+            } catch (Exception e) {
+                logger.warn("Hugging Face API unavailable ({}). Pattern filter passed.", e.getMessage());
             }
         }
+
         return false;
     }
 
@@ -146,7 +138,7 @@ public class HuggingFaceAiServiceImpl implements AiService {
 
             JsonNode error = root.path("error");
             if (!error.isMissingNode()) {
-                String msg = error.path("message").asText("").toLowerCase();
+                String msg = error.path("message").asText("").toLowerCase(Locale.ROOT);
                 if (msg.contains("moderat") || msg.contains("safety") || msg.contains("policy")) {
                     return true;
                 }
@@ -155,11 +147,22 @@ public class HuggingFaceAiServiceImpl implements AiService {
 
             String text = extractContent(responseBody).trim();
             if (text.isEmpty()) return false;
-            if (text.startsWith("1")) return true;
-            if (text.startsWith("0")) return false;
+
+            // Strip reasoning tokens like <think>...</think> if present
+            text = text.replaceAll("(?s)<think>.*?</think>", "").trim();
 
             String lower = text.toLowerCase(Locale.ROOT);
-            return lower.contains("unsafe") || lower.contains("block") || lower.contains("violat");
+            if (lower.startsWith("1") || lower.startsWith("unsafe") || lower.startsWith("block") ||
+                lower.contains("violation") || lower.contains("violat") || lower.contains("harmful") ||
+                lower.contains("hate") || lower.contains("threat")) {
+                return true;
+            }
+
+            if (lower.startsWith("0") || lower.startsWith("safe") || lower.startsWith("allow")) {
+                return false;
+            }
+
+            return lower.contains("unsafe") || lower.contains("block");
         } catch (Exception e) {
             return false;
         }
