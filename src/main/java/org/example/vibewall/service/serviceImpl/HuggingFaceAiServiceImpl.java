@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.PostConstruct;
 import org.example.vibewall.security.ContentSafetyFilter;
 import org.example.vibewall.service.AiService;
 import org.slf4j.Logger;
@@ -25,17 +26,41 @@ public class HuggingFaceAiServiceImpl implements AiService {
 
     private static final Logger logger = LoggerFactory.getLogger(HuggingFaceAiServiceImpl.class);
 
-    @Value("${hf.token:${HF_TOKEN:}}")
+    @Value("${hf.token:${HF_TOKEN:${ai.token:${AI_TOKEN:}}}}")
     private String hfToken;
 
-    @Value("${hf.model:${HF_MODEL:Qwen/Qwen2.5-72B-Instruct}}")
+    @Value("${hf.model:${HF_MODEL:${ai.model:${AI_MODEL:Qwen/Qwen2.5-72B-Instruct}}}}")
     private String hfModel;
 
-    @Value("${hf.api.url:${HF_API_URL:https://router.huggingface.co/v1/chat/completions}}")
+    @Value("${hf.api.url:${HF_API_URL:${ai.api.url:${AI_API_URL:https://router.huggingface.co/v1/chat/completions}}}}")
     private String hfUrl;
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @PostConstruct
+    public void init() {
+        if (hfToken != null) {
+            String trimmedToken = hfToken.trim();
+            // Automatically switch endpoint & model if Groq key is supplied
+            if (trimmedToken.startsWith("gsk_") && hfUrl.contains("huggingface.co")) {
+                this.hfUrl = "https://api.groq.com/openai/v1/chat/completions";
+                if (this.hfModel == null || this.hfModel.contains("Qwen") || this.hfModel.isBlank()) {
+                    this.hfModel = "llama-3.3-70b-versatile";
+                }
+                logger.info("Auto-configured Groq API endpoint for Groq key prefix 'gsk_' (model: {})", this.hfModel);
+            }
+            // Automatically switch endpoint & model if OpenRouter key is supplied
+            else if (trimmedToken.startsWith("sk-or-v1-") && hfUrl.contains("huggingface.co")) {
+                this.hfUrl = "https://openrouter.ai/api/v1/chat/completions";
+                if (this.hfModel == null || this.hfModel.contains("Qwen/Qwen2.5-72B-Instruct")) {
+                    this.hfModel = "meta-llama/llama-3.2-3b-instruct:free";
+                }
+                logger.info("Auto-configured OpenRouter API endpoint for OpenRouter key prefix 'sk-or-v1-' (model: {})", this.hfModel);
+            }
+        }
+        logger.info("AI Service initialized with endpoint: {} and model: {}", hfUrl, hfModel);
+    }
 
     private static final String MODERATION_SYSTEM_PROMPT =
             "You are a content moderator for VibeWall, an anonymous social platform. " +
@@ -69,7 +94,7 @@ public class HuggingFaceAiServiceImpl implements AiService {
     @Override
     public String getResponse(String prompt) {
         if (hfToken == null || hfToken.isBlank()) {
-            return "VibeBot is here for you! Please make sure HF_TOKEN is configured in the environment.";
+            return generateOfflineCompanionResponse(prompt);
         }
 
         try {
@@ -79,23 +104,94 @@ public class HuggingFaceAiServiceImpl implements AiService {
                     new HttpEntity<>(body, buildHeaders()),
                     String.class
             );
-            return extractContent(response.getBody());
+            String reply = extractContent(response.getBody());
+            if (reply != null && !reply.isBlank()) {
+                return reply;
+            }
+            return generateOfflineCompanionResponse(prompt);
         } catch (HttpStatusCodeException e) {
             String errorBody = e.getResponseBodyAsString();
-            logger.warn("Hugging Face API error [{}]: {}", e.getStatusCode(), errorBody);
+            logger.warn("AI Provider API error [{}]: {}", e.getStatusCode(), errorBody);
 
             if (errorBody.contains("pre-paid credits") || errorBody.contains("credits") || e.getStatusCode() == HttpStatus.PAYMENT_REQUIRED) {
-                return "Hey there! I hear you, but my AI inference is currently waiting for Hugging Face pre-paid credits. " +
-                       "Please add credits in Hugging Face Settings -> Billing, or use a model with available quota!";
+                logger.warn("AI Provider quota reached / requires pre-paid credits. To use 100% free AI without credit card, switch to Groq (https://console.groq.com/keys) or OpenRouter in Backend/.env");
+                return generateOfflineCompanionResponse(prompt) +
+                        "\n\n*(Note: Cloud AI quota reached. To use 100% free live AI, switch to Groq in Backend/.env - see README)*";
             } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED || e.getStatusCode() == HttpStatus.FORBIDDEN) {
-                return "My connection to Hugging Face needs attention. Please verify your HF_TOKEN has 'Inference Providers' permission enabled.";
+                logger.warn("AI Provider unauthorized. Please check token permissions in Backend/.env.");
+                return generateOfflineCompanionResponse(prompt);
             }
 
-            return "I'm currently taking a quick breather while connecting to Hugging Face, but I'm here to listen. You're doing great, take a deep breath!";
+            return generateOfflineCompanionResponse(prompt);
         } catch (Exception e) {
-            logger.error("Hugging Face AI request failed: {}", e.getMessage(), e);
-            return "Thank you for sharing with me! I'm currently running in offline companion mode, but remember: your feelings are valid, and things will get better.";
+            logger.error("AI request failed: {}", e.getMessage(), e);
+            return generateOfflineCompanionResponse(prompt);
         }
+    }
+
+    /**
+     * Resilient offline empathetic companion fallback that responds warmly even if
+     * external cloud AI is offline, rate-limited, or out of credits.
+     */
+    public String generateOfflineCompanionResponse(String prompt) {
+        if (prompt == null || prompt.isBlank()) {
+            return "Hey there! I'm VibeBot, your anonymous AI companion on VibeWall. 💜 I'm always here to listen whenever you're ready to share.";
+        }
+
+        String lower = prompt.toLowerCase(Locale.ROOT);
+
+        // Greetings
+        if (lower.matches(".*\\b(hi|hello|hey|greetings|sup|yo|good morning|good evening|good afternoon)\\b.*")) {
+            return "Hey there! 💜 I'm VibeBot, your anonymous companion on VibeWall. How are you feeling today? Whether you want to vent, share a confession, or just have someone listen, I'm right here with you.";
+        }
+
+        // Stress / Anxiety / Overwhelmed / Burnout
+        if (lower.contains("stress") || lower.contains("anxious") || lower.contains("anxiety") ||
+                lower.contains("overwhelm") || lower.contains("burnout") || lower.contains("pressure") ||
+                lower.contains("panic") || lower.contains("exhaust") || lower.contains("cant take this")) {
+            return "Take a slow, deep breath and gently unclench your shoulders. 🌿 " +
+                    "When everything piles up at once, the weight can feel crushing. Remember: you don't need to solve your entire life right now. " +
+                    "Just focus on taking the next small breath and getting through today. You've made it through 100% of your hardest days so far, and you're stronger than you think.";
+        }
+
+        // Sadness / Crying / Loneliness / Heartbreak / Breakup
+        if (lower.contains("sad") || lower.contains("cry") || lower.contains("alone") || lower.contains("lonely") ||
+                lower.contains("heartbreak") || lower.contains("breakup") || lower.contains("broken") ||
+                lower.contains("miss them") || lower.contains("nobody cares") || lower.contains("empty")) {
+            return "I'm so sorry you're hurting right now. 💜 Loneliness and heartache can feel like a heavy shadow, but please hear me: you are not invisible, and your feelings are completely valid. " +
+                    "It's okay to cry and let it all out—crying is how the heart makes room for healing. You don't have to carry this grief alone. VibeWall is a safe sanctuary for you.";
+        }
+
+        // Academic / Exam / School / Career / Job
+        if (lower.contains("exam") || lower.contains("college") || lower.contains("school") ||
+                lower.contains("study") || lower.contains("grades") || lower.contains("fail") ||
+                lower.contains("job") || lower.contains("interview") || lower.contains("career")) {
+            return "Take a deep breath. 📚 Academic and career pressure can make it feel like your entire worth is on the line, but your grades or career milestones do not define your human value. " +
+                    "Give yourself credit for how hard you're trying. Take a short 10-minute break, drink a glass of water, and tackle one small piece at a time. You've got this!";
+        }
+
+        // How VibeWall works / Privacy questions
+        if (lower.contains("how does") || lower.contains("anonymous") || lower.contains("safe") ||
+                lower.contains("privacy") || lower.contains("confession work")) {
+            return "VibeWall is designed from the ground up for total privacy! 🛡️ " +
+                    "When you post a confession, your username and identity are never attached to it. Everything is encrypted, moderation keeps the sanctuary respectful, and you can freely speak your truth without judgment or fear.";
+        }
+
+        // Encouragement / Advice request
+        if (lower.contains("advice") || lower.contains("help me") || lower.contains("what should i do") ||
+                lower.contains("encourage") || lower.contains("positive") || lower.contains("quote")) {
+            return "Here is a gentle reminder for you today: ✨ You are allowed to be both a masterpiece and a work in progress simultaneously. " +
+                    "Be patient with yourself. Give yourself the same gentleness and forgiveness that you so freely give to others. One day at a time.";
+        }
+
+        // Gratitude / Thank you
+        if (lower.contains("thank") || lower.contains("thx") || lower.contains("appreciate")) {
+            return "You are so very welcome! 💜 Never hesitate to stop by and talk whenever you need a friendly space. Sending you warm vibes and peace for the rest of your day!";
+        }
+
+        // Default supportive listening
+        return "Thank you for opening up and sharing that with me. 💜 " +
+                "Sometimes just putting what we feel into words takes immense courage. Whatever chapter of life you're walking through right now, know that your voice matters and you are never truly alone. What else is on your mind?";
     }
 
     @Override
