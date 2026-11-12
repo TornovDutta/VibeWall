@@ -181,6 +181,58 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public void notifyQuestionReceived(String targetUserId, String questionId, String questionSnippet) {
+        if (targetUserId == null || targetUserId.isBlank()) return;
+        try {
+            String snippet = questionSnippet != null && questionSnippet.length() > 40
+                    ? questionSnippet.substring(0, 40) + "..."
+                    : (questionSnippet != null ? questionSnippet : "Question");
+
+            Notification notification = Notification.builder()
+                    .userId(targetUserId)
+                    .confessionId(questionId)
+                    .type("QUESTION_RECEIVED")
+                    .title("New Q&A Question ❓")
+                    .message("Someone asked you: \"" + snippet + "\". Reply publicly on your wall or privately!")
+                    .read(false)
+                    .createdAt(new Date())
+                    .build();
+
+            notificationRepo.save(notification);
+            logger.info("Created QUESTION_RECEIVED notification for user {}", targetUserId);
+        } catch (Exception e) {
+            logger.warn("Failed to create question received notification: {}", e.getMessage());
+        }
+    }
+
+    @Override
+    public void notifyQuestionAnswered(String askerUserId, String questionId, String answerSnippet, boolean isPublic) {
+        if (askerUserId == null || askerUserId.isBlank()) return;
+        try {
+            String snippet = answerSnippet != null && answerSnippet.length() > 40
+                    ? answerSnippet.substring(0, 40) + "..."
+                    : (answerSnippet != null ? answerSnippet : "Answer");
+
+            String privacyText = isPublic ? "publicly on their wall" : "privately";
+
+            Notification notification = Notification.builder()
+                    .userId(askerUserId)
+                    .confessionId(questionId)
+                    .type("QUESTION_ANSWERED")
+                    .title("Question Answered 💬")
+                    .message("Your question was answered " + privacyText + ": \"" + snippet + "\"")
+                    .read(false)
+                    .createdAt(new Date())
+                    .build();
+
+            notificationRepo.save(notification);
+            logger.info("Created QUESTION_ANSWERED notification for user {}", askerUserId);
+        } catch (Exception e) {
+            logger.warn("Failed to create question answered notification: {}", e.getMessage());
+        }
+    }
+
+    @Override
     public List<NotificationResponse> getUserNotifications(String userId) {
         return notificationRepo.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()

@@ -10,6 +10,8 @@ public interface NotificationService {
     void notifyFeedback(String confessionId, String feedbackContent);
     void notifyPollCreated(String userId, String pollId, String question);
     void notifyPollVote(String pollId, String pollQuestion, String pollOwnerUserId, int totalVotes);
+    void notifyQuestionReceived(String targetUserId, String questionId, String questionSnippet);
+    void notifyQuestionAnswered(String askerUserId, String questionId, String answerSnippet, boolean isPublic);
     List<NotificationResponse> getUserNotifications(String userId);
     long getUnreadCount(String userId);
     NotificationResponse markAsRead(String userId, String notificationId);
