@@ -41,7 +41,7 @@ public class Poll {
     @CreatedDate
     private Date createdAt;
 
-    @Indexed(expireAfter = "P7D") // Auto-cleanup after 7 days
+    @Indexed(expireAfter = "PT168H") // Auto-cleanup after 7 days
     private Date expiresAt;
 
     public boolean isActive() {

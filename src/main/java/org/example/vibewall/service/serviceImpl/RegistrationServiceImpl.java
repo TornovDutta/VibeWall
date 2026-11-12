@@ -44,7 +44,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Override
     public UserResponse adduser(UserRequest request) {
 
-        if (repo.existsByUsername((encryption.encode(request.getName())))) {
+        String encodedUsername = encryption.encode(request.getName());
+        if (repo.existsByUsername(encodedUsername)) {
             throw new RuntimeException("User already exists");
         }
 
@@ -58,7 +59,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         }
 
         Users user = new Users();
-        user.setUsername(encryption.encode(request.getName()));
+        user.setUsername(encodedUsername);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
 

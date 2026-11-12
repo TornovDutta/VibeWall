@@ -65,6 +65,11 @@ class ConfessionServiceTest {
 
         when(aiService.unSafe("hello")).thenReturn(false);
         when(encryption.encode("hello")).thenReturn("encoded");
+        when(confessionRepo.save(any(Confession.class))).thenAnswer(invocation -> {
+            Confession c = invocation.getArgument(0);
+            c.setId("c1");
+            return c;
+        });
         when(confessionMapper.toDTO(any(Confession.class)))
                 .thenReturn(new ConfessionResponse("c1", "encoded", null));
 

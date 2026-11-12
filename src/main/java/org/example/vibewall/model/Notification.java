@@ -36,6 +36,6 @@ public class Notification {
     private boolean read;
 
     @CreatedDate
-    @Indexed(expireAfter = "P7D") // 7 days retention
+    @Indexed(expireAfter = "PT168H") // 7 days retention
     private Date createdAt;
 }

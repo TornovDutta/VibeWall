@@ -40,11 +40,14 @@ public class ConfessionServiceImpl implements ConfessionService {
 
         Confession confession = new Confession(encryption.encode(requested.getContent()), userId);
 
-        confessionRepo.save(confession);
+        Confession saved = confessionRepo.save(confession);
+        if (saved == null) {
+            saved = confession;
+        }
 
-        notificationService.notifyConfessionCreated(userId, confession.getId(), requested.getContent());
+        notificationService.notifyConfessionCreated(userId, saved.getId(), requested.getContent());
 
-        return mapper.toDTO(confession);
+        return mapper.toDTO(saved);
     }
 
     @Override

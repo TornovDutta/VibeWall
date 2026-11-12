@@ -55,7 +55,12 @@ public class NotificationServiceImpl implements NotificationService {
         if (confessionId == null || reactionType == null) return;
         try {
             Confession confession = confessionRepo.findById(confessionId).orElse(null);
-            if (confession == null || confession.getUserId() == null || confession.getUserId().isBlank()) {
+            if (confession == null) {
+                logger.warn("notifyReaction skipped: confession not found for id={}", confessionId);
+                return;
+            }
+            if (confession.getUserId() == null || confession.getUserId().isBlank()) {
+                logger.warn("notifyReaction skipped: confession id={} has no linked userId", confessionId);
                 return;
             }
 
@@ -86,8 +91,9 @@ public class NotificationServiceImpl implements NotificationService {
                     .build();
 
             notificationRepo.save(notification);
+            logger.info("Created REACTION notification for recipient userId={}, confessionId={}", confession.getUserId(), confessionId);
         } catch (Exception e) {
-            logger.warn("Failed to create reaction notification: {}", e.getMessage());
+            logger.warn("Failed to create reaction notification: {}", e.getMessage(), e);
         }
     }
 
@@ -96,7 +102,12 @@ public class NotificationServiceImpl implements NotificationService {
         if (confessionId == null) return;
         try {
             Confession confession = confessionRepo.findById(confessionId).orElse(null);
-            if (confession == null || confession.getUserId() == null || confession.getUserId().isBlank()) {
+            if (confession == null) {
+                logger.warn("notifyFeedback skipped: confession not found for id={}", confessionId);
+                return;
+            }
+            if (confession.getUserId() == null || confession.getUserId().isBlank()) {
+                logger.warn("notifyFeedback skipped: confession id={} has no linked userId", confessionId);
                 return;
             }
 
@@ -108,15 +119,16 @@ public class NotificationServiceImpl implements NotificationService {
                     .userId(confession.getUserId())
                     .confessionId(confessionId)
                     .type("COMMENT")
-                    .title("New Comment")
+                    .title("New Comment 💬")
                     .message("Someone commented: \"" + commentSnippet + "\" on your confession.")
                     .read(false)
                     .createdAt(new Date())
                     .build();
 
             notificationRepo.save(notification);
+            logger.info("Created COMMENT notification for recipient userId={}, confessionId={}", confession.getUserId(), confessionId);
         } catch (Exception e) {
-            logger.warn("Failed to create feedback notification: {}", e.getMessage());
+            logger.warn("Failed to create feedback notification: {}", e.getMessage(), e);
         }
     }
 

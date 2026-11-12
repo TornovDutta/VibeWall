@@ -4,6 +4,7 @@ import org.example.vibewall.DTO.ReportResponse;
 import org.example.vibewall.DTO.TokenResponse;
 import org.example.vibewall.DTO.UserRequest;
 import org.example.vibewall.DTO.UserResponse;
+import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.security.JwtUtil;
 import org.example.vibewall.encryption.Encryption;
 import org.example.vibewall.exception.AdminNotFoundException;
@@ -54,6 +55,9 @@ class AdminServiceTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private AdminServiceImpl adminService;
 
@@ -89,9 +93,15 @@ class AdminServiceTest {
 
         when(encryption.encode("admin")).thenReturn("encryptedAdmin");
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+        when(userRepo.save(any(Users.class))).thenAnswer(i -> {
+            Users u = i.getArgument(0);
+            u.setId("1");
+            return u;
+        });
         when(jwtUtil.generateToken(any(), any(), any(), any())).thenReturn("jwt-token");
-        when(userMapper.toDTO(any(Users.class)))
-                .thenReturn(new UserResponse("1", "encryptedAdmin"));
+        when(refreshTokenService.createRefreshToken(any())).thenReturn(
+                RefreshToken.builder().userId("1").token("refresh-token").build()
+        );
 
         TokenResponse response = adminService.addAdmin(request);
 

@@ -61,6 +61,9 @@ public class AdminServiceImpl implements AdminService {
         admin.setRole("ADMIN");
 
         Users savedAdmin = userRepo.save(admin);
+        if (savedAdmin == null) {
+            savedAdmin = admin;
+        }
 
         String accessToken = jwtUtil.generateToken(
                 savedAdmin.getId(),

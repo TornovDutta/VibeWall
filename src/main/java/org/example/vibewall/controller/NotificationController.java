@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.vibewall.DTO.NotificationResponse;
 import org.example.vibewall.security.CustomUserDetails;
 import org.example.vibewall.service.NotificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,9 @@ public class NotificationController {
     public ResponseEntity<List<NotificationResponse>> getNotifications(
             @AuthenticationPrincipal CustomUserDetails details
     ) {
+        if (details == null || details.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.ok(notificationService.getUserNotifications(details.getId()));
     }
 
@@ -34,6 +38,9 @@ public class NotificationController {
     public ResponseEntity<Map<String, Long>> getUnreadCount(
             @AuthenticationPrincipal CustomUserDetails details
     ) {
+        if (details == null || details.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         long count = notificationService.getUnreadCount(details.getId());
         return ResponseEntity.ok(Map.of("unreadCount", count));
     }
@@ -44,6 +51,9 @@ public class NotificationController {
             @AuthenticationPrincipal CustomUserDetails details,
             @PathVariable String id
     ) {
+        if (details == null || details.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.ok(notificationService.markAsRead(details.getId(), id));
     }
 
@@ -52,6 +62,9 @@ public class NotificationController {
     public ResponseEntity<Map<String, String>> markAllAsRead(
             @AuthenticationPrincipal CustomUserDetails details
     ) {
+        if (details == null || details.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         notificationService.markAllAsRead(details.getId());
         return ResponseEntity.ok(Map.of("status", "success"));
     }
@@ -62,6 +75,9 @@ public class NotificationController {
             @AuthenticationPrincipal CustomUserDetails details,
             @PathVariable String id
     ) {
+        if (details == null || details.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         notificationService.deleteNotification(details.getId(), id);
         return ResponseEntity.ok(Map.of("status", "deleted"));
     }
@@ -71,6 +87,9 @@ public class NotificationController {
     public ResponseEntity<Map<String, String>> clearAllNotifications(
             @AuthenticationPrincipal CustomUserDetails details
     ) {
+        if (details == null || details.getId() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         notificationService.clearAllNotifications(details.getId());
         return ResponseEntity.ok(Map.of("status", "cleared"));
     }
