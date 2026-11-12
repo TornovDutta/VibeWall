@@ -11,6 +11,7 @@ import org.example.vibewall.model.Feedback;
 import org.example.vibewall.repo.ConfessionRepository;
 import org.example.vibewall.service.FeedbackService;
 import org.example.vibewall.service.AiService;
+import org.example.vibewall.service.NotificationService;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final AiService aiService;
     private final Encryption encryption;
     private final ConfessionMapper mapper;
+    private final NotificationService notificationService;
 
     @Override
     @CacheEvict(
@@ -70,6 +72,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         confession.getFeedbacks().add(feedback);
         confessionRepo.save(confession);
+
+        notificationService.notifyFeedback(confessionId, requested.getContent());
 
         return mapper.toDTO(confession);
     }

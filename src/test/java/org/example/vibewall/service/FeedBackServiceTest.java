@@ -37,6 +37,9 @@ class FeedBackServiceTest {
     @Mock
     private ConfessionMapper confessionMapper;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private FeedbackServiceImpl feedbackService;
 

@@ -12,6 +12,7 @@ import org.example.vibewall.repo.ConfessionRepository;
 import org.example.vibewall.repo.UserRepository;
 import org.example.vibewall.service.ConfessionService;
 import org.example.vibewall.service.AiService;
+import org.example.vibewall.service.NotificationService;
 import org.example.vibewall.utility.ConfessionMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class ConfessionServiceImpl implements ConfessionService {
     private final ConfessionMapper mapper;
     private final Encryption encryption;
     private final AiService aiService;
+    private final NotificationService notificationService;
 
     @Override
     @CacheEvict(
@@ -39,6 +41,8 @@ public class ConfessionServiceImpl implements ConfessionService {
         Confession confession = new Confession(encryption.encode(requested.getContent()), userId);
 
         confessionRepo.save(confession);
+
+        notificationService.notifyConfessionCreated(userId, confession.getId(), requested.getContent());
 
         return mapper.toDTO(confession);
     }

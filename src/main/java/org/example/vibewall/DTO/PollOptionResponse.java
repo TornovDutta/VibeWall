@@ -1,0 +1,17 @@
+package org.example.vibewall.DTO;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PollOptionResponse {
+    private int id;
+    private String text;
+    private int voteCount;
+    private double percentage;
+}

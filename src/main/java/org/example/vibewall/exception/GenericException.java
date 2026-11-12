@@ -16,7 +16,8 @@ public class GenericException {
             UserNotFoundException.class,
             ReportNotFoundException.class,
             ConfessionNotFoundException.class,
-            FeedbackNotFoundException.class
+            FeedbackNotFoundException.class,
+            PollNotFoundException.class
     })
     public ResponseEntity<?> handleNotFound(Exception e) {
         return build(e.getMessage(), "resource not found", HttpStatus.NOT_FOUND);

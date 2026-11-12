@@ -41,6 +41,9 @@ class ConfessionServiceTest {
     @Mock
     private AiService aiService;
 
+    @Mock
+    private NotificationService notificationService;
+
     @InjectMocks
     private ConfessionServiceImpl confessionService;
 

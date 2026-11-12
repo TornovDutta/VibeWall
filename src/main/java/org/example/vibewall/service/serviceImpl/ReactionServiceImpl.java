@@ -1,6 +1,7 @@
 package org.example.vibewall.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.vibewall.service.NotificationService;
 import org.example.vibewall.service.ReactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ public class ReactionServiceImpl implements ReactionService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReactionServiceImpl.class);
     private final StringRedisTemplate redisTemplate;
+    private final NotificationService notificationService;
 
     // Allowed reaction types
     private static final Set<String> ALLOWED_REACTIONS = Set.of("hug", "heart", "relate", "strength");
@@ -61,16 +63,20 @@ public class ReactionServiceImpl implements ReactionService {
         }
 
         String key = "reactions:" + confessionId;
+        Map<String, Integer> result;
         try {
             redisTemplate.opsForHash().increment(key, normalizedType, 1);
             redisTemplate.expire(key, TTL_12_HOURS);
-            return getReactions(confessionId);
+            result = getReactions(confessionId);
         } catch (Exception e) {
             logger.warn("Redis unavailable for reactions write, using in-memory: {}", e.getMessage());
             Map<String, Integer> map = memoryFallback.computeIfAbsent(confessionId, k -> getDefaultReactions());
             map.put(normalizedType, map.getOrDefault(normalizedType, 0) + 1);
-            return new HashMap<>(map);
+            result = new HashMap<>(map);
         }
+
+        notificationService.notifyReaction(confessionId, normalizedType);
+        return result;
     }
 
     private Map<String, Integer> getDefaultReactions() {
