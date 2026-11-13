@@ -181,4 +181,38 @@ class QuestionServiceTest {
         assertEquals(1, results.size());
         assertEquals("q1", results.get(0).getId());
     }
+
+    @Test
+    void askQuestion_community_success() {
+        QuestionRequest request = QuestionRequest.builder()
+                .content("What is the meaning of life?")
+                .anonymous(true)
+                .build();
+
+        when(aiService.unSafe("What is the meaning of life?")).thenReturn(false);
+        when(questionRepo.save(any(Question.class))).thenAnswer(i -> {
+            Question q = i.getArgument(0);
+            q.setId("q_community");
+            return q;
+        });
+
+        QuestionResponse response = questionService.askQuestion("community", request, null);
+
+        assertNotNull(response);
+        assertEquals("q_community", response.getId());
+        assertEquals("Community", response.getTargetAlias());
+        assertTrue(response.isPublic());
+        verify(notificationService, never()).notifyQuestionReceived(any(), any(), any());
+    }
+
+    @Test
+    void getFeedQuestions_returnsList() {
+        sampleQuestion.setPublic(true);
+        when(questionRepo.findAllPublicQuestions(any())).thenReturn(List.of(sampleQuestion));
+
+        List<QuestionResponse> results = questionService.getFeedQuestions();
+
+        assertEquals(1, results.size());
+        assertEquals("q1", results.get(0).getId());
+    }
 }

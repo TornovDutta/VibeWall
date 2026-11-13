@@ -59,8 +59,9 @@ public class SecurityConfig {
                                 "/api-docs/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/polls/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/qa", "/qa/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/qa/wall/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/qa/ask/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/qa/ask", "/qa/ask/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users/**").authenticated()
                         .anyRequest().authenticated()

@@ -1,7 +1,9 @@
 package org.example.vibewall.repo;
 
 import org.example.vibewall.model.Question;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +20,8 @@ public interface QuestionRepository extends MongoRepository<Question, String> {
     List<Question> findByAskerUserIdOrderByCreatedAtDesc(String askerUserId);
 
     long countByTargetUserIdAndStatus(String targetUserId, String status);
+
+    @Query("{ '$or': [ { 'isPublic': true }, { 'isPublic': { '$exists': false } }, { 'isPublic': null } ] }")
+    List<Question> findAllPublicQuestions(Sort sort);
 }
+

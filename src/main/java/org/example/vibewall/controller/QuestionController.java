@@ -25,6 +25,22 @@ public class QuestionController {
 
     private final QuestionService questionService;
 
+    @GetMapping
+    @Operation(summary = "Get all public Q&A questions for the feed")
+    public ResponseEntity<List<QuestionResponse>> getFeedQuestions() {
+        return ResponseEntity.ok(questionService.getFeedQuestions());
+    }
+
+    @PostMapping("/ask")
+    @Operation(summary = "Ask a community question (anonymously or with identity)")
+    public ResponseEntity<QuestionResponse> askCommunityQuestion(
+            @Valid @RequestBody QuestionRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        QuestionResponse response = questionService.askQuestion("community", request, currentUser);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
     @PostMapping("/ask/{targetUserId}")
     @Operation(summary = "Ask a question to a wall owner (anonymously or with identity)")
     public ResponseEntity<QuestionResponse> askQuestion(

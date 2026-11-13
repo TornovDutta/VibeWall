@@ -16,6 +16,7 @@ import org.example.vibewall.service.QuestionService;
 import org.example.vibewall.utility.AnonNameUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -35,16 +36,15 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public QuestionResponse askQuestion(String targetUserId, QuestionRequest request, CustomUserDetails currentUser) {
-        if (targetUserId == null || targetUserId.isBlank()) {
-            throw new IllegalArgumentException("Target user ID is required");
-        }
-
-        if (!userRepo.existsById(targetUserId)) {
-            throw new IllegalArgumentException("User wall not found");
-        }
-
         if (aiService.unSafe(request.getContent())) {
             throw new UnsafeContentException("Question flagged by AI moderation: violates community safety guidelines.");
+        }
+
+        boolean isCommunity = targetUserId == null || targetUserId.isBlank() || "community".equalsIgnoreCase(targetUserId);
+        String finalTargetUserId = isCommunity ? "community" : targetUserId.trim();
+
+        if (!isCommunity && !userRepo.existsById(finalTargetUserId)) {
+            throw new IllegalArgumentException("User wall not found");
         }
 
         String askerUserId = null;
@@ -66,12 +66,13 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         Question question = Question.builder()
-                .targetUserId(targetUserId)
+                .targetUserId(finalTargetUserId)
                 .askerUserId(askerUserId)
                 .askerAlias(askerAlias)
                 .isAnonymous(isAnonymous)
                 .content(request.getContent().trim())
                 .status("PENDING")
+                .isPublic(true)
                 .createdAt(new Date())
                 .build();
 
@@ -80,8 +81,10 @@ public class QuestionServiceImpl implements QuestionService {
             saved = question;
         }
 
-        notificationService.notifyQuestionReceived(targetUserId, saved.getId(), saved.getContent());
-        logger.info("New question asked to targetUserId={}, isAnonymous={}", targetUserId, isAnonymous);
+        if (!isCommunity) {
+            notificationService.notifyQuestionReceived(finalTargetUserId, saved.getId(), saved.getContent());
+        }
+        logger.info("New question asked to targetUserId={}, isAnonymous={}", finalTargetUserId, isAnonymous);
 
         return toDTO(saved);
     }
@@ -113,12 +116,21 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new IllegalArgumentException("Question not found with id: " + questionId));
 
-        if (!question.getTargetUserId().equals(ownerUserId)) {
+        boolean isCommunity = question.getTargetUserId() == null
+                || question.getTargetUserId().isBlank()
+                || "community".equalsIgnoreCase(question.getTargetUserId());
+
+        if (!isCommunity && !question.getTargetUserId().equals(ownerUserId)) {
             throw new AccessDeniedException("You are not authorized to reply to this question.");
         }
 
         if (aiService.unSafe(request.getAnswer())) {
             throw new UnsafeContentException("Reply flagged by AI moderation: violates community safety guidelines.");
+        }
+
+        // If it was a community question, track who answered it
+        if (isCommunity) {
+            question.setTargetUserId(ownerUserId);
         }
 
         question.setAnswer(request.getAnswer().trim());
@@ -149,7 +161,10 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepo.findById(questionId)
                 .orElseThrow(() -> new IllegalArgumentException("Question not found with id: " + questionId));
 
-        if (!isAdmin && !question.getTargetUserId().equals(userId)) {
+        boolean isTarget = question.getTargetUserId() != null && question.getTargetUserId().equals(userId);
+        boolean isAsker = question.getAskerUserId() != null && question.getAskerUserId().equals(userId);
+
+        if (!isAdmin && !isTarget && !isAsker) {
             throw new AccessDeniedException("You are not authorized to delete this question.");
         }
 
@@ -170,11 +185,26 @@ public class QuestionServiceImpl implements QuestionService {
         return questionRepo.countByTargetUserIdAndStatus(ownerUserId, "PENDING");
     }
 
+    @Override
+    public List<QuestionResponse> getFeedQuestions() {
+        return questionRepo.findAllPublicQuestions(Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     private QuestionResponse toDTO(Question q) {
+        String targetAlias;
+        if (q.getTargetUserId() == null || q.getTargetUserId().isBlank() || "community".equalsIgnoreCase(q.getTargetUserId())) {
+            targetAlias = "Community";
+        } else {
+            targetAlias = AnonNameUtil.generate(q.getTargetUserId());
+        }
+
         return QuestionResponse.builder()
                 .id(q.getId())
                 .targetUserId(q.getTargetUserId())
-                .targetAlias(AnonNameUtil.generate(q.getTargetUserId()))
+                .targetAlias(targetAlias)
                 .askerAlias(q.getAskerAlias())
                 .isAnonymous(q.isAnonymous())
                 .content(q.getContent())

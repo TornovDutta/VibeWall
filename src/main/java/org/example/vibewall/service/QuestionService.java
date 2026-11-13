@@ -22,4 +22,6 @@ public interface QuestionService {
     List<QuestionResponse> getMyAskedQuestions(String askerUserId);
 
     long getPendingCount(String ownerUserId);
+
+    List<QuestionResponse> getFeedQuestions();
 }
