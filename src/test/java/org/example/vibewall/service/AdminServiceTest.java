@@ -58,6 +58,12 @@ class AdminServiceTest {
     @Mock
     private RefreshTokenService refreshTokenService;
 
+    @Mock
+    private SystemLogService systemLogService;
+
+    @Mock
+    private AiService aiService;
+
     @InjectMocks
     private AdminServiceImpl adminService;
 
@@ -208,6 +214,33 @@ class AdminServiceTest {
 
         assertNotNull(response);
         assertEquals("RESOLVED", report.getStatus());
+    }
+
+    @Test
+    void getLogs_shouldCallSystemLogService() {
+        when(systemLogService.getRecentLogs()).thenReturn(List.of());
+        assertEquals(0, adminService.getLogs().size());
+        verify(systemLogService).getRecentLogs();
+    }
+
+    @Test
+    void clearLogs_shouldCallSystemLogService() {
+        adminService.clearLogs();
+        verify(systemLogService).clearLogs();
+    }
+
+    @Test
+    void getAiStatus_shouldCallAiService() {
+        when(aiService.getAiStatus()).thenReturn(null);
+        assertNull(adminService.getAiStatus());
+        verify(aiService).getAiStatus();
+    }
+
+    @Test
+    void testAiConnection_shouldCallAiService() {
+        when(aiService.testAiConnection()).thenReturn(null);
+        assertNull(adminService.testAiConnection());
+        verify(aiService).testAiConnection();
     }
 
 }

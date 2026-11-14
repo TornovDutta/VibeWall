@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PostConstruct;
+import org.example.vibewall.DTO.AiStatusResponse;
 import org.example.vibewall.security.ContentSafetyFilter;
 import org.example.vibewall.service.AiService;
+import org.example.vibewall.service.SystemLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
@@ -17,6 +20,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,6 +38,14 @@ public class HuggingFaceAiServiceImpl implements AiService {
 
     @Value("${hf.api.url:${HF_API_URL:${ai.api.url:${AI_API_URL:https://router.huggingface.co/v1/chat/completions}}}}")
     private String hfUrl;
+
+    @Autowired(required = false)
+    private SystemLogService systemLogService;
+
+    private volatile String currentStatus = "HEALTHY";
+    private volatile String lastError = null;
+    private volatile Long lastLatencyMs = null;
+    private volatile Date lastChecked = new Date();
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -112,6 +124,12 @@ public class HuggingFaceAiServiceImpl implements AiService {
         } catch (HttpStatusCodeException e) {
             String errorBody = e.getResponseBodyAsString();
             logger.warn("AI Provider API error [{}]: {}", e.getStatusCode(), errorBody);
+            this.currentStatus = "DEGRADED";
+            this.lastError = "HTTP " + e.getStatusCode() + ": " + (errorBody.length() > 200 ? errorBody.substring(0, 200) : errorBody);
+            this.lastChecked = new Date();
+            if (systemLogService != null) {
+                systemLogService.recordLog("WARN", "AI_SERVICE", "Chatbot /get-response", e.getStatusCode().value(), null, "AI Provider returned error: " + e.getStatusCode(), lastError);
+            }
 
             if (errorBody.contains("pre-paid credits") || errorBody.contains("credits") || e.getStatusCode() == HttpStatus.PAYMENT_REQUIRED) {
                 logger.warn("AI Provider quota reached / requires pre-paid credits. To use 100% free AI without credit card, switch to Groq (https://console.groq.com/keys) or OpenRouter in Backend/.env");
@@ -125,6 +143,12 @@ public class HuggingFaceAiServiceImpl implements AiService {
             return generateOfflineCompanionResponse(prompt);
         } catch (Exception e) {
             logger.error("AI request failed: {}", e.getMessage(), e);
+            this.currentStatus = "DEGRADED";
+            this.lastError = e.getMessage() != null ? e.getMessage() : e.toString();
+            this.lastChecked = new Date();
+            if (systemLogService != null) {
+                systemLogService.recordLog("WARN", "AI_SERVICE", "Chatbot /get-response", 500, null, "AI request failed: " + e.getMessage(), lastError);
+            }
             return generateOfflineCompanionResponse(prompt);
         }
     }
@@ -218,6 +242,12 @@ public class HuggingFaceAiServiceImpl implements AiService {
                 return parseModeration(response.getBody());
             } catch (Exception e) {
                 logger.warn("Hugging Face API unavailable ({}). Pattern filter passed.", e.getMessage());
+                this.currentStatus = "DEGRADED";
+                this.lastError = "Moderation request failed: " + e.getMessage();
+                this.lastChecked = new Date();
+                if (systemLogService != null) {
+                    systemLogService.recordLog("WARN", "AI_SERVICE", "Moderation /unsafe", 503, null, "AI moderation unavailable: " + e.getMessage(), lastError);
+                }
             }
         }
 
@@ -302,5 +332,93 @@ public class HuggingFaceAiServiceImpl implements AiService {
         } catch (Exception e) {
             return "";
         }
+    }
+
+    @Override
+    public AiStatusResponse getAiStatus() {
+        String provider = detectProvider();
+        String message;
+        if ("HEALTHY".equalsIgnoreCase(currentStatus)) {
+            message = "AI provider (" + provider + ") is online and responding normally (" + (lastLatencyMs != null ? lastLatencyMs + "ms" : "ready") + ").";
+        } else if ("DEGRADED".equalsIgnoreCase(currentStatus)) {
+            message = "AI provider is degraded: " + (lastError != null ? lastError : "Fallback active") + ". Pattern-based moderation and offline companion active.";
+        } else if ("OFFLINE".equalsIgnoreCase(currentStatus)) {
+            message = "AI provider is offline: " + (lastError != null ? lastError : "Connection failed") + ". Offline fallback active.";
+        } else {
+            message = "AI token is unconfigured. Offline companion and regex safety are running.";
+        }
+
+        return AiStatusResponse.builder()
+                .status(currentStatus)
+                .provider(provider)
+                .model(hfModel)
+                .endpoint(hfUrl)
+                .latencyMs(lastLatencyMs)
+                .lastChecked(lastChecked)
+                .lastError(lastError)
+                .activeFallback(!"HEALTHY".equalsIgnoreCase(currentStatus))
+                .message(message)
+                .build();
+    }
+
+    @Override
+    public AiStatusResponse testAiConnection() {
+        this.lastChecked = new Date();
+        if (hfToken == null || hfToken.isBlank()) {
+            this.currentStatus = "UNCONFIGURED";
+            this.lastError = "AI token is not configured in Backend/.env";
+            return getAiStatus();
+        }
+
+        long start = System.currentTimeMillis();
+        try {
+            String body = buildChatBody("You are an echo bot.", "ping", 5, 0.0);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    hfUrl,
+                    new HttpEntity<>(body, buildHeaders()),
+                    String.class
+            );
+
+            long latency = System.currentTimeMillis() - start;
+            if (response.getStatusCode().is2xxSuccessful()) {
+                this.currentStatus = "HEALTHY";
+                this.lastLatencyMs = latency;
+                this.lastError = null;
+                logger.info("AI ping test successful in {}ms", latency);
+            } else {
+                this.currentStatus = "DEGRADED";
+                this.lastLatencyMs = latency;
+                this.lastError = "Returned non-2xx status: " + response.getStatusCode();
+                if (systemLogService != null) {
+                    systemLogService.recordLog("WARN", "AI_SERVICE", "POST /admin/ai-test", response.getStatusCode().value(), "admin", "AI ping test non-2xx response", lastError);
+                }
+            }
+        } catch (HttpStatusCodeException e) {
+            long latency = System.currentTimeMillis() - start;
+            this.currentStatus = "OFFLINE";
+            this.lastLatencyMs = latency;
+            this.lastError = "HTTP " + e.getStatusCode() + ": " + e.getResponseBodyAsString();
+            if (systemLogService != null) {
+                systemLogService.recordLog("CRITICAL", "AI_SERVICE", "POST /admin/ai-test", e.getStatusCode().value(), "admin", "AI ping test failed: " + e.getStatusCode(), lastError);
+            }
+        } catch (Exception e) {
+            long latency = System.currentTimeMillis() - start;
+            this.currentStatus = "OFFLINE";
+            this.lastLatencyMs = latency;
+            this.lastError = e.getMessage() != null ? e.getMessage() : e.toString();
+            if (systemLogService != null) {
+                systemLogService.recordLog("CRITICAL", "AI_SERVICE", "POST /admin/ai-test", 503, "admin", "AI ping test failed with exception", lastError);
+            }
+        }
+        return getAiStatus();
+    }
+
+    private String detectProvider() {
+        if (hfUrl == null) return "Unknown";
+        String lower = hfUrl.toLowerCase(Locale.ROOT);
+        if (lower.contains("groq.com")) return "Groq";
+        if (lower.contains("openrouter.ai")) return "OpenRouter";
+        if (lower.contains("huggingface.co")) return "Hugging Face";
+        return "Custom LLM Provider";
     }
 }

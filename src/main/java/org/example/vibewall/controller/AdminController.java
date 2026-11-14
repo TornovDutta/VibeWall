@@ -4,10 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.ReportResponse;
-import org.example.vibewall.DTO.TokenResponse;
-import org.example.vibewall.DTO.UserRequest;
-import org.example.vibewall.DTO.UserResponse;
+import org.example.vibewall.DTO.*;
 import org.example.vibewall.exception.AdminNotFoundException;
 import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.security.CustomUserDetails;
@@ -99,5 +96,45 @@ public class AdminController {
             @PathVariable String id,
             @RequestParam String status) throws ReportNotFoundException {
         return new ResponseEntity<>(service.reslove(id, status), HttpStatus.OK);
+    }
+
+    @GetMapping("/logs")
+    @Operation(summary = "Get latest system error and diagnostic logs")
+    @ApiResponse(responseCode = "200", description = "List of latest system error logs")
+    public ResponseEntity<List<SystemLogResponse>> getLogs() {
+        return ResponseEntity.ok(service.getLogs());
+    }
+
+    @DeleteMapping("/logs")
+    @Operation(summary = "Clear all system error logs")
+    @ApiResponse(responseCode = "204", description = "Logs cleared")
+    public ResponseEntity<Void> clearLogs() {
+        service.clearLogs();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/logs/client")
+    @Operation(summary = "Log an error experienced by a client/user on the website")
+    public ResponseEntity<Void> logClientError(
+            @RequestBody ClientErrorRequest req,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        String userId = (user != null) ? user.getId() : null;
+        service.recordClientError(req, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/ai-status")
+    @Operation(summary = "Get live AI system status, provider, latency, and health")
+    @ApiResponse(responseCode = "200", description = "Current AI system diagnostics")
+    public ResponseEntity<AiStatusResponse> getAiStatus() {
+        return ResponseEntity.ok(service.getAiStatus());
+    }
+
+    @PostMapping("/ai-test")
+    @Operation(summary = "Execute an on-demand AI ping and connectivity check")
+    @ApiResponse(responseCode = "200", description = "AI ping test results")
+    public ResponseEntity<AiStatusResponse> testAiConnection() {
+        return ResponseEntity.ok(service.testAiConnection());
     }
 }

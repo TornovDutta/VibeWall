@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/qa", "/qa/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/qa/wall/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/qa/ask", "/qa/ask/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/logs/client").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users/**").authenticated()
                         .anyRequest().authenticated()

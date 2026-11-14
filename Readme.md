@@ -37,7 +37,9 @@ This is a full-featured backend service designed and developed from scratch. It 
 | **Auto-Deletion (TTL)** | Confessions automatically expire and delete after 12 hours via MongoDB native TTL index |
 | **In-App Notifications** | Real-time alerts for questions received, replies, reactions, and comments |
 | **Reporting System** | Users report inappropriate content; admins review, approve, or reject from a dedicated panel |
-| **Admin Dashboard API** | Full user management and content moderation audit endpoints |
+| **Admin Dashboard API** | Full user management, content moderation audit, system error logs, and AI health telemetry |
+| **System Error Logs** | Auto-captures user exceptions and client errors with 7-day TTL index for administrator auditing |
+| **AI Health Monitoring** | Real-time tracking of AI provider uptime, latency, fallback heuristics, and on-demand ping tests |
 
 ---
 
@@ -118,6 +120,11 @@ Base URL: `/api/v3`
 - `DELETE /admin/users/{id}` — Ban / delete user
 - `GET /admin/report` — View all content reports
 - `PATCH /admin/report/Reviewed/{id}` — Approve or reject flagged content
+- `GET /admin/logs` — List recent system and user error logs (Admin only)
+- `DELETE /admin/logs` — Clear all error logs (Admin only)
+- `POST /admin/logs/client` — Ingest client-side error telemetry (Public / Client)
+- `GET /admin/ai-status` — Get real-time AI provider health, latency, and fallback state (Admin only)
+- `POST /admin/ai-test` — Trigger live connectivity ping test for AI provider (Admin only)
 - `POST /reports` — Submit abuse report for moderation
 
 ---

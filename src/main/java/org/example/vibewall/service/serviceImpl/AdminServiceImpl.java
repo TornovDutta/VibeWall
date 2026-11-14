@@ -1,10 +1,7 @@
 package org.example.vibewall.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vibewall.DTO.ReportResponse;
-import org.example.vibewall.DTO.TokenResponse;
-import org.example.vibewall.DTO.UserRequest;
-import org.example.vibewall.DTO.UserResponse;
+import org.example.vibewall.DTO.*;
 import org.example.vibewall.model.RefreshToken;
 import org.example.vibewall.security.JwtUtil;
 import org.example.vibewall.repo.ReportRepository;
@@ -15,7 +12,9 @@ import org.example.vibewall.exception.ReportNotFoundException;
 import org.example.vibewall.model.Report;
 import org.example.vibewall.model.Users;
 import org.example.vibewall.service.AdminService;
+import org.example.vibewall.service.AiService;
 import org.example.vibewall.service.RefreshTokenService;
+import org.example.vibewall.service.SystemLogService;
 import org.example.vibewall.utility.ReportMapper;
 import org.example.vibewall.utility.UserMapper;
 import org.slf4j.Logger;
@@ -38,6 +37,8 @@ public class AdminServiceImpl implements AdminService {
     private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
+    private final SystemLogService systemLogService;
+    private final AiService aiService;
 
 
     @Override
@@ -133,5 +134,38 @@ public class AdminServiceImpl implements AdminService {
 
         report.setStatus(status);
         return reportMapper.toDTO(reportRepo.save(report));
+    }
+
+    @Override
+    public List<SystemLogResponse> getLogs() {
+        return systemLogService.getRecentLogs();
+    }
+
+    @Override
+    public void clearLogs() {
+        systemLogService.clearLogs();
+    }
+
+    @Override
+    public void recordClientError(ClientErrorRequest req, String userId) {
+        systemLogService.recordLog(
+                "ERROR",
+                "CLIENT",
+                req.getEndpoint(),
+                req.getStatusCode() != null ? req.getStatusCode() : 500,
+                userId,
+                req.getMessage(),
+                req.getDetails()
+        );
+    }
+
+    @Override
+    public AiStatusResponse getAiStatus() {
+        return aiService.getAiStatus();
+    }
+
+    @Override
+    public AiStatusResponse testAiConnection() {
+        return aiService.testAiConnection();
     }
 }
