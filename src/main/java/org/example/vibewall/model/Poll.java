@@ -45,6 +45,18 @@ public class Poll {
     private Date expiresAt;
 
     public boolean isActive() {
-        return expiresAt == null || new Date().before(expiresAt);
+        if (expiresAt == null) {
+            return true;
+        }
+        Date now = new Date();
+        // Backward-compatibility: if poll was created with the previous short 24h expiration,
+        // extend active voting window to 30 days from creation time
+        if (createdAt != null) {
+            long thirtyDays = 30L * 24 * 3600 * 1000L;
+            if (now.before(new Date(createdAt.getTime() + thirtyDays))) {
+                return true;
+            }
+        }
+        return now.before(expiresAt);
     }
 }

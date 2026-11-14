@@ -21,6 +21,15 @@ public class GenericException {
     private final SystemLogService systemLogService;
 
     @ExceptionHandler({
+            IllegalArgumentException.class,
+            IllegalStateException.class
+    })
+    public ResponseEntity<?> handleBadRequest(RuntimeException e, HttpServletRequest req) {
+        logError("WARN", "API", req, HttpStatus.BAD_REQUEST.value(), e.getMessage(), "bad request");
+        return build(e.getMessage(), "bad request", HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({
             AdminNotFoundException.class,
             UserNotFoundException.class,
             ReportNotFoundException.class,

@@ -50,6 +50,9 @@ public class PollController {
             @AuthenticationPrincipal CustomUserDetails details,
             @Valid @RequestBody CreatePollRequest request
     ) {
+        if (details == null) {
+            throw new org.example.vibewall.exception.AccessDeniedException("You must be logged in to create a poll.");
+        }
         return new ResponseEntity<>(pollService.createPoll(details.getId(), request), HttpStatus.CREATED);
     }
 
@@ -60,6 +63,9 @@ public class PollController {
             @AuthenticationPrincipal CustomUserDetails details,
             @Valid @RequestBody VoteRequest request
     ) {
+        if (details == null) {
+            throw new org.example.vibewall.exception.AccessDeniedException("You must be logged in to vote.");
+        }
         return ResponseEntity.ok(pollService.vote(id, request.getOptionId(), details.getId()));
     }
 
@@ -69,6 +75,9 @@ public class PollController {
             @PathVariable String id,
             @AuthenticationPrincipal CustomUserDetails details
     ) {
+        if (details == null) {
+            throw new org.example.vibewall.exception.AccessDeniedException("You must be logged in to delete a poll.");
+        }
         boolean isAdmin = details.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         pollService.deletePoll(id, details.getId(), isAdmin);

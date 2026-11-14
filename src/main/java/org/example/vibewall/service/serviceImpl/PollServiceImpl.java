@@ -26,7 +26,7 @@ public class PollServiceImpl implements PollService {
     private final AiService aiService;
     private final NotificationService notificationService;
 
-    private static final long POLL_TTL_MILLIS = 24L * 3600 * 1000; // 24 hours live duration
+    private static final long POLL_TTL_MILLIS = 30L * 24 * 3600 * 1000L; // 30 days active voting window
 
     @Override
     public PollResponse createPoll(String userId, CreatePollRequest request) {
@@ -36,13 +36,15 @@ public class PollServiceImpl implements PollService {
 
         List<PollOption> optionList = new ArrayList<>();
         int index = 0;
-        for (String optText : request.getOptions()) {
-            if (optText != null && !optText.trim().isEmpty()) {
-                optionList.add(PollOption.builder()
-                        .id(index++)
-                        .text(optText.trim())
-                        .voteCount(0)
-                        .build());
+        if (request.getOptions() != null) {
+            for (String optText : request.getOptions()) {
+                if (optText != null && !optText.trim().isEmpty()) {
+                    optionList.add(PollOption.builder()
+                            .id(index++)
+                            .text(optText.trim())
+                            .voteCount(0)
+                            .build());
+                }
             }
         }
 
@@ -97,9 +99,14 @@ public class PollServiceImpl implements PollService {
             throw new IllegalStateException("This poll has ended and is no longer accepting votes.");
         }
 
-        if (optionId < 0 || optionId >= poll.getOptions().size()) {
-            throw new IllegalArgumentException("Invalid option selected: " + optionId);
+        if (poll.getOptions() == null || poll.getOptions().isEmpty()) {
+            throw new IllegalStateException("This poll has no available voting options.");
         }
+
+        PollOption chosenOpt = poll.getOptions().stream()
+                .filter(o -> o.getId() == optionId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid option selected: " + optionId));
 
         if (currentUserId == null || currentUserId.isBlank()) {
             throw new AccessDeniedException("You must be logged in to vote.");
@@ -116,22 +123,26 @@ public class PollServiceImpl implements PollService {
 
         if (previousOptionId != null) {
             // User already voted this exact option
-            if (previousOptionId == optionId) {
+            if (previousOptionId.intValue() == optionId) {
                 return toResponse(poll, currentUserId);
             }
             // User is switching their vote: decrement previous option
-            PollOption prevOpt = poll.getOptions().get(previousOptionId);
-            prevOpt.setVoteCount(Math.max(0, prevOpt.getVoteCount() - 1));
+            poll.getOptions().stream()
+                    .filter(o -> o.getId() == previousOptionId)
+                    .findFirst()
+                    .ifPresent(prevOpt -> prevOpt.setVoteCount(Math.max(0, prevOpt.getVoteCount() - 1)));
         } else {
             // First time voting
-            poll.setTotalVotes(poll.getTotalVotes() + 1);
             poll.getVotedUserIds().add(currentUserId);
         }
 
         // Increment selected option
-        PollOption chosenOpt = poll.getOptions().get(optionId);
         chosenOpt.setVoteCount(chosenOpt.getVoteCount() + 1);
         poll.getUserVotes().put(currentUserId, optionId);
+
+        // Accurately synchronize totalVotes
+        int computedTotal = poll.getOptions().stream().mapToInt(PollOption::getVoteCount).sum();
+        poll.setTotalVotes(computedTotal);
 
         Poll saved = pollRepo.save(poll);
 
@@ -157,7 +168,8 @@ public class PollServiceImpl implements PollService {
 
     private PollResponse toResponse(Poll poll, String currentUserId) {
         int total = poll.getTotalVotes();
-        List<PollOptionResponse> optionResponses = poll.getOptions().stream().map(opt -> {
+        List<PollOption> opts = poll.getOptions() != null ? poll.getOptions() : Collections.emptyList();
+        List<PollOptionResponse> optionResponses = opts.stream().map(opt -> {
             double pct = total == 0 ? 0.0 : Math.round(((double) opt.getVoteCount() / total) * 1000.0) / 10.0;
             return PollOptionResponse.builder()
                     .id(opt.getId())
