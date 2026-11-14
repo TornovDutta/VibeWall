@@ -33,11 +33,19 @@ public class QuestionServiceImpl implements QuestionService {
     private final UserRepository userRepo;
     private final AiService aiService;
     private final NotificationService notificationService;
+    private final org.example.vibewall.service.ReputationService reputationService;
 
     @Override
     public QuestionResponse askQuestion(String targetUserId, QuestionRequest request, CustomUserDetails currentUser) {
+        if (currentUser != null && reputationService.isUserBanned(currentUser.getId())) {
+            throw new AccessDeniedException("Your account is currently suspended due to negative reputation points. Contact admin to appeal.");
+        }
+
         if (aiService.unSafe(request.getContent())) {
-            throw new UnsafeContentException("Question flagged by AI moderation: violates community safety guidelines.");
+            if (currentUser != null) {
+                reputationService.penalizeHateViolation(currentUser.getId(), "Hateful Q&A question submission", 25);
+            }
+            throw new UnsafeContentException("Question flagged by AI moderation: violates community safety guidelines. 25 points deducted from reputation score.");
         }
 
         boolean isCommunity = targetUserId == null || targetUserId.isBlank() || "community".equalsIgnoreCase(targetUserId);
@@ -124,8 +132,15 @@ public class QuestionServiceImpl implements QuestionService {
             throw new AccessDeniedException("You are not authorized to reply to this question.");
         }
 
+        if (ownerUserId != null && reputationService.isUserBanned(ownerUserId)) {
+            throw new AccessDeniedException("Your account is currently suspended due to negative reputation points. Contact admin to appeal.");
+        }
+
         if (aiService.unSafe(request.getAnswer())) {
-            throw new UnsafeContentException("Reply flagged by AI moderation: violates community safety guidelines.");
+            if (ownerUserId != null) {
+                reputationService.penalizeHateViolation(ownerUserId, "Hateful Q&A reply submission", 25);
+            }
+            throw new UnsafeContentException("Reply flagged by AI moderation: violates community safety guidelines. 25 points deducted from reputation score.");
         }
 
         // If it was a community question, track who answered it

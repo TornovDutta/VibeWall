@@ -81,6 +81,11 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
+        if (user.isBanned()) {
+            throw new org.example.vibewall.exception.AccessDeniedException(
+                    "Your account has been suspended due to negative reputation points (" + user.getPoints() + "). Only an administrator can unban your account.");
+        }
+
         String accessToken = jwtUtil.generateToken(
                 user.getId(),
                 user.getUsername(),

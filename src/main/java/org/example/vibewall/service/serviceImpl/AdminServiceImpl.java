@@ -39,6 +39,7 @@ public class AdminServiceImpl implements AdminService {
     private final RefreshTokenService refreshTokenService;
     private final SystemLogService systemLogService;
     private final AiService aiService;
+    private final org.example.vibewall.service.ReputationService reputationService;
 
 
     @Override
@@ -167,5 +168,27 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public AiStatusResponse testAiConnection() {
         return aiService.testAiConnection();
+    }
+
+    @Override
+    public void unbanUser(String userId, int restorePoints) {
+        reputationService.unbanUser(userId, restorePoints);
+    }
+
+    @Override
+    public void banUser(String userId, String reason) {
+        reputationService.banUser(userId, reason);
+    }
+
+    @Override
+    public void adjustUserPoints(String userId, int points) {
+        userRepo.findById(userId).ifPresent(u -> {
+            u.setPoints(points);
+            if (points >= 0 && u.isBanned()) {
+                u.setBanned(false);
+                u.setBanReason(null);
+            }
+            userRepo.save(u);
+        });
     }
 }

@@ -137,4 +137,37 @@ public class AdminController {
     public ResponseEntity<AiStatusResponse> testAiConnection() {
         return ResponseEntity.ok(service.testAiConnection());
     }
+
+    @PostMapping("/users/{userId}/unban")
+    @Operation(summary = "Unban a user account and restore reputation points")
+    @ApiResponse(responseCode = "200", description = "User unbanned")
+    public ResponseEntity<Map<String, String>> unbanUser(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "100") int restorePoints
+    ) {
+        service.unbanUser(userId, restorePoints);
+        return ResponseEntity.ok(Map.of("message", "User successfully unbanned and points restored."));
+    }
+
+    @PostMapping("/users/{userId}/ban")
+    @Operation(summary = "Manually ban a user account")
+    @ApiResponse(responseCode = "200", description = "User banned")
+    public ResponseEntity<Map<String, String>> banUser(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "Banned by administrator") String reason
+    ) {
+        service.banUser(userId, reason);
+        return ResponseEntity.ok(Map.of("message", "User successfully banned."));
+    }
+
+    @PutMapping("/users/{userId}/points")
+    @Operation(summary = "Manually adjust a user's reputation points")
+    @ApiResponse(responseCode = "200", description = "Points updated")
+    public ResponseEntity<Map<String, String>> adjustUserPoints(
+            @PathVariable String userId,
+            @RequestParam int points
+    ) {
+        service.adjustUserPoints(userId, points);
+        return ResponseEntity.ok(Map.of("message", "User points updated."));
+    }
 }

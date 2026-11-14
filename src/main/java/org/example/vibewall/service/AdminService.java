@@ -34,4 +34,10 @@ public interface AdminService {
     AiStatusResponse getAiStatus();
 
     AiStatusResponse testAiConnection();
+
+    void unbanUser(String userId, int restorePoints);
+
+    void banUser(String userId, String reason);
+
+    void adjustUserPoints(String userId, int points);
 }

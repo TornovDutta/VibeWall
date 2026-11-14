@@ -26,6 +26,7 @@ public class ConfessionServiceImpl implements ConfessionService {
     private final Encryption encryption;
     private final AiService aiService;
     private final NotificationService notificationService;
+    private final org.example.vibewall.service.ReputationService reputationService;
 
     @Override
     @CacheEvict(
@@ -34,8 +35,15 @@ public class ConfessionServiceImpl implements ConfessionService {
     )
     public ConfessionResponse create(String userId, ConfessionRequest requested) {
 
+        if (userId != null && reputationService.isUserBanned(userId)) {
+            throw new AccessDeniedException("Your account is currently suspended due to negative reputation points. Please contact an administrator to appeal.");
+        }
+
         if (aiService.unSafe(requested.getContent())) {
-            throw new UnsafeContentException("Content flagged by AI safety moderation: violates community guidelines (harassment, hate speech, or offensive content).");
+            if (userId != null) {
+                reputationService.penalizeHateViolation(userId, "Hateful confession submission", 25);
+            }
+            throw new UnsafeContentException("Content flagged by AI safety moderation: Hateful, abusive, or violating content detected. 25 points have been deducted from your reputation score.");
         }
 
         Confession confession = new Confession(encryption.encode(requested.getContent()), userId);
@@ -61,8 +69,14 @@ public class ConfessionServiceImpl implements ConfessionService {
         if (!confession.getUserId().equals(userId)) {
             throw new AccessDeniedException("access denied");
         }
+        if (userId != null && reputationService.isUserBanned(userId)) {
+            throw new AccessDeniedException("Your account is currently suspended due to negative reputation points. Please contact an administrator to appeal.");
+        }
         if (aiService.unSafe(requested.getContent())) {
-            throw new UnsafeContentException("Content flagged by AI safety moderation: violates community guidelines (harassment, hate speech, or offensive content).");
+            if (userId != null) {
+                reputationService.penalizeHateViolation(userId, "Hateful confession update", 25);
+            }
+            throw new UnsafeContentException("Content flagged by AI safety moderation: Hateful, abusive, or violating content detected. 25 points have been deducted from your reputation score.");
         }
         confession.setContent(encryption.encode(requested.getContent()));
         confessionRepo.save(confession);

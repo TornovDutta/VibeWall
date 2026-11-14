@@ -15,7 +15,14 @@ public class UserMapper {
 
     public UserResponse toDTO(Users users) {
         String name = encryption.decode(users.getUsername());
-        return new UserResponse(users.getId(), name);
+        return UserResponse.builder()
+                .id(users.getId())
+                .name(name)
+                .role(users.getRole())
+                .points(users.getPoints())
+                .banned(users.isBanned())
+                .banReason(users.getBanReason())
+                .build();
     }
 
     public List<UserResponse> toDTO(List<Users> users) {

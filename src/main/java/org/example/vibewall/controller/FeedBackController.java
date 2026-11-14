@@ -27,8 +27,20 @@ public class FeedBackController {
     @ApiResponse(responseCode = "422", description = "Content failed safety check")
     public ResponseEntity<?> create(
             @PathVariable String confessionId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.example.vibewall.security.CustomUserDetails details,
             @Valid @RequestBody FeedbackRequest requested) throws PlatformMisuseException, ConfessionNotFoundException {
-        return new ResponseEntity<>(service.giveFeedback(confessionId, requested), HttpStatus.CREATED);
+        String userId = details != null ? details.getId() : null;
+        return new ResponseEntity<>(service.giveFeedback(userId, confessionId, requested), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{confessionId}/{feedbackId}/like")
+    @Operation(summary = "Like a feedback comment and award points to author")
+    public ResponseEntity<?> like(
+            @PathVariable String confessionId,
+            @PathVariable int feedbackId,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.example.vibewall.security.CustomUserDetails details) throws ConfessionNotFoundException {
+        String userId = details != null ? details.getId() : null;
+        return ResponseEntity.ok(service.likeFeedback(confessionId, feedbackId, userId));
     }
 
     @PutMapping("/{confessionId}/{feedbackId}")

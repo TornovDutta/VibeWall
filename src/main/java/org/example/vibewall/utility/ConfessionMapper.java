@@ -23,6 +23,9 @@ public class ConfessionMapper {
             feedback1.setId(feedback.getId());
             feedback1.setContent(encryption.decode(feedback.getContent()));
             feedback1.setDate(feedback.getDate());
+            feedback1.setUserId(feedback.getUserId());
+            feedback1.setLikes(feedback.getLikes());
+            feedback1.setLikedUserIds(feedback.getLikedUserIds());
             feedbackList.add(feedback1);
         }
 

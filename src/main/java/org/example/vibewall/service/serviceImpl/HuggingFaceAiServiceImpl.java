@@ -54,40 +54,48 @@ public class HuggingFaceAiServiceImpl implements AiService {
     public void init() {
         if (hfToken != null) {
             String trimmedToken = hfToken.trim();
-            // Automatically switch endpoint & model if Groq key is supplied
-            if (trimmedToken.startsWith("gsk_") && hfUrl.contains("huggingface.co")) {
+            // Automatically configure Groq if Groq key prefix 'gsk_' is supplied
+            if (trimmedToken.startsWith("gsk_")) {
                 this.hfUrl = "https://api.groq.com/openai/v1/chat/completions";
                 if (this.hfModel == null || this.hfModel.contains("Qwen") || this.hfModel.isBlank()) {
                     this.hfModel = "llama-3.3-70b-versatile";
                 }
                 logger.info("Auto-configured Groq API endpoint for Groq key prefix 'gsk_' (model: {})", this.hfModel);
             }
-            // Automatically switch endpoint & model if OpenRouter key is supplied
-            else if (trimmedToken.startsWith("sk-or-v1-") && hfUrl.contains("huggingface.co")) {
+            // Automatically configure OpenRouter if OpenRouter key prefix 'sk-or-v1-' is supplied
+            else if (trimmedToken.startsWith("sk-or-v1-")) {
                 this.hfUrl = "https://openrouter.ai/api/v1/chat/completions";
-                if (this.hfModel == null || this.hfModel.contains("Qwen/Qwen2.5-72B-Instruct")) {
+                if (this.hfModel == null || this.hfModel.contains("Qwen/Qwen2.5-72B-Instruct") || this.hfModel.isBlank()) {
                     this.hfModel = "meta-llama/llama-3.2-3b-instruct:free";
                 }
                 logger.info("Auto-configured OpenRouter API endpoint for OpenRouter key prefix 'sk-or-v1-' (model: {})", this.hfModel);
+            }
+            // If Hugging Face token 'hf_' is supplied but URL was pointed to Groq/OpenRouter, auto-correct to HF Router
+            else if (trimmedToken.startsWith("hf_") && !this.hfUrl.contains("huggingface.co")) {
+                this.hfUrl = "https://router.huggingface.co/v1/chat/completions";
+                if (this.hfModel == null || this.hfModel.contains("llama") || this.hfModel.isBlank()) {
+                    this.hfModel = "Qwen/Qwen2.5-72B-Instruct";
+                }
+                logger.info("Auto-corrected Hugging Face endpoint for token prefix 'hf_' (model: {})", this.hfModel);
             }
         }
         logger.info("AI Service initialized with endpoint: {} and model: {}", hfUrl, hfModel);
     }
 
     private static final String MODERATION_SYSTEM_PROMPT =
-            "You are a content moderator for VibeWall, an anonymous social platform. " +
-            "Reply ONLY with 1 (block) or 0 (allow). No explanation.\n\n" +
-            "BLOCK (1) — message contains:\n" +
-            "- Severe insults, slurs, harassment, or humiliation\n" +
-            "- Threats, violence, or harm towards others\n" +
-            "- Encouraging self-harm or suicide\n" +
-            "- Hate speech (race, religion, gender, sexuality)\n" +
-            "- Sexually explicit content or illegal activities\n\n" +
-            "ALLOW (0) — message is:\n" +
-            "- Greetings, personal stories, sharing feelings, sadness, stress\n" +
-            "- Seeking advice, venting, emotional expression\n" +
-            "- Friendly, neutral, or supportive thoughts\n\n" +
-            "Reply ONLY with 1 or 0.";
+            "You are an empathetic yet vigilant safety moderator for VibeWall, a supportive anonymous student platform. " +
+            "Analyze the author's INTENTION. Reply ONLY with 1 (block/hateful) or 0 (allow/safe).\n\n" +
+            "INTENTION CRITERIA:\n" +
+            "ALLOW (0) — Encourage healthy anonymous expression and emotional vulnerability:\n" +
+            "- Personal confessions, sadness, feeling lonely, heartbreak, grief, venting frustration\n" +
+            "- Academic stress, fear of failure, seeking advice, asking sensitive questions\n" +
+            "- Supportive comments, empathy, sharing lived experiences, casual thoughts\n\n" +
+            "BLOCK (1) — Zero tolerance for malice, hate, or harm towards others:\n" +
+            "- Hateful messages, slurs, identity attacks (race, gender, sexual orientation, disability, religion)\n" +
+            "- Directed harassment, cyberbullying, malicious insults, defamation, name-calling\n" +
+            "- Incitement to violence, physical threats, encouraging suicide or self-harm\n" +
+            "- Doxxing, sexually predatory content, non-consensual sharing\n\n" +
+            "Output ONLY '0' or '1'.";
 
     private static final String CHATBOT_SYSTEM_PROMPT =
             "You are VibeBot, the official empathetic, supportive, and non-judgmental AI companion for VibeWall. " +

@@ -25,13 +25,21 @@ public class PollServiceImpl implements PollService {
     private final PollRepository pollRepo;
     private final AiService aiService;
     private final NotificationService notificationService;
+    private final org.example.vibewall.service.ReputationService reputationService;
 
     private static final long POLL_TTL_MILLIS = 30L * 24 * 3600 * 1000L; // 30 days active voting window
 
     @Override
     public PollResponse createPoll(String userId, CreatePollRequest request) {
+        if (userId != null && reputationService.isUserBanned(userId)) {
+            throw new AccessDeniedException("Your account is currently suspended due to negative reputation points. Contact admin to appeal.");
+        }
+
         if (aiService.unSafe(request.getQuestion())) {
-            throw new UnsafeContentException("Content flagged by AI moderation: violates community safety guidelines.");
+            if (userId != null) {
+                reputationService.penalizeHateViolation(userId, "Hateful poll question submission", 25);
+            }
+            throw new UnsafeContentException("Content flagged by AI moderation: Hateful, abusive, or violating question detected. 25 points have been deducted from your reputation score.");
         }
 
         List<PollOption> optionList = new ArrayList<>();
@@ -110,6 +118,10 @@ public class PollServiceImpl implements PollService {
 
         if (currentUserId == null || currentUserId.isBlank()) {
             throw new AccessDeniedException("You must be logged in to vote.");
+        }
+
+        if (reputationService.isUserBanned(currentUserId)) {
+            throw new AccessDeniedException("Your account is currently suspended due to negative reputation points. Contact admin to appeal.");
         }
 
         if (poll.getUserVotes() == null) {

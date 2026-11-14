@@ -26,14 +26,25 @@ public class UserServiceImpl implements UsersService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     private final Encryption encryption;
 
+    @Override
+    public UserResponse getProfile(String id) {
+        Users user = repo.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+        return mapper.toDTO(user);
+    }
+
     public UserResponse update(String id, UserRequest user) {
 
         Users existingUser = repo.findById(id)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found with id: " + id));
 
-        existingUser.setUsername(encryption.encode(user.getName()));
-        existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getName() != null && !user.getName().isBlank()) {
+            existingUser.setUsername(encryption.encode(user.getName().trim()));
+        }
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         repo.save(existingUser);
         return mapper.toDTO(existingUser);
     }

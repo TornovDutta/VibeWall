@@ -64,6 +64,9 @@ class AdminServiceTest {
     @Mock
     private AiService aiService;
 
+    @Mock
+    private ReputationService reputationService;
+
     @InjectMocks
     private AdminServiceImpl adminService;
 

@@ -33,6 +33,9 @@ class PollServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private ReputationService reputationService;
+
     @InjectMocks
     private PollServiceImpl pollService;
 

@@ -5,6 +5,8 @@ import org.example.vibewall.DTO.UserResponse;
 import org.example.vibewall.exception.UserNotFoundException;
 
 public interface UsersService {
+    UserResponse getProfile(String id);
+
     UserResponse update(String id, UserRequest user);
 
     void delete(String id) throws UserNotFoundException;

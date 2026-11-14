@@ -18,6 +18,12 @@ public class Feedback {
 
     private Date date;
 
+    private String userId;
+
+    private int likes = 0;
+
+    private java.util.Set<String> likedUserIds = new java.util.HashSet<>();
+
     public Feedback() {
         this.date = new Date();
     }
@@ -30,6 +36,13 @@ public class Feedback {
     public Feedback(Integer id, String content) {
         this.id = id;
         this.content = content;
+        this.date = new Date();
+    }
+
+    public Feedback(Integer id, String content, String userId) {
+        this.id = id;
+        this.content = content;
+        this.userId = userId;
         this.date = new Date();
     }
 }

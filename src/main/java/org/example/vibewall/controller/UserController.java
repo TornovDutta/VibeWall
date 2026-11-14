@@ -23,6 +23,15 @@ import jakarta.validation.Valid;
 public class UserController {
     private final UsersService service;
 
+    @GetMapping("/me")
+    @Operation(summary = "Get your own user profile with reputation points and status")
+    @ApiResponse(responseCode = "200", description = "Profile retrieved")
+    @ApiResponse(responseCode = "404", description = "User not found")
+    public ResponseEntity<UserResponse> getProfile(
+            @AuthenticationPrincipal CustomUserDetails details) {
+        return ResponseEntity.ok(service.getProfile(details.getId()));
+    }
+
     @PutMapping("/me")
     @Operation(summary = "Update your profile")
     @ApiResponse(responseCode = "200", description = "Profile updated")

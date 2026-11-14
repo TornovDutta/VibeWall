@@ -26,7 +26,10 @@ public class Users {
     private String password;
     private String role="USER";
 
-
+    private int points = 100;
+    private boolean banned = false;
+    private String banReason;
+    private java.util.Date bannedAt;
 
     public Users( String username, String password, String role) {
 

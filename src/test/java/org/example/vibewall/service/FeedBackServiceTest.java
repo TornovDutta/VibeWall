@@ -40,6 +40,9 @@ class FeedBackServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private ReputationService reputationService;
+
     @InjectMocks
     private FeedbackServiceImpl feedbackService;
 

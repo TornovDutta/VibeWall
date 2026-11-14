@@ -19,6 +19,8 @@ public class ReactionServiceImpl implements ReactionService {
     private static final Logger logger = LoggerFactory.getLogger(ReactionServiceImpl.class);
     private final StringRedisTemplate redisTemplate;
     private final NotificationService notificationService;
+    private final org.example.vibewall.repo.ConfessionRepository confessionRepo;
+    private final org.example.vibewall.service.ReputationService reputationService;
 
     // Allowed reaction types
     private static final Set<String> ALLOWED_REACTIONS = Set.of("hug", "heart", "relate", "strength");
@@ -76,6 +78,18 @@ public class ReactionServiceImpl implements ReactionService {
         }
 
         notificationService.notifyReaction(confessionId, normalizedType);
+
+        // Award points to confession author
+        try {
+            confessionRepo.findById(confessionId).ifPresent(c -> {
+                if (c.getUserId() != null && !c.getUserId().isBlank()) {
+                    reputationService.awardPoints(c.getUserId(), 5, "Received " + normalizedType + " reaction");
+                }
+            });
+        } catch (Exception ex) {
+            logger.warn("Failed to award points for reaction: {}", ex.getMessage());
+        }
+
         return result;
     }
 
