@@ -18,5 +18,19 @@ public class UserResponse implements Serializable{
     private boolean banned;
     private String banReason;
 
+    public UserResponse(String id, String name) {
+        this.id = id;
+        this.name = name;
+        this.role = "USER";
+        this.points = 100;
+        this.banned = false;
+    }
 
+    public UserResponse(String id, String name, String role) {
+        this.id = id;
+        this.name = name;
+        this.role = role;
+        this.points = 100;
+        this.banned = false;
+    }
 }

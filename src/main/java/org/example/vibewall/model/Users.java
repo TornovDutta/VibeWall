@@ -31,6 +31,15 @@ public class Users {
     private String banReason;
     private java.util.Date bannedAt;
 
+    public Users(String id, String username, String password, String role) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.points = 100;
+        this.banned = false;
+    }
+
     public Users( String username, String password, String role) {
 
         this.username = username;
