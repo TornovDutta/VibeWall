@@ -29,7 +29,10 @@ This is a full-featured backend service designed and developed from scratch. It 
 | **Anonymous Confessions** | Users post confessions without exposing real-world identity or trackable metadata |
 | **Interactive Opinion Polls** | Create community polls with 2–6 options; live vote counting, percentages, and duplicate prevention |
 | **Anonymous Q&A Walls** | Ask questions anonymously to the community or to specific user walls with public and private reply channels |
-| **AI Content Moderation** | Every confession, poll, and question is screened by LLM before persistence — unsafe content is rejected with `422` |
+| **AI Content & Intent Moderation** | Every confession, comment, poll, and question is screened by LLM before persistence. Distinguishes authentic vulnerability from malice/harassment; blocked content incurs a -25 point penalty |
+| **Reputation & Point System** | 100 base points. Community likes/reactions award +5 points. Toxic attempts deduct -25 points. Dropping below 0 points triggers an automatic ban |
+| **Admin Unban Governance** | Only platform administrators can unban suspended users from the Admin Panel, restoring 100 reputation points |
+| **Comment Liking & Feedback** | Threaded responses with comment liking that dynamically increases the comment author's reputation score |
 | **JWT Auth & Silent Rotation** | Short-lived access token + 7-day rotating refresh token with single-active-session revocation |
 | **AES-256-GCM Encryption** | All confession and feedback text is encrypted at rest using authenticated AES-GCM |
 | **Redis Caching** | Feed read endpoints are cached in memory for sub-millisecond throughput |
@@ -37,7 +40,7 @@ This is a full-featured backend service designed and developed from scratch. It 
 | **Auto-Deletion (TTL)** | Confessions automatically expire and delete after 12 hours via MongoDB native TTL index |
 | **In-App Notifications** | Real-time alerts for questions received, replies, reactions, and comments |
 | **Reporting System** | Users report inappropriate content; admins review, approve, or reject from a dedicated panel |
-| **Admin Dashboard API** | Full user management, content moderation audit, system error logs, and AI health telemetry |
+| **Admin Dashboard API** | Full user management, content moderation audit, system error logs, unban actions, and AI health telemetry |
 | **System Error Logs** | Auto-captures user exceptions and client errors with 7-day TTL index for administrator auditing |
 | **AI Health Monitoring** | Real-time tracking of AI provider uptime, latency, fallback heuristics, and on-demand ping tests |
 
@@ -102,12 +105,15 @@ Base URL: `/api/v3`
 - `GET /qa/my-asked` — List questions asked by the current user (Authenticated)
 - `GET /qa/pending-count` — Count of pending unanswered inbox questions (Authenticated)
 
-### Confessions & Feedback (`/users`, `/feedback`, `/vibes`)
-- `POST /users/confession` — Submit encrypted confession (AI moderated)
+### User Profile, Confessions & Feedback (`/users`, `/feedback`, `/vibes`)
+- `GET /users/me` — Get authenticated user's profile, reputation points, ban status, and role (Authenticated)
+- `PUT /users/me` — Update user profile credentials (username/password) (Authenticated)
+- `POST /users/confession` — Submit encrypted confession (AI intent moderated, deducts 25 pts on violation)
 - `PUT /users/confession/{id}` — Edit own confession within 12h window
 - `DELETE /users/confession/{id}` — Delete own confession
-- `POST /feedback/{confessionId}` — Add feedback comment to confession
-- `POST /vibes/{confessionId}/react` — React with an emoji vibe
+- `POST /feedback/{confessionId}` — Add feedback comment to confession (AI intent moderated)
+- `POST /users/feedback/{confessionId}/{feedbackId}/like` — Like or unlike comment (awards +5 pts to comment author)
+- `POST /vibes/{confessionId}/react` — React with an emoji vibe (awards +5 pts to confession author)
 
 ### Notifications (`/notifications`)
 - `GET /notifications` — List in-app notifications
@@ -116,7 +122,10 @@ Base URL: `/api/v3`
 - `PUT /notifications/read-all` — Mark all notifications as read
 
 ### Admin & Moderation (`/admin`, `/reports`)
-- `GET /admin/users` — List platform users
+- `GET /admin` — List all registered users with reputation points and ban status (Admin only)
+- `POST /admin/users/{userId}/unban` — Unban user account and restore 100 reputation points (Admin only)
+- `POST /admin/users/{userId}/ban` — Manually suspend user with custom reason (Admin only)
+- `PUT /admin/users/{userId}/points` — Manually adjust user reputation points (Admin only)
 - `DELETE /admin/users/{id}` — Ban / delete user
 - `GET /admin/report` — View all content reports
 - `PATCH /admin/report/Reviewed/{id}` — Approve or reject flagged content
