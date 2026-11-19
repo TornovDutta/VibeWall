@@ -14,7 +14,7 @@ public class ChatServiceImpl implements ChatService {
 
     private final AiService aiService;
 
-    @Value("${hf.model:${HF_MODEL:Qwen/Qwen2.5-72B-Instruct}}")
+    @Value("${groq.model:${GROQ_MODEL:${AI_MODEL:openai/gpt-oss-120b}}}")
     private String model;
 
     @Override
