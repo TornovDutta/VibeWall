@@ -15,6 +15,8 @@ public class EnhanceResponse {
 
     private String originalText;
     private String polishedText;
+    private boolean unsafeInput;
+    private String safetyNotice;
     private List<String> suggestions;
     private List<String> suggestedOptions; // populated for POLL type
 }

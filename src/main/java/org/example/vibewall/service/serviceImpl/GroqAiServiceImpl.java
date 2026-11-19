@@ -414,29 +414,57 @@ public class GroqAiServiceImpl implements AiService {
 
         String systemPrompt;
         if ("POLL".equals(type)) {
-            systemPrompt = "You are an expert community poll writer for an anonymous campus platform. " +
-                    "The user wants to post a poll. " +
-                    "1. Polish the poll question so it is grammatically correct, intriguing, unbiased, and ends with a '?'. " +
-                    "2. Generate 3 to 4 distinct, realistic, high-quality poll options that capture diverse viewpoints. " +
-                    "3. Provide 1 brief tip for driving high engagement. " +
-                    "Reply ONLY in valid JSON matching this schema: " +
-                    "{\"polishedText\": \"<polished question ending in ?>\", \"suggestions\": [\"<tip>\"], \"suggestedOptions\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"]}";
+            systemPrompt = "You are an expert community poll writer and safety coach for an anonymous campus platform. " +
+                    "MANDATORY SAFETY DIRECTIVE: You must NEVER generate, output, or suggest insults, slurs, attacks, or rule violations under any circumstances.\n\n" +
+                    "If the input is aggressive, hostile, or insulting:\n" +
+                    "- Set \"unsafeInput\": true\n" +
+                    "- Set \"safetyNotice\": \"Your draft contained aggressive language. Here is a constructive, safe poll you can post without violating community rules:\"\n" +
+                    "- Transform into a respectful, unbiased poll question in \"polishedText\"\n" +
+                    "- Provide 3 to 4 balanced, constructive poll options in \"suggestedOptions\"\n" +
+                    "- Provide 1 to 2 safe alternative poll questions in \"suggestions\"\n\n" +
+                    "If the input is safe:\n" +
+                    "- Set \"unsafeInput\": false\n" +
+                    "- Set \"safetyNotice\": null\n" +
+                    "- Polish the poll question so it is intriguing and ends with '?' in \"polishedText\"\n" +
+                    "- Provide 3 to 4 distinct poll options in \"suggestedOptions\"\n" +
+                    "- Provide 1 engagement tip in \"suggestions\"\n\n" +
+                    "Respond ONLY in valid JSON matching:\n" +
+                    "{\"unsafeInput\": false, \"safetyNotice\": null, \"polishedText\": \"...\", \"suggestions\": [\"...\"], \"suggestedOptions\": [\"...\"]}";
         } else if ("QUESTION".equals(type)) {
-            systemPrompt = "You are a thoughtful question enhancer for an anonymous campus Q&A wall. " +
-                    "The user is asking a question anonymously. " +
-                    "1. Polish the question so it is clear, engaging, grammatically correct, and ends with a '?'. " +
-                    "2. Suggest 1 to 2 creative alternative question phrasings or related follow-up angles. " +
-                    "Reply ONLY in valid JSON matching this schema: " +
-                    "{\"polishedText\": \"<polished question ending in ?>\", \"suggestions\": [\"<creative alternative 1>\", \"<creative alternative 2>\"], \"suggestedOptions\": []}";
+            systemPrompt = "You are a thoughtful question enhancer and safety counselor for an anonymous campus Q&A wall. " +
+                    "MANDATORY SAFETY DIRECTIVE: You must NEVER generate, output, or suggest insults, slurs, attacks, or rule violations under any circumstances.\n\n" +
+                    "If the input is hostile, attacking, or insulting:\n" +
+                    "- Set \"unsafeInput\": true\n" +
+                    "- Set \"safetyNotice\": \"Your question contained hostile phrasing that violates community rules. Here are respectful, safe ways to ask:\"\n" +
+                    "- Transform into a respectful, thought-provoking question in \"polishedText\"\n" +
+                    "- Provide 2 to 3 alternative safe, de-escalated question variations in \"suggestions\"\n" +
+                    "- Keep \"suggestedOptions\": []\n\n" +
+                    "If the input is safe:\n" +
+                    "- Set \"unsafeInput\": false\n" +
+                    "- Set \"safetyNotice\": null\n" +
+                    "- Polish the question to be clear, engaging, and end with '?' in \"polishedText\"\n" +
+                    "- Provide 1 to 2 creative alternative follow-up angles in \"suggestions\"\n" +
+                    "- Keep \"suggestedOptions\": []\n\n" +
+                    "Respond ONLY in valid JSON matching:\n" +
+                    "{\"unsafeInput\": false, \"safetyNotice\": null, \"polishedText\": \"...\", \"suggestions\": [\"...\"], \"suggestedOptions\": []}";
         } else {
             // CONFESSION
-            systemPrompt = "You are an empathetic creative writing assistant for an anonymous student venting platform. " +
-                    "The user has written an emotional confession or thought. " +
-                    "1. Fix any grammatical, spelling, and punctuation errors. " +
-                    "2. Polish the sentence flow and emotional clarity while strictly preserving the author's raw, authentic tone and voice (never sound robotic or artificial). " +
-                    "3. Suggest 1 to 2 thoughtful perspectives or empathetic phrasing suggestions. " +
-                    "Reply ONLY in valid JSON matching this schema: " +
-                    "{\"polishedText\": \"<polished confession>\", \"suggestions\": [\"<perspective or phrasing idea 1>\", \"<perspective 2>\"], \"suggestedOptions\": []}";
+            systemPrompt = "You are an empathetic creative writing assistant and safety counselor for an anonymous student venting platform. " +
+                    "MANDATORY SAFETY DIRECTIVE: You must NEVER generate, output, or suggest insults, defamatory statements, slurs, attacks, hate speech, or rule violations under any circumstances.\n\n" +
+                    "If the input contains anger, insults, aggressive attacks, or unsafe intentions:\n" +
+                    "- Set \"unsafeInput\": true\n" +
+                    "- Set \"safetyNotice\": \"Your original draft contained harsh or aggressive phrasing that violates community rules. Here are respectful, safe alternative sentences that express your feelings without attacking others:\"\n" +
+                    "- Transform the author's underlying emotional hurt, anger, or frustration into a mature, safe, and completely non-violent confession in \"polishedText\".\n" +
+                    "- In \"suggestions\", provide 2 to 3 alternative safe, non-violating sentences related to the topic that the user can choose from.\n" +
+                    "- Keep \"suggestedOptions\": []\n\n" +
+                    "If the input is safe:\n" +
+                    "- Set \"unsafeInput\": false\n" +
+                    "- Set \"safetyNotice\": null\n" +
+                    "- Fix grammar, spelling, and flow while strictly preserving the author's authentic voice in \"polishedText\".\n" +
+                    "- In \"suggestions\", offer 1 to 2 thoughtful perspective tips or phrasing variations.\n" +
+                    "- Keep \"suggestedOptions\": []\n\n" +
+                    "Respond ONLY in valid JSON matching:\n" +
+                    "{\"unsafeInput\": false, \"safetyNotice\": null, \"polishedText\": \"...\", \"suggestions\": [\"...\"], \"suggestedOptions\": []}";
         }
 
         try {
@@ -472,6 +500,16 @@ public class GroqAiServiceImpl implements AiService {
                     polished = rawText;
                 }
 
+                boolean unsafeInput = root.path("unsafeInput").asBoolean(false);
+                String safetyNotice = root.path("safetyNotice").isTextual() ? root.path("safetyNotice").asText() : null;
+
+                if (ContentSafetyFilter.isUnsafe(rawText)) {
+                    unsafeInput = true;
+                    if (safetyNotice == null || safetyNotice.isBlank()) {
+                        safetyNotice = "Your draft contains aggressive or insulting language that violates community rules. Here are healthy, safe alternative sentences you can post:";
+                    }
+                }
+
                 List<String> suggestions = new ArrayList<>();
                 JsonNode suggNode = root.path("suggestions");
                 if (suggNode.isArray()) {
@@ -498,6 +536,8 @@ public class GroqAiServiceImpl implements AiService {
                 return EnhanceResponse.builder()
                         .originalText(rawText)
                         .polishedText(polished)
+                        .unsafeInput(unsafeInput)
+                        .safetyNotice(safetyNotice)
                         .suggestions(suggestions)
                         .suggestedOptions(options)
                         .build();
