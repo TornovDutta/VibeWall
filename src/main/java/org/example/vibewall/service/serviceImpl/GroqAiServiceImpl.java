@@ -19,25 +19,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
+/**
+ * High-performance Groq AI Service implementation using Groq's LPU inference API.
+ * Provides real-time intent-aware safety moderation and empathetic companion responses.
+ */
 @Service
 @Primary
-public class HuggingFaceAiServiceImpl implements AiService {
+public class GroqAiServiceImpl implements AiService {
 
-    private static final Logger logger = LoggerFactory.getLogger(HuggingFaceAiServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(GroqAiServiceImpl.class);
 
-    @Value("${hf.token:${HF_TOKEN:${ai.token:${AI_TOKEN:}}}}")
-    private String hfToken;
+    @Value("${groq.api.key:${GROQ_API_KEY:${GROQ_APIKEY:${groq.token:${AI_TOKEN:${HF_TOKEN:}}}}}}")
+    private String groqApiKey;
 
-    @Value("${hf.model:${HF_MODEL:${ai.model:${AI_MODEL:Qwen/Qwen2.5-72B-Instruct}}}}")
-    private String hfModel;
+    @Value("${groq.model:${GROQ_MODEL:${AI_MODEL:llama-3.3-70b-versatile}}}")
+    private String groqModel;
 
-    @Value("${hf.api.url:${HF_API_URL:${ai.api.url:${AI_API_URL:https://router.huggingface.co/v1/chat/completions}}}}")
-    private String hfUrl;
+    @Value("${groq.api.url:${GROQ_API_URL:${AI_API_URL:https://api.groq.com/openai/v1/chat/completions}}}")
+    private String groqApiUrl;
 
     @Autowired(required = false)
     private SystemLogService systemLogService;
@@ -52,34 +54,16 @@ public class HuggingFaceAiServiceImpl implements AiService {
 
     @PostConstruct
     public void init() {
-        if (hfToken != null) {
-            String trimmedToken = hfToken.trim();
-            // Automatically configure Groq if Groq key prefix 'gsk_' is supplied
-            if (trimmedToken.startsWith("gsk_")) {
-                this.hfUrl = "https://api.groq.com/openai/v1/chat/completions";
-                if (this.hfModel == null || this.hfModel.contains("Qwen") || this.hfModel.isBlank()) {
-                    this.hfModel = "llama-3.3-70b-versatile";
-                }
-                logger.info("Auto-configured Groq API endpoint for Groq key prefix 'gsk_' (model: {})", this.hfModel);
-            }
-            // Automatically configure OpenRouter if OpenRouter key prefix 'sk-or-v1-' is supplied
-            else if (trimmedToken.startsWith("sk-or-v1-")) {
-                this.hfUrl = "https://openrouter.ai/api/v1/chat/completions";
-                if (this.hfModel == null || this.hfModel.contains("Qwen/Qwen2.5-72B-Instruct") || this.hfModel.isBlank()) {
-                    this.hfModel = "meta-llama/llama-3.2-3b-instruct:free";
-                }
-                logger.info("Auto-configured OpenRouter API endpoint for OpenRouter key prefix 'sk-or-v1-' (model: {})", this.hfModel);
-            }
-            // If Hugging Face token 'hf_' is supplied but URL was pointed to Groq/OpenRouter, auto-correct to HF Router
-            else if (trimmedToken.startsWith("hf_") && !this.hfUrl.contains("huggingface.co")) {
-                this.hfUrl = "https://router.huggingface.co/v1/chat/completions";
-                if (this.hfModel == null || this.hfModel.contains("llama") || this.hfModel.isBlank()) {
-                    this.hfModel = "Qwen/Qwen2.5-72B-Instruct";
-                }
-                logger.info("Auto-corrected Hugging Face endpoint for token prefix 'hf_' (model: {})", this.hfModel);
-            }
+        if (groqApiKey != null && !groqApiKey.isBlank()) {
+            groqApiKey = groqApiKey.trim();
         }
-        logger.info("AI Service initialized with endpoint: {} and model: {}", hfUrl, hfModel);
+        if (groqModel == null || groqModel.isBlank() || groqModel.contains("Qwen") || groqModel.contains("huggingface")) {
+            this.groqModel = "llama-3.3-70b-versatile";
+        }
+        if (groqApiUrl == null || groqApiUrl.isBlank() || groqApiUrl.contains("huggingface.co")) {
+            this.groqApiUrl = "https://api.groq.com/openai/v1/chat/completions";
+        }
+        logger.info("Groq AI Service initialized with endpoint: {} and model: {}", groqApiUrl, groqModel);
     }
 
     private static final String MODERATION_SYSTEM_PROMPT =
@@ -105,57 +89,52 @@ public class HuggingFaceAiServiceImpl implements AiService {
             "If someone is feeling down or overwhelmed, validate their emotions and offer gentle encouragement. " +
             "Never be robotic or overly formal.";
 
-    // Fallback blocklist if Hugging Face inference is temporarily unavailable or out of credits
-    private static final List<String> SEVERE_BLOCKLIST = Arrays.asList(
-            "kill yourself", "kys", "hang yourself", "suicide instruction",
-            "die bitch", "i will kill you", "i will murder", "i will hunt you down"
-    );
-
     @Override
     public String getResponse(String prompt) {
-        if (hfToken == null || hfToken.isBlank()) {
+        if (groqApiKey == null || groqApiKey.isBlank()) {
             return generateOfflineCompanionResponse(prompt);
         }
 
         try {
             String body = buildChatBody(CHATBOT_SYSTEM_PROMPT, prompt, 512, 0.7);
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    hfUrl,
+                    groqApiUrl,
                     new HttpEntity<>(body, buildHeaders()),
                     String.class
             );
             String reply = extractContent(response.getBody());
             if (reply != null && !reply.isBlank()) {
+                this.currentStatus = "HEALTHY";
+                this.lastError = null;
                 return reply;
             }
             return generateOfflineCompanionResponse(prompt);
         } catch (HttpStatusCodeException e) {
             String errorBody = e.getResponseBodyAsString();
-            logger.warn("AI Provider API error [{}]: {}", e.getStatusCode(), errorBody);
+            logger.warn("Groq API error [{}]: {}", e.getStatusCode(), errorBody);
             this.currentStatus = "DEGRADED";
             this.lastError = "HTTP " + e.getStatusCode() + ": " + (errorBody.length() > 200 ? errorBody.substring(0, 200) : errorBody);
             this.lastChecked = new Date();
             if (systemLogService != null) {
-                systemLogService.recordLog("WARN", "AI_SERVICE", "Chatbot /get-response", e.getStatusCode().value(), null, "AI Provider returned error: " + e.getStatusCode(), lastError);
+                systemLogService.recordLog("WARN", "GROQ_AI", "Chatbot /get-response", e.getStatusCode().value(), null, "Groq API returned error: " + e.getStatusCode(), lastError);
             }
 
-            if (errorBody.contains("pre-paid credits") || errorBody.contains("credits") || e.getStatusCode() == HttpStatus.PAYMENT_REQUIRED) {
-                logger.warn("AI Provider quota reached / requires pre-paid credits. To use 100% free AI without credit card, switch to Groq (https://console.groq.com/keys) or OpenRouter in Backend/.env");
-                return generateOfflineCompanionResponse(prompt) +
-                        "\n\n*(Note: Cloud AI quota reached. To use 100% free live AI, switch to Groq in Backend/.env - see README)*";
+            if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                logger.warn("Groq rate limit reached (HTTP 429). Falling back to offline companion.");
+                return generateOfflineCompanionResponse(prompt);
             } else if (e.getStatusCode() == HttpStatus.UNAUTHORIZED || e.getStatusCode() == HttpStatus.FORBIDDEN) {
-                logger.warn("AI Provider unauthorized. Please check token permissions in Backend/.env.");
+                logger.warn("Groq API unauthorized. Please verify GROQ_APIKEY in Backend/.env.");
                 return generateOfflineCompanionResponse(prompt);
             }
 
             return generateOfflineCompanionResponse(prompt);
         } catch (Exception e) {
-            logger.error("AI request failed: {}", e.getMessage(), e);
+            logger.error("Groq AI request failed: {}", e.getMessage(), e);
             this.currentStatus = "DEGRADED";
             this.lastError = e.getMessage() != null ? e.getMessage() : e.toString();
             this.lastChecked = new Date();
             if (systemLogService != null) {
-                systemLogService.recordLog("WARN", "AI_SERVICE", "Chatbot /get-response", 500, null, "AI request failed: " + e.getMessage(), lastError);
+                systemLogService.recordLog("WARN", "GROQ_AI", "Chatbot /get-response", 500, null, "Groq AI request failed: " + e.getMessage(), lastError);
             }
             return generateOfflineCompanionResponse(prompt);
         }
@@ -163,7 +142,7 @@ public class HuggingFaceAiServiceImpl implements AiService {
 
     /**
      * Resilient offline empathetic companion fallback that responds warmly even if
-     * external cloud AI is offline, rate-limited, or out of credits.
+     * external cloud AI is offline, rate-limited, or token is unconfigured.
      */
     public String generateOfflineCompanionResponse(String prompt) {
         if (prompt == null || prompt.isBlank()) {
@@ -238,23 +217,23 @@ public class HuggingFaceAiServiceImpl implements AiService {
             return true;
         }
 
-        // Layer 2: Hugging Face AI semantic analysis (if configured)
-        if (hfToken != null && !hfToken.isBlank()) {
+        // Layer 2: Groq AI intent-aware semantic analysis (if configured)
+        if (groqApiKey != null && !groqApiKey.isBlank()) {
             try {
                 String body = buildChatBody(MODERATION_SYSTEM_PROMPT, "Evaluate this message: \"" + str + "\"", 25, 0.0);
                 ResponseEntity<String> response = restTemplate.postForEntity(
-                        hfUrl,
+                        groqApiUrl,
                         new HttpEntity<>(body, buildHeaders()),
                         String.class
                 );
                 return parseModeration(response.getBody());
             } catch (Exception e) {
-                logger.warn("Hugging Face API unavailable ({}). Pattern filter passed.", e.getMessage());
+                logger.warn("Groq API unavailable ({}). Pattern filter passed.", e.getMessage());
                 this.currentStatus = "DEGRADED";
                 this.lastError = "Moderation request failed: " + e.getMessage();
                 this.lastChecked = new Date();
                 if (systemLogService != null) {
-                    systemLogService.recordLog("WARN", "AI_SERVICE", "Moderation /unsafe", 503, null, "AI moderation unavailable: " + e.getMessage(), lastError);
+                    systemLogService.recordLog("WARN", "GROQ_AI", "Moderation /unsafe", 503, null, "Groq moderation unavailable: " + e.getMessage(), lastError);
                 }
             }
         }
@@ -305,7 +284,7 @@ public class HuggingFaceAiServiceImpl implements AiService {
     private HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(hfToken);
+        headers.setBearerAuth(groqApiKey);
         return headers;
     }
 
@@ -320,7 +299,7 @@ public class HuggingFaceAiServiceImpl implements AiService {
         ArrayNode messages = objectMapper.createArrayNode().add(systemMsg).add(userMsg);
 
         ObjectNode root = objectMapper.createObjectNode();
-        root.put("model", hfModel);
+        root.put("model", groqModel);
         root.set("messages", messages);
         root.put("max_tokens", maxTokens);
         root.put("temperature", temperature);
@@ -347,20 +326,20 @@ public class HuggingFaceAiServiceImpl implements AiService {
         String provider = detectProvider();
         String message;
         if ("HEALTHY".equalsIgnoreCase(currentStatus)) {
-            message = "AI provider (" + provider + ") is online and responding normally (" + (lastLatencyMs != null ? lastLatencyMs + "ms" : "ready") + ").";
+            message = "Groq LPU AI inference is online and responding normally (" + (lastLatencyMs != null ? lastLatencyMs + "ms" : "ready") + ").";
         } else if ("DEGRADED".equalsIgnoreCase(currentStatus)) {
-            message = "AI provider is degraded: " + (lastError != null ? lastError : "Fallback active") + ". Pattern-based moderation and offline companion active.";
+            message = "Groq AI service is degraded: " + (lastError != null ? lastError : "Fallback active") + ". Pattern-based moderation and offline companion active.";
         } else if ("OFFLINE".equalsIgnoreCase(currentStatus)) {
-            message = "AI provider is offline: " + (lastError != null ? lastError : "Connection failed") + ". Offline fallback active.";
+            message = "Groq AI service is offline: " + (lastError != null ? lastError : "Connection failed") + ". Offline fallback active.";
         } else {
-            message = "AI token is unconfigured. Offline companion and regex safety are running.";
+            message = "Groq API key is unconfigured. Offline companion and regex safety are running.";
         }
 
         return AiStatusResponse.builder()
                 .status(currentStatus)
                 .provider(provider)
-                .model(hfModel)
-                .endpoint(hfUrl)
+                .model(groqModel)
+                .endpoint(groqApiUrl)
                 .latencyMs(lastLatencyMs)
                 .lastChecked(lastChecked)
                 .lastError(lastError)
@@ -372,9 +351,9 @@ public class HuggingFaceAiServiceImpl implements AiService {
     @Override
     public AiStatusResponse testAiConnection() {
         this.lastChecked = new Date();
-        if (hfToken == null || hfToken.isBlank()) {
+        if (groqApiKey == null || groqApiKey.isBlank()) {
             this.currentStatus = "UNCONFIGURED";
-            this.lastError = "AI token is not configured in Backend/.env";
+            this.lastError = "Groq API key (GROQ_APIKEY) is not configured in Backend/.env";
             return getAiStatus();
         }
 
@@ -382,7 +361,7 @@ public class HuggingFaceAiServiceImpl implements AiService {
         try {
             String body = buildChatBody("You are an echo bot.", "ping", 5, 0.0);
             ResponseEntity<String> response = restTemplate.postForEntity(
-                    hfUrl,
+                    groqApiUrl,
                     new HttpEntity<>(body, buildHeaders()),
                     String.class
             );
@@ -392,13 +371,13 @@ public class HuggingFaceAiServiceImpl implements AiService {
                 this.currentStatus = "HEALTHY";
                 this.lastLatencyMs = latency;
                 this.lastError = null;
-                logger.info("AI ping test successful in {}ms", latency);
+                logger.info("Groq AI ping test successful in {}ms", latency);
             } else {
                 this.currentStatus = "DEGRADED";
                 this.lastLatencyMs = latency;
                 this.lastError = "Returned non-2xx status: " + response.getStatusCode();
                 if (systemLogService != null) {
-                    systemLogService.recordLog("WARN", "AI_SERVICE", "POST /admin/ai-test", response.getStatusCode().value(), "admin", "AI ping test non-2xx response", lastError);
+                    systemLogService.recordLog("WARN", "GROQ_AI", "POST /admin/ai-test", response.getStatusCode().value(), "admin", "Groq ping test non-2xx response", lastError);
                 }
             }
         } catch (HttpStatusCodeException e) {
@@ -407,7 +386,7 @@ public class HuggingFaceAiServiceImpl implements AiService {
             this.lastLatencyMs = latency;
             this.lastError = "HTTP " + e.getStatusCode() + ": " + e.getResponseBodyAsString();
             if (systemLogService != null) {
-                systemLogService.recordLog("CRITICAL", "AI_SERVICE", "POST /admin/ai-test", e.getStatusCode().value(), "admin", "AI ping test failed: " + e.getStatusCode(), lastError);
+                systemLogService.recordLog("CRITICAL", "GROQ_AI", "POST /admin/ai-test", e.getStatusCode().value(), "admin", "Groq ping test failed: " + e.getStatusCode(), lastError);
             }
         } catch (Exception e) {
             long latency = System.currentTimeMillis() - start;
@@ -415,18 +394,17 @@ public class HuggingFaceAiServiceImpl implements AiService {
             this.lastLatencyMs = latency;
             this.lastError = e.getMessage() != null ? e.getMessage() : e.toString();
             if (systemLogService != null) {
-                systemLogService.recordLog("CRITICAL", "AI_SERVICE", "POST /admin/ai-test", 503, "admin", "AI ping test failed with exception", lastError);
+                systemLogService.recordLog("CRITICAL", "GROQ_AI", "POST /admin/ai-test", 503, "admin", "Groq ping test failed with exception", lastError);
             }
         }
         return getAiStatus();
     }
 
     private String detectProvider() {
-        if (hfUrl == null) return "Unknown";
-        String lower = hfUrl.toLowerCase(Locale.ROOT);
+        if (groqApiUrl == null) return "Groq";
+        String lower = groqApiUrl.toLowerCase(Locale.ROOT);
         if (lower.contains("groq.com")) return "Groq";
         if (lower.contains("openrouter.ai")) return "OpenRouter";
-        if (lower.contains("huggingface.co")) return "Hugging Face";
         return "Custom LLM Provider";
     }
 }

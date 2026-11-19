@@ -156,8 +156,8 @@ cp .env.example .env
 
 | Variable | Description |
 |---|---|
-| `HF_TOKEN` | Hugging Face user access token (`hf_...`) with Inference API access |
-| `HF_MODEL` | Hugging Face model identifier (e.g. `Qwen/Qwen2.5-72B-Instruct`) |
+| `GROQ_APIKEY` | Groq API Key (`gsk_...`) — obtain free from [console.groq.com/keys](https://console.groq.com/keys) |
+| `GROQ_MODEL` | Groq Model ID (default: `llama-3.3-70b-versatile` or `llama-3.1-8b-instant`) |
 | `ENCRYPTION_KEY` | Base64-encoded 32-byte AES key — generate via `openssl rand -base64 32` |
 | `JWT_SECRET` | Base64-encoded 48-byte secret — generate via `openssl rand -base64 48` |
 | `SPRING_DATA_MONGODB_URI` | MongoDB Atlas connection URI |
