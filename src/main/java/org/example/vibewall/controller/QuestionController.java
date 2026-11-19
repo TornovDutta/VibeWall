@@ -27,8 +27,11 @@ public class QuestionController {
 
     @GetMapping
     @Operation(summary = "Get all public Q&A questions for the feed")
-    public ResponseEntity<List<QuestionResponse>> getFeedQuestions() {
-        return ResponseEntity.ok(questionService.getFeedQuestions());
+    public ResponseEntity<List<QuestionResponse>> getFeedQuestions(
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        String currentUserId = currentUser != null ? currentUser.getId() : null;
+        return ResponseEntity.ok(questionService.getFeedQuestions(currentUserId));
     }
 
     @PostMapping("/ask")
@@ -55,9 +58,11 @@ public class QuestionController {
     @GetMapping("/wall/{targetUserId}")
     @Operation(summary = "Get all publicly answered Q&As on a user's wall")
     public ResponseEntity<List<QuestionResponse>> getPublicWallQuestions(
-            @PathVariable String targetUserId
+            @PathVariable String targetUserId,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        return ResponseEntity.ok(questionService.getPublicWallQuestions(targetUserId));
+        String currentUserId = currentUser != null ? currentUser.getId() : null;
+        return ResponseEntity.ok(questionService.getPublicWallQuestions(targetUserId, currentUserId));
     }
 
     @GetMapping("/inbox")

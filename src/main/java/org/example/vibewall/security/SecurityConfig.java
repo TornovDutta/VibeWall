@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/feed/**",
                                 "/chat/**",
                                 "/vibes/**",
+                                "/ai/**",
                                 "/stats/**",
                                 "/support/**",
                                 "/health",

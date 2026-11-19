@@ -55,23 +55,10 @@ public class QuestionServiceImpl implements QuestionService {
             throw new IllegalArgumentException("User wall not found");
         }
 
-        String askerUserId = null;
-        String askerAlias;
-        boolean isAnonymous = request.isAnonymous();
-
-        if (isAnonymous) {
-            askerAlias = "Anonymous";
-        } else {
-            if (currentUser != null && currentUser.getId() != null) {
-                askerUserId = currentUser.getId();
-                askerAlias = AnonNameUtil.generate(currentUser.getId());
-            } else if (request.getAskerName() != null && !request.getAskerName().isBlank()) {
-                askerAlias = request.getAskerName().trim();
-            } else {
-                askerAlias = "Anonymous";
-                isAnonymous = true;
-            }
-        }
+        // Maintain creator ownership while keeping Q&A 100% anonymous externally
+        String askerUserId = currentUser != null ? currentUser.getId() : null;
+        boolean isAnonymous = true;
+        String askerAlias = "Anonymous";
 
         Question question = Question.builder()
                 .targetUserId(finalTargetUserId)
@@ -94,14 +81,19 @@ public class QuestionServiceImpl implements QuestionService {
         }
         logger.info("New question asked to targetUserId={}, isAnonymous={}", finalTargetUserId, isAnonymous);
 
-        return toDTO(saved);
+        return toDTO(saved, askerUserId);
     }
 
     @Override
     public List<QuestionResponse> getPublicWallQuestions(String targetUserId) {
+        return getPublicWallQuestions(targetUserId, null);
+    }
+
+    @Override
+    public List<QuestionResponse> getPublicWallQuestions(String targetUserId, String currentUserId) {
         return questionRepo.findByTargetUserIdAndStatusAndIsPublicTrueOrderByAnsweredAtDesc(targetUserId, "ANSWERED")
                 .stream()
-                .map(this::toDTO)
+                .map(q -> toDTO(q, currentUserId))
                 .collect(Collectors.toList());
     }
 
@@ -115,7 +107,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         return list.stream()
-                .map(this::toDTO)
+                .map(q -> toDTO(q, ownerUserId))
                 .collect(Collectors.toList());
     }
 
@@ -168,7 +160,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         logger.info("Owner {} replied to questionId {}, isPublic={}", ownerUserId, questionId, request.isPublic());
-        return toDTO(saved);
+        return toDTO(saved, ownerUserId);
     }
 
     @Override
@@ -191,7 +183,7 @@ public class QuestionServiceImpl implements QuestionService {
     public List<QuestionResponse> getMyAskedQuestions(String askerUserId) {
         return questionRepo.findByAskerUserIdOrderByCreatedAtDesc(askerUserId)
                 .stream()
-                .map(this::toDTO)
+                .map(q -> toDTO(q, askerUserId))
                 .collect(Collectors.toList());
     }
 
@@ -202,13 +194,22 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionResponse> getFeedQuestions() {
+        return getFeedQuestions(null);
+    }
+
+    @Override
+    public List<QuestionResponse> getFeedQuestions(String currentUserId) {
         return questionRepo.findAllPublicQuestions(Sort.by(Sort.Direction.DESC, "createdAt"))
                 .stream()
-                .map(this::toDTO)
+                .map(q -> toDTO(q, currentUserId))
                 .collect(Collectors.toList());
     }
 
     private QuestionResponse toDTO(Question q) {
+        return toDTO(q, null);
+    }
+
+    private QuestionResponse toDTO(Question q, String currentUserId) {
         String targetAlias;
         if (q.getTargetUserId() == null || q.getTargetUserId().isBlank() || "community".equalsIgnoreCase(q.getTargetUserId())) {
             targetAlias = "Community";
@@ -216,16 +217,22 @@ public class QuestionServiceImpl implements QuestionService {
             targetAlias = AnonNameUtil.generate(q.getTargetUserId());
         }
 
+        boolean isOwner = currentUserId != null && (
+                (q.getAskerUserId() != null && currentUserId.equals(q.getAskerUserId())) ||
+                (q.getTargetUserId() != null && !"community".equalsIgnoreCase(q.getTargetUserId()) && currentUserId.equals(q.getTargetUserId()))
+        );
+
         return QuestionResponse.builder()
                 .id(q.getId())
                 .targetUserId(q.getTargetUserId())
                 .targetAlias(targetAlias)
-                .askerAlias(q.getAskerAlias())
+                .askerAlias(q.getAskerAlias() != null && !q.getAskerAlias().isBlank() ? q.getAskerAlias() : "Anonymous")
                 .isAnonymous(q.isAnonymous())
                 .content(q.getContent())
                 .status(q.getStatus())
                 .answer(q.getAnswer())
                 .isPublic(q.isPublic())
+                .isOwner(isOwner)
                 .createdAt(q.getCreatedAt())
                 .answeredAt(q.getAnsweredAt())
                 .build();

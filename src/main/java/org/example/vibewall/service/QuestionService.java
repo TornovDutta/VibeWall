@@ -13,6 +13,10 @@ public interface QuestionService {
 
     List<QuestionResponse> getPublicWallQuestions(String targetUserId);
 
+    default List<QuestionResponse> getPublicWallQuestions(String targetUserId, String currentUserId) {
+        return getPublicWallQuestions(targetUserId);
+    }
+
     List<QuestionResponse> getOwnerInbox(String ownerUserId, String statusFilter);
 
     QuestionResponse replyQuestion(String ownerUserId, String questionId, ReplyQuestionRequest request);
@@ -24,4 +28,8 @@ public interface QuestionService {
     long getPendingCount(String ownerUserId);
 
     List<QuestionResponse> getFeedQuestions();
+
+    default List<QuestionResponse> getFeedQuestions(String currentUserId) {
+        return getFeedQuestions();
+    }
 }

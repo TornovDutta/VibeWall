@@ -21,6 +21,7 @@ public class PollResponse {
     private int totalVotes;
     private Integer userVotedOptionId; // null if current user has not voted yet
     private boolean active;
+    private boolean isOwner;
     private Date createdAt;
     private Date expiresAt;
 }

@@ -21,6 +21,7 @@ public class QuestionResponse {
     private String status; // PENDING, ANSWERED, DISMISSED
     private String answer;
     private boolean isPublic;
+    private boolean isOwner;
     private Date createdAt;
     private Date answeredAt;
 }

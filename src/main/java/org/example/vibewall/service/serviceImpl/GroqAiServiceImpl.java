@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PostConstruct;
 import org.example.vibewall.DTO.AiStatusResponse;
+import org.example.vibewall.DTO.EnhanceRequest;
+import org.example.vibewall.DTO.EnhanceResponse;
 import org.example.vibewall.security.ContentSafetyFilter;
 import org.example.vibewall.service.AiService;
 import org.example.vibewall.service.SystemLogService;
@@ -19,7 +21,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -398,6 +403,166 @@ public class GroqAiServiceImpl implements AiService {
             }
         }
         return getAiStatus();
+    }
+
+    @Override
+    public EnhanceResponse enhanceText(EnhanceRequest request) {
+        if (request == null || request.getText() == null || request.getText().isBlank()) {
+            return EnhanceResponse.builder()
+                    .originalText("")
+                    .polishedText("")
+                    .suggestions(Collections.emptyList())
+                    .suggestedOptions(Collections.emptyList())
+                    .build();
+        }
+
+        String rawText = request.getText().trim();
+        String type = request.getType() != null ? request.getType().toUpperCase(Locale.ROOT) : "CONFESSION";
+
+        if (groqApiKey == null || groqApiKey.isBlank()) {
+            return fallbackEnhance(rawText, type);
+        }
+
+        String systemPrompt;
+        if ("POLL".equals(type)) {
+            systemPrompt = "You are an expert community poll writer for an anonymous campus platform. " +
+                    "The user wants to post a poll. " +
+                    "1. Polish the poll question so it is grammatically correct, intriguing, unbiased, and ends with a '?'. " +
+                    "2. Generate 3 to 4 distinct, realistic, high-quality poll options that capture diverse viewpoints. " +
+                    "3. Provide 1 brief tip for driving high engagement. " +
+                    "Reply ONLY in valid JSON matching this schema: " +
+                    "{\"polishedText\": \"<polished question ending in ?>\", \"suggestions\": [\"<tip>\"], \"suggestedOptions\": [\"Option 1\", \"Option 2\", \"Option 3\", \"Option 4\"]}";
+        } else if ("QUESTION".equals(type)) {
+            systemPrompt = "You are a thoughtful question enhancer for an anonymous campus Q&A wall. " +
+                    "The user is asking a question anonymously. " +
+                    "1. Polish the question so it is clear, engaging, grammatically correct, and ends with a '?'. " +
+                    "2. Suggest 1 to 2 creative alternative question phrasings or related follow-up angles. " +
+                    "Reply ONLY in valid JSON matching this schema: " +
+                    "{\"polishedText\": \"<polished question ending in ?>\", \"suggestions\": [\"<creative alternative 1>\", \"<creative alternative 2>\"], \"suggestedOptions\": []}";
+        } else {
+            // CONFESSION
+            systemPrompt = "You are an empathetic creative writing assistant for an anonymous student venting platform. " +
+                    "The user has written an emotional confession or thought. " +
+                    "1. Fix any grammatical, spelling, and punctuation errors. " +
+                    "2. Polish the sentence flow and emotional clarity while strictly preserving the author's raw, authentic tone and voice (never sound robotic or artificial). " +
+                    "3. Suggest 1 to 2 thoughtful perspectives or empathetic phrasing suggestions. " +
+                    "Reply ONLY in valid JSON matching this schema: " +
+                    "{\"polishedText\": \"<polished confession>\", \"suggestions\": [\"<perspective or phrasing idea 1>\", \"<perspective 2>\"], \"suggestedOptions\": []}";
+        }
+
+        try {
+            String body = buildChatBody(systemPrompt, "Input text to enhance: \"" + rawText + "\"", 512, 0.4);
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    groqApiUrl,
+                    new HttpEntity<>(body, buildHeaders()),
+                    String.class
+            );
+
+            String reply = extractContent(response.getBody());
+            if (reply != null && !reply.isBlank()) {
+                reply = reply.replaceAll("(?s)<think>.*?</think>", "").trim();
+                if (reply.contains("```json")) {
+                    reply = reply.substring(reply.indexOf("```json") + 7);
+                    if (reply.contains("```")) {
+                        reply = reply.substring(0, reply.indexOf("```"));
+                    }
+                } else if (reply.contains("```")) {
+                    reply = reply.substring(reply.indexOf("```") + 3);
+                    if (reply.contains("```")) {
+                        reply = reply.substring(0, reply.indexOf("```"));
+                    }
+                }
+                reply = reply.trim();
+                JsonNode root = objectMapper.readTree(reply);
+                String polished = root.path("polishedText").asText();
+                if (polished == null || polished.isBlank()) {
+                    polished = rawText;
+                }
+
+                List<String> suggestions = new ArrayList<>();
+                JsonNode suggNode = root.path("suggestions");
+                if (suggNode.isArray()) {
+                    for (JsonNode n : suggNode) {
+                        if (n.isTextual() && !n.asText().isBlank()) {
+                            suggestions.add(n.asText().trim());
+                        }
+                    }
+                }
+
+                List<String> options = new ArrayList<>();
+                JsonNode optNode = root.path("suggestedOptions");
+                if (optNode.isArray()) {
+                    for (JsonNode n : optNode) {
+                        if (n.isTextual() && !n.asText().isBlank()) {
+                            options.add(n.asText().trim());
+                        }
+                    }
+                }
+
+                this.currentStatus = "HEALTHY";
+                this.lastError = null;
+
+                return EnhanceResponse.builder()
+                        .originalText(rawText)
+                        .polishedText(polished)
+                        .suggestions(suggestions)
+                        .suggestedOptions(options)
+                        .build();
+            }
+        } catch (Exception e) {
+            logger.warn("Groq enhanceText encountered error: {}. Falling back to heuristic enhancement.", e.getMessage());
+        }
+
+        return fallbackEnhance(rawText, type);
+    }
+
+    private EnhanceResponse fallbackEnhance(String rawText, String type) {
+        String polished = rawText;
+        if (!polished.isEmpty()) {
+            polished = Character.toUpperCase(polished.charAt(0)) + polished.substring(1);
+        }
+        // Basic punctuation & common contractions fix
+        polished = polished.replaceAll("\\bi\\b", "I")
+                .replaceAll("\\bdont\\b", "don't")
+                .replaceAll("\\bim\\b", "I'm")
+                .replaceAll("\\bcant\\b", "can't")
+                .replaceAll("\\bwont\\b", "won't")
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        List<String> suggestions = new ArrayList<>();
+        List<String> suggestedOptions = new ArrayList<>();
+
+        if ("POLL".equals(type)) {
+            if (!polished.endsWith("?")) {
+                polished += "?";
+            }
+            suggestedOptions.add("Strongly Agree / Yes");
+            suggestedOptions.add("Somewhat / In between");
+            suggestedOptions.add("Strongly Disagree / No");
+            suggestedOptions.add("Just viewing results");
+            suggestions.add("Keep options balanced so voters feel confident picking one.");
+        } else if ("QUESTION".equals(type)) {
+            if (!polished.endsWith("?")) {
+                polished += "?";
+            }
+            suggestions.add("Consider framing the question with personal context to encourage open, honest replies.");
+            suggestions.add("Short, clear questions receive the most community engagement.");
+        } else {
+            // CONFESSION
+            if (!polished.endsWith(".") && !polished.endsWith("!") && !polished.endsWith("?")) {
+                polished += ".";
+            }
+            suggestions.add("Sharing how this situation made you feel brings comforting, genuine empathy from peers.");
+            suggestions.add("Your vulnerability is respected and 100% anonymous.");
+        }
+
+        return EnhanceResponse.builder()
+                .originalText(rawText)
+                .polishedText(polished)
+                .suggestions(suggestions)
+                .suggestedOptions(suggestedOptions)
+                .build();
     }
 
     private String detectProvider() {

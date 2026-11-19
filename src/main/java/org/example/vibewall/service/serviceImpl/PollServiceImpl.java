@@ -196,6 +196,8 @@ public class PollServiceImpl implements PollService {
             userVotedOptId = poll.getUserVotes().get(currentUserId);
         }
 
+        boolean isOwner = currentUserId != null && currentUserId.equals(poll.getUserId());
+
         return PollResponse.builder()
                 .id(poll.getId())
                 .question(poll.getQuestion())
@@ -205,6 +207,7 @@ public class PollServiceImpl implements PollService {
                 .totalVotes(total)
                 .userVotedOptionId(userVotedOptId)
                 .active(poll.isActive())
+                .isOwner(isOwner)
                 .createdAt(poll.getCreatedAt())
                 .expiresAt(poll.getExpiresAt())
                 .build();
