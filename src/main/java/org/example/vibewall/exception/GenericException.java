@@ -53,8 +53,8 @@ public class GenericException {
 
     @ExceptionHandler(AiUnavailableException.class)
     public ResponseEntity<?> handleAiUnavailable(AiUnavailableException e, HttpServletRequest req) {
-        logError("CRITICAL", "AI_SERVICE", req, HttpStatus.SERVICE_UNAVAILABLE.value(), e.getMessage(), "ai system down");
-        return build(e.getMessage(), "ai system down", HttpStatus.SERVICE_UNAVAILABLE);
+        logError("WARN", "AI_SERVICE", req, HttpStatus.SERVICE_UNAVAILABLE.value(), e.getMessage(), "AI service temporarily unavailable");
+        return build(e.getMessage(), "AI service temporarily unavailable", HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
